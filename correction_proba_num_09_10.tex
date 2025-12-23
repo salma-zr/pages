@@ -36,7 +36,7 @@
 \newtheorem{definition}{Définition}
 \newtheorem{remark}{Remarque}
 
-\title{Probabilités numériques -- Corrigés (Sujets 09 et 10) \\
+\title{Probabilités numériques / Méthodes de Monte Carlo -- Corrigés (Sujets 07 à 10) \\
 \large et fiche de révision (définitions, théorèmes, méthodes)}
 \author{}
 \date{Décembre 2025}
@@ -47,12 +47,450 @@
 \bigskip
 
 \section*{Avant-propos}
-Ce document regroupe une correction rigoureuse et rédigée des deux sujets:
+Ce document regroupe une correction rigoureuse et rédigée de quatre sujets:
 \begin{itemize}[leftmargin=*]
+  \item \textbf{Sujet 07} (3 janvier 2011): sensibilités (différences finies et accélération), digitales, réduction de variance (importance sampling gaussien).
+  \item \textbf{Sujet 08} (2 avril 2012): équidistribution et QMC (van der Corput), co-monotonie et vega, convergence p.s. d'Euler, volatilité locale et propagation de convexité.
   \item \textbf{Sujet 09} (10 janvier 2013): schéma de Milstein, positivité, modèles CIR/OU, Heston, ponts de diffusion et barrières.
   \item \textbf{Sujet 10} (5 janvier 2015): quasi-Monte Carlo, randomisation, et estimation de la sensibilité d'une digitale (``kappa'').
 \end{itemize}
 Les notations suivent celles usuelles du cours: $W$ désigne un mouvement brownien standard; pour un pas de discrétisation $\Delta=T/n$ on note $t_i=i\Delta$ et $\Delta W_i = W_{t_{i+1}}-W_{t_i}\sim\mathcal{N}(0,\Delta)$.
+
+\part{Sujet 07 (3 janvier 2011)}
+
+\section{Problème 1 -- Sensibilités I: accélérer les différences finies}
+\subsection{Cadre et notations}
+Soit $F:\R\times\R^q\to\R$ borélienne et $Z$ un vecteur aléatoire. Fixons $x\in\R$ et $\varepsilon_0>0$ tels que $F(x,Z)\in L^2$ et
+\begin{equation}\label{eq:L2-Lip-F}
+  \forall x'\in (x-\varepsilon_0,x+\varepsilon_0),\qquad \|F(x',Z)-F(x,Z)\|_{L^2}\le C_{F,Z}|x'-x|.
+\end{equation}
+On pose $f(\xi)=\E[F(\xi,Z)]$ et on suppose $f\in C^3$ sur $I_x=(x-\varepsilon_0,x+\varepsilon_0)$, avec $f^{(3)}$ Lipschitz de constante $[f^{(3)}]_{\Lip}$ sur $I_x$.
+
+\subsection{1 -- Développement de la différence finie symétrique}
+\begin{proposition}\label{prop:df-sym-ordre2}
+Pour tout $\varepsilon\in(0,\varepsilon_0)$,
+\[
+\left|\frac{f(x+\varepsilon)-f(x-\varepsilon)}{2\varepsilon}-f'(x)-\frac{\varepsilon^2}{6}f^{(3)}(x)\right|
+\le \frac{\varepsilon^3}{6}[f^{(3)}]_{\Lip}.
+\]
+\end{proposition}
+\begin{proof}
+On applique Taylor à l'ordre 3 avec reste intégral (ou forme de Lagrange contrôlée par la Lipschitzité de $f^{(3)}$):
+\[
+f(x\pm\varepsilon)
+=f(x)\pm \varepsilon f'(x)+\frac{\varepsilon^2}{2}f''(x)\pm \frac{\varepsilon^3}{6}f^{(3)}(x)+R_\pm,
+\]
+avec $|R_\pm|\le \frac{\varepsilon^4}{24}[f^{(3)}]_{\Lip}$.
+En soustrayant $f(x-\varepsilon)$ de $f(x+\varepsilon)$ et en divisant par $2\varepsilon$, les termes pairs s'annulent, on obtient
+\[
+\frac{f(x+\varepsilon)-f(x-\varepsilon)}{2\varepsilon}
+=f'(x)+\frac{\varepsilon^2}{6}f^{(3)}(x)+\frac{R_+-R_-}{2\varepsilon},
+\]
+et $|(R_+-R_-)/(2\varepsilon)|\le (\varepsilon^3/6)[f^{(3)}]_{\Lip}$.
+\end{proof}
+
+\subsection{2 -- Estimateur MC de la différence finie}
+Pour $\varepsilon\in(0,\varepsilon_0)$, on définit
+\[
+F_\varepsilon(x,z)=\frac{F(x+\varepsilon,z)-F(x-\varepsilon,z)}{2\varepsilon},
+\qquad
+\widehat f'_{\varepsilon,M}(x)=\frac1M\sum_{k=1}^M F_\varepsilon(x,Z_k),
+\]
+où $(Z_k)_{k\ge1}$ sont des copies i.i.d. de $Z$.
+
+\subsubsection{2.a -- Espérance, LLN et CLT}
+\begin{proposition}
+On a $\E[F_\varepsilon(x,Z)]=(f(x+\varepsilon)-f(x-\varepsilon))/(2\varepsilon)$.
+De plus, quand $M\to\infty$,
+\[
+\widehat f'_{\varepsilon,M}(x)\xrightarrow[]{a.s.}\E[F_\varepsilon(x,Z)],
+\qquad
+\sqrt{M}\Big(\widehat f'_{\varepsilon,M}(x)-\E[F_\varepsilon(x,Z)]\Big)\xRightarrow[]{}
+\mathcal N(0,\sigma_{f,\varepsilon}^2),
+\]
+où $\sigma_{f,\varepsilon}^2=\Var(F_\varepsilon(x,Z))$.
+Enfin, sous \eqref{eq:L2-Lip-F}, on a la borne $\sigma_{f,\varepsilon}^2\le C_{F,Z}^2$.
+\end{proposition}
+\begin{proof}
+L'identité d'espérance est immédiate par linéarité de $\E$.
+La convergence p.s. et le TCL suivent du théorème de la loi forte et du TCL i.i.d. dès que $F_\varepsilon(x,Z)\in L^2$, ce qui découle de \eqref{eq:L2-Lip-F}.
+Enfin
+\[
+\|F_\varepsilon(x,Z)\|_{L^2}
+=\frac{1}{2\varepsilon}\|F(x+\varepsilon,Z)-F(x-\varepsilon,Z)\|_{L^2}
+\le \frac{1}{2\varepsilon}\,C_{F,Z}\,|2\varepsilon|=C_{F,Z},
+\]
+donc $\Var(F_\varepsilon(x,Z))\le \E[F_\varepsilon(x,Z)^2]\le C_{F,Z}^2$.
+\end{proof}
+
+\subsubsection{2.b -- Contrôle de l'erreur quadratique}
+\begin{proposition}\label{prop:mse-df-2011}
+Pour tout $\varepsilon\in(0,\varepsilon_0)$ et $M\ge 1$,
+\[
+\E\Big[\big(f'(x)-\widehat f'_{\varepsilon,M}(x)\big)^2\Big]
+\le
+\left(\frac{\varepsilon^2}{6}|f^{(3)}(x)|+\frac{\varepsilon^3}{6}[f^{(3)}]_{\Lip}\right)^2
+\;+\;\frac{\sigma_{f,\varepsilon}^2}{M}.
+\]
+\end{proposition}
+\begin{proof}
+On décompose l'erreur en \emph{biais} + \emph{fluctuation}:
+\[
+f'(x)-\widehat f'_{\varepsilon,M}(x)
+\;=\;\Big(f'(x)-\E[F_\varepsilon(x,Z)]\Big)\;+\;\Big(\E[F_\varepsilon(x,Z)]-\widehat f'_{\varepsilon,M}(x)\Big).
+\]
+Le second terme est centré; en développant le carré on obtient
+\[
+\E[(f'(x)-\widehat f'_{\varepsilon,M}(x))^2]
+=\big(f'(x)-\E[F_\varepsilon(x,Z)]\big)^2+\Var(\widehat f'_{\varepsilon,M}(x)).
+\]
+Le biais est contrôlé par la proposition \ref{prop:df-sym-ordre2}. Enfin
+$\Var(\widehat f'_{\varepsilon,M})=\Var(F_\varepsilon)/M$.
+\end{proof}
+
+\subsubsection{2.c -- Choix de $\varepsilon$ et $M$ (biais/variance)}
+La borne \ref{prop:mse-df-2011} montre ici un point important:
+\begin{itemize}[leftmargin=*]
+  \item le \textbf{biais} est d'ordre $\varepsilon^2$ (donc biais$^2$ d'ordre $\varepsilon^4$);
+  \item la \textbf{variance MC} est d'ordre $1/M$ et, sous \eqref{eq:L2-Lip-F}, \emph{ne dépend pas} (au pire) de $\varepsilon$.
+\end{itemize}
+Ainsi, à $M$ fixé, diminuer $\varepsilon$ améliore essentiellement le biais sans pénaliser la variance (contrairement aux digitales).
+
+\subsection{3 -- Accélération (Richardson) de la différence finie}
+\subsubsection{3.a -- Combinaison qui annule le terme en $\varepsilon^2$}
+\begin{proposition}\label{prop:richardson-2011}
+Il existe $a,b\in\R$ (uniques) tels que $a+b=1$ et, pour tout $\varepsilon\in(0,\varepsilon_0)$,
+\[
+\left|\E\big[aF_\varepsilon(x,Z)+bF_{\varepsilon/2}(x,Z)\big]-f'(x)\right|
+\le \frac{\varepsilon^3}{12}[f^{(3)}]_{\Lip}.
+\]
+On peut prendre $a=-\frac13$ et $b=\frac43$.
+\end{proposition}
+\begin{proof}
+Par la proposition \ref{prop:df-sym-ordre2},
+\[
+\E[F_\varepsilon(x,Z)]=f'(x)+\frac{\varepsilon^2}{6}f^{(3)}(x)+O(\varepsilon^3),
+\qquad
+\E[F_{\varepsilon/2}(x,Z)]=f'(x)+\frac{\varepsilon^2}{24}f^{(3)}(x)+O(\varepsilon^3).
+\]
+Choisir $a,b$ tels que $a+b=1$ et $\frac{a}{6}+\frac{b}{24}=0$ annule le terme en $\varepsilon^2$.
+On trouve $b=-4a$ puis $a=-1/3$, $b=4/3$.
+Le reste est d'ordre $\varepsilon^3$ et se contrôle explicitement, d'où la borne.
+\end{proof}
+
+\subsubsection{3.b -- Estimateur accéléré et contrôle MSE}
+On définit l'estimateur accéléré (biaisé) par
+\[
+\widehat f'^{\,g}_{\varepsilon,M}(x)
+=\frac1M\sum_{k=1}^M\left(-\frac13F_\varepsilon(x,Z_k)+\frac43F_{\varepsilon/2}(x,Z_k)\right).
+\]
+Le biais est désormais d'ordre $\varepsilon^3$ (biais$^2$ d'ordre $\varepsilon^6$).
+Pour la variance, l'astuce importante est d'utiliser les \textbf{mêmes} $Z_k$ (common random numbers) pour $F_\varepsilon$ et $F_{\varepsilon/2}$ afin de bénéficier de corrélations favorables.
+
+\subsubsection{3.c -- Astuce de réordonnancement (amélioration de constante)}
+En réécrivant la combinaison linéaire en regroupant les évaluations de $F$:
+\[
+-\frac13F_\varepsilon+\frac43F_{\varepsilon/2}
+=\frac{1}{3\varepsilon}\Big(-F(x+\varepsilon,\cdot)+F(x-\varepsilon,\cdot)+4F(x+\varepsilon/2,\cdot)-4F(x-\varepsilon/2,\cdot)\Big),
+\]
+on peut majorer le $L^2$ de façon plus fine que via l'inégalité triangulaire brute (ce qui améliore la constante de variance asymptotique, conformément à l'énoncé).
+
+\subsubsection{3.d -- Choix $\varepsilon, M$}
+Avec l'accélération, le biais$^2$ est $\asymp \varepsilon^6$ tandis que la variance reste $\asymp 1/M$ (au pire).
+Pour diviser la MSE par 2, on peut typiquement:
+\begin{itemize}[leftmargin=*]
+  \item doubler $M$ (variance divisée par 2);
+  \item réduire $\varepsilon$ d'un facteur $2^{1/6}$ (biais$^2$ divisé par 2).
+\end{itemize}
+On constate que la régularité supplémentaire exploitée (Richardson) permet de \emph{réduire beaucoup plus lentement} $\varepsilon$ pour atteindre le même gain de précision.
+
+\section{Problème 2 -- Sensibilités II: options digitales}
+\subsection{Cadre}
+On considère
+\[
+dX_t^x=rX_t^x\,dt+\sigma(X_t^x)\,dW_t,\qquad X_0^x=x>0,
+\]
+où $\sigma:\R\to\R_+^*$ est bornée, dérivable et $\sup_{\xi\in\R}|\xi\sigma'(\xi)|\le C$.
+
+\subsection{1 -- Existence, représentation exponentielle et positivité}
+\paragraph{1.a.}
+Sur $(0,\infty)$, les coefficients sont localement Lipschitz (sous les hypothèses données) et à croissance linéaire, donc il existe une solution forte unique (théorème standard; la positivité ci-dessous évite toute atteinte de $0$).
+\paragraph{1.b--1.c.}
+On applique Itô à $\log X_t^x$ (possible tant que $X_t^x>0$) ou bien on reconnaît $X$ comme une exponentielle de Doléans:
+\[
+X_t^x
+=x\exp\Big(\int_0^t\Big(r-\frac12\Big(\frac{\sigma(X_s^x)}{X_s^x}\Big)^2\Big)ds+\int_0^t \frac{\sigma(X_s^x)}{X_s^x}\,dW_s\Big).
+\]
+Le membre de droite est bien défini (les intégrandes sont contrôlées via la bornitude de $\sigma$ et les estimées de moments), et la formule d'Itô montre qu'il résout l'EDS; en particulier c'est une exponentielle, donc $X_t^x>0$ p.s.
+En posant $Y_t^{(x)}=\log X_t^x$, on obtient
+\[
+dY_t^{(x)}=\Big(r-\frac12\sigma^2(e^{Y_t^{(x)}})\Big)dt+\sigma(e^{Y_t^{(x)}})\,dW_t,\qquad Y_0^{(x)}=\log x.
+\]
+
+\subsection{2 -- Dérivabilité de $f(x)=\Pp(X_T^x\ge K)$}
+Sous les hypothèses d'ellipticité uniforme et de régularité admises dans l'énoncé, $Y_T^{(x)}$ admet une densité $q(T,x,\cdot)$ $C^\infty$ et avec bornes sur les dérivées.
+Comme
+\[
+f(x)=\Pp(Y_T^{(x)}\ge \log K)=\int_{\log K}^{\infty} q(T,x,y)\,dy,
+\]
+on peut dériver sous le signe intégral et obtenir
+\[
+f'(x)=\int_{\log K}^{\infty}\partial_x q(T,x,y)\,dy,
+\]
+et plus généralement $f\in C^\infty$.
+
+\subsection{2.b--2.c -- Astuce monotonicité $\Rightarrow$ Hölder $1/2$ en $L^2$}
+On utilise le rappel: si $x'\ge x$ alors $X_t^{x'}\ge X_t^{x}$ p.s. pour tout $t$.
+Ainsi, pour $x<x'$,
+\[
+\big(\1_{\{X_T^{x}\ge K\}}-\1_{\{X_T^{x'}\ge K\}}\big)^2
+=\1_{\{X_T^{x}<K\le X_T^{x'}\}}.
+\]
+En prenant l'espérance,
+\[
+\E\Big[\big(\1_{\{X_T^{x}\ge K\}}-\1_{\{X_T^{x'}\ge K\}}\big)^2\Big]
+=\Pp(X_T^{x'}\ge K)-\Pp(X_T^{x}\ge K)=f(x')-f(x).
+\]
+Sur un compact $I\Subset(0,\infty)$, $f'$ est bornée, donc $f$ est Lipschitz sur $I$ et
+\[
+\big\|\1_{\{X_T^{x}\ge K\}}-\1_{\{X_T^{x'}\ge K\}}\big\|_{L^2}
+=\sqrt{f(x')-f(x)}\ \le\ C_I^{1/2}|x'-x|^{1/2}.
+\]
+Autrement dit, la fonction aléatoire $x\mapsto \1_{\{X_T^{x}\ge K\}}$ est Hölder d'ordre $1/2$ à valeurs dans $L^2$.
+
+\subsection{3 -- Différences finies pour la digitale: explosion de variance}
+On pose $F(x,\omega)=\1_{\{X_T^{x}(\omega)\ge K\}}$ et, pour $\varepsilon>0$ petit,
+\[
+F_\varepsilon(x,\omega)=\frac{F(x+\varepsilon,\omega)-F(x-\varepsilon,\omega)}{2\varepsilon},
+\qquad
+\widehat f'_{\varepsilon,M}(x)=\frac1M\sum_{k=1}^M F_\varepsilon(x,\omega_k).
+\]
+Comme $F$ n'est que Hölder $1/2$ en $L^2$, on a typiquement
+\[
+\|F(x+\varepsilon,\cdot)-F(x-\varepsilon,\cdot)\|_{L^2}\le C\sqrt{\varepsilon},
+\]
+ce qui implique une borne de variance
+\[
+\Var(F_\varepsilon(x,\cdot))\ \lesssim\ \frac{1}{\varepsilon}.
+\]
+Conclusion (astuce à retenir): \textbf{pour les digitales}, diminuer $\varepsilon$ réduit le biais mais \emph{augmente} la variance (phénomène absent au Problème 1).
+L'optimisation biais/variance mène alors à des choix de type $\varepsilon\asymp M^{-1/5}$ (ordre classique).
+\medskip
+
+\paragraph{4. Amélioration.}
+On peut reprendre l'accélération de Richardson du Problème 1 pour réduire l'ordre du biais (passer de $\varepsilon^2$ à $\varepsilon^3$), mais la variance gardant une dépendance en $1/\varepsilon$, l'optimum change et l'amélioration est réelle mais plus délicate: il faut \emph{re-optimiser} simultanément $\varepsilon$ et $M$.
+
+\section{Problème 3 -- Réduction de variance: importance sampling gaussien}
+\subsection{Cadre}
+Soit $Z\sim\mathcal N(0,I_d)$ et $\phi(Z)=(K-\sum_{k=1}^d \lambda_k e^{\sigma_k Z_k})_+$.
+On veut estimer $\E[\phi(Z)]$.
+
+\subsection{1 -- Identité de Cameron--Martin (translation gaussienne)}
+\begin{proposition}\label{prop:cameron-martin}
+Pour tout $\theta\in\R^d$,
+\[
+\E[\phi(Z)]=\E\Big[\phi(Z+\theta)\exp\Big(-\langle\theta,Z\rangle-\frac{\|\theta\|^2}{2}\Big)\Big].
+\]
+\end{proposition}
+\begin{proof}
+Il s'agit de la formule de changement de mesure/translation pour la loi gaussienne (Cameron--Martin). On peut aussi la vérifier par un calcul direct de densités.
+\end{proof}
+
+\subsection{2 -- Estimateur et fonction $g(\theta)$}
+L'estimateur MC associé à \ref{prop:cameron-martin} est
+\[
+\widehat I_M(\theta)=\frac1M\sum_{m=1}^M \phi(Z^{(m)}+\theta)\exp\Big(-\langle\theta,Z^{(m)}\rangle-\frac{\|\theta\|^2}{2}\Big).
+\]
+La quantité
+\[
+g(\theta)=\E\Big[\phi(Z+\theta)^2\exp\big(-2\langle\theta,Z\rangle-\|\theta\|^2\big)\Big]
+\]
+est (à constante près) le \textbf{second moment} de l'estimateur et donc contrôle sa variance; minimiser $g(\theta)$ revient à minimiser la variance.
+
+\subsection{3 -- Convexité stricte et existence d'un minimiseur unique}
+On réécrit $g$ sous une forme équivalente (changement de variable $Z\mapsto Z-\theta$):
+\[
+g(\theta)=\E\Big[\phi(Z)^2\exp\Big(-\langle\theta,Z\rangle+\frac{\|\theta\|^2}{2}\Big)\Big].
+\]
+Comme $\Pp(\phi(Z)>0)>0$ (en particulier dans le régime $K<\sum_k\lambda_k$ étudié plus loin), l'intégrande est strictement convexe en $\theta$ et $g(\theta)\to\infty$ lorsque $\|\theta\|\to\infty$, ce qui assure l'existence et l'unicité de
+\[
+\theta^*=\arg\min_{\theta\in\R^d} g(\theta).
+\]
+De plus, pour $k=1,\dots,d$,
+\[
+\frac{\partial g}{\partial\theta_k}(\theta)
+=\E\Big[\phi(Z)^2\exp\Big(-\langle\theta,Z\rangle+\frac{\|\theta\|^2}{2}\Big)\,(\theta_k-Z_k)\Big].
+\]
+(Astuce: cette formule permet une optimisation stochastique type Robbins--Monro.)
+
+\subsection{4--6 -- Choix explicite $\bar\theta$ et interprétation}
+L'inclusion de niveau issue de la concavité du $\log$ (et de Jensen) permet de montrer qu'un choix de la forme
+\[
+\theta(\alpha)=\alpha(\lambda_1\sigma_1,\dots,\lambda_d\sigma_d)
+\]
+donne une direction de descente pour $g$ dès que $\alpha$ est assez grand, et en particulier que le choix explicite $\bar\theta$ de l'énoncé satisfait $g(\bar\theta)<g(0)$.
+Conclusion: il est pertinent d'utiliser \textbf{importance sampling gaussien} (shift) pour estimer un put panier, en initialisant le shift à $\bar\theta$ puis en optimisant éventuellement numériquement.
+
+\part{Sujet 08 (2 avril 2012)}
+
+\section{Exercice 1 -- Équidistribution, van der Corput et QMC}
+\subsection{1.a -- Définition et caractérisations}
+\begin{definition}[Équidistribution sur $[0,1]^d$]
+Une suite $(\xi_n)_{n\ge1}\subset[0,1]^d$ est dite équirepartie (équidistribuée) si pour tout pavé $B=\prod_{j=1}^d [0,a_j)$,
+\[
+\frac1n\sum_{k=1}^n \1_B(\xi_k)\xrightarrow[n\to\infty]{} \lambda_d(B)=\prod_{j=1}^d a_j.
+\]
+\end{definition}
+\begin{remark}[Critère de Weyl]
+Équivalent: pour tout $h\in\Z^d\setminus\{0\}$, $\frac1n\sum_{k=1}^n e^{2\pi i\langle h,\xi_k\rangle}\to 0$.
+\end{remark}
+
+\subsection{1.b -- Discrépance faible}
+On dit que $(\xi_n)$ est \emph{à discrépance faible} si $D_n^*(\xi_1,\dots,\xi_n)\to 0$ (et typiquement avec un taux proche de $(\log n)^d/n$).
+
+\subsection{2 -- Suite de van der Corput en base $p$}
+Soit $p\ge2$ et $n=\sum_{k\ge 0} a_k p^k$ sa décomposition $p$-adique.
+On définit
+\[
+\xi_n=\sum_{k\ge0}\frac{a_k}{p^{k+1}}.
+\]
+\subsubsection{2.a}
+Pour $r\in\{0,\dots,p-1\}$, l'écriture $np+r$ décale les chiffres: on obtient
+\[
+\xi_{np+r}=\frac{\xi_n+r}{p}.
+\]
+Comme $(\xi_n)$ est équirepartie, pour tout $r$ fixé, la sous-suite $(\xi_{kp+r})_{k\ge1}$ est équirepartie sur $[0,1]$ avec transformation affine, et
+\[
+\lim_{n\to\infty}\frac1n\sum_{k=1}^n \xi_{kp+r}
+=\int_0^1 \frac{u+r}{p}\,du
+=\frac{r+1/2}{p}.
+\]
+\subsubsection{2.b}
+De même, pour $r,r'\in\{0,\dots,p-1\}$,
+\[
+\lim_{n\to\infty}\frac1n\sum_{k=1}^n \xi_{kp+r}\xi_{kp+r'}
+=\int_0^1 \frac{u+r}{p}\frac{u+r'}{p}\,du
+=\frac{1}{p^2}\Big(\frac13+\frac{r+r'}{2}+rr'\Big).
+\]
+En soustrayant le produit des limites des moyennes, on obtient
+\[
+\lim_{n\to\infty}\left(\frac1n\sum_{k=1}^n \xi_{kp+r}\xi_{kp+r'}-\Big(\frac1n\sum_{k=1}^n \xi_{kp+r}\Big)\Big(\frac1n\sum_{k=1}^n \xi_{kp+r'}\Big)\right)
+=\frac{1}{12p^2},
+\]
+indépendant de $r,r'$.
+
+\subsubsection{3 -- Commentaire (astuce/prudence)}
+Ce calcul met en évidence une \emph{structure arithmétique forte} et des corrélations non négligeables entre sous-suites.
+Moralité QMC à retenir: en dimension $d>1$, il faut utiliser des constructions adaptées (nets/suites Sobol', Halton multi-d) ou des \emph{scramblings}, plutôt que des couplages naïfs de sous-suites très dépendantes.
+
+\subsection{3.a--3.b -- QMC pour $\E[f(Z)]$, $Z\sim\mathcal N(0,\Sigma)$}
+\begin{itemize}[leftmargin=*]
+  \item Simuler $U_k\in[0,1]^2$ via une suite à faible discrépance; poser $G_k=(\Phi^{-1}(U_k^{(1)}),\Phi^{-1}(U_k^{(2)}))\sim \mathcal N(0,I_2)$ au sens ``transport''.
+  \item Pour une covariance $\Sigma$, prendre une factorisation $\Sigma=AA^\top$ (Cholesky) et poser $Z_k=AG_k$.
+  \item Approximer $\E[f(Z)]\approx \frac1n\sum_{k=1}^n f(Z_k)$, et randomiser (shift/scramble) pour obtenir des IC.
+\end{itemize}
+
+\section{Exercice 2 -- Co-monotonie et application à la vega}
+\subsection{2.a--2.c -- Inégalité de Chebyshev (covariance positive)}
+\begin{proposition}[Co-monotonie]\label{prop:comono}
+Si $f$ et $g$ sont monotones de même sens et $f(Z),g(Z)$ intégrables, alors
+\[
+\E[f(Z)g(Z)]\ge \E[f(Z)]\,\E[g(Z)].
+\]
+\end{proposition}
+\begin{proof}
+Soient $Z'$ une copie indépendante de $Z$. Alors $(f(Z)-f(Z'))(g(Z)-g(Z'))\ge 0$ p.s. par co-monotonie.
+En prenant l'espérance et en développant,
+\[
+0\le \E[(f(Z)-f(Z'))(g(Z)-g(Z'))]=2\Big(\E[f(Z)g(Z)]-\E[f(Z)]\E[g(Z)]\Big).
+\]
+\end{proof}
+\begin{remark}
+Pour des fonctions positives non nécessairement dans $L^2$, on conclut par troncature et convergence monotone.
+\end{remark}
+
+\subsection{3 -- Vega en Black--Scholes et signe}
+Dans Black--Scholes: $X_T=x_0\exp((r-\sigma^2/2)T+\sigma W_T)$, et
+\[
+\Phi(x_0,\sigma,r,T)=e^{-rT}\E[\varphi(X_T)].
+\]
+\paragraph{3.a (astuce).}
+Pour $\varphi$ convexe $C^1$ à croissance polynomiale, on obtient des inégalités de pentes
+\[
+\varphi(x)-\varphi(x-1)\le \varphi'(x)\le \varphi(x+1)-\varphi(x),
+\]
+ce qui assure la croissance polynomiale de $\varphi'$ et justifie la différentiation sous l'espérance.
+\paragraph{3.b.}
+Comme $\partial_\sigma X_T=X_T(W_T-\sigma T)$, on a
+\[
+\frac{\partial\Phi}{\partial\sigma}(x_0,\sigma,r,T)=e^{-rT}\E\big[\varphi'(X_T)\,X_T\,(W_T-\sigma T)\big].
+\]
+\paragraph{3.c.}
+En effectuant un changement de mesure de Girsanov qui recentre $W_T-\sigma T$ (ou une réécriture équivalente), on peut ramener la formule à une espérance sous $Z\sim\mathcal N(0,1)$:
+\[
+\frac{\partial\Phi}{\partial\sigma}(x_0,\sigma,r,T)=x_0\sqrt{T}\,\E\big[\varphi'(x_0e^{\sigma\sqrt{T}Z+(r+\sigma^2/2)T})\,Z\big].
+\]
+\paragraph{3.d (signe).}
+Si $\varphi$ est convexe, alors $\varphi'$ est croissante; la fonction $z\mapsto z$ est croissante.
+Par co-monotonie (prop. \ref{prop:comono}) et $\E[Z]=0$, on obtient $\E[\varphi'(\cdot)\,Z]\ge 0$, donc \(\partial_\sigma\Phi\ge 0\).
+
+\section{Exercice 3 -- Convergence p.s. du schéma d'Euler}
+\subsection{3.a--3.b -- De $L^p$ à p.s. (Borel--Cantelli)}
+Sous hypothèses Lipschitz, on sait (cours) que, pour tout $p\ge 1$,
+\[
+\E\Big[\sup_{t\le T}|X_t-\bar X_t^n|^p\Big]\le C_p\,n^{-p/2}.
+\]
+Fixons $\alpha\in(0,1/2)$. Choisissons $p$ tel que $p(1/2-\alpha)>1$. Alors
+\[
+\sum_{n\ge 1}\Pp\Big(n^\alpha\sup_{t\le T}|X_t-\bar X_t^n|>\varepsilon\Big)
+\le \sum_{n\ge 1}\frac{n^{p\alpha}}{\varepsilon^p}\E\Big[\sup_{t\le T}|X_t-\bar X_t^n|^p\Big]
+\le C\sum_{n\ge 1} n^{-p(1/2-\alpha)}<\infty.
+\]
+Par Borel--Cantelli, $n^\alpha\sup_{t\le T}|X_t-\bar X_t^n|\to 0$ p.s.
+\subsection{3.c}
+Le même type de résultat vaut pour l'Euler constant par morceaux, en combinant l'erreur de discrétisation et l'oscillation intra-pas (modulus de continuité du brownien).
+
+\section{Problème -- Volatilité locale: positivité, convexité, comparaison}
+\subsection{1 -- Positivité et SDE du logarithme}
+Pour $dX_t^x=X_t^x\sigma(X_t^x)\,dW_t$ (prix actualisé) avec $\sigma$ bornée, Lipschitz sur $\R_+$, on obtient
+\[
+X_t^x=x\exp\Big(-\frac12\int_0^t \sigma^2(X_s^x)\,ds+\int_0^t \sigma(X_s^x)\,dW_s\Big),
+\]
+donc $X_t^x>0$ p.s. et $\xi_t=\log X_t^x$ vérifie
+\[
+d\xi_t=-\frac12\sigma^2(e^{\xi_t})\,dt+\sigma(e^{\xi_t})\,dW_t.
+\]
+
+\subsection{2 -- Outils convexes (astuces)}
+Pour $g$ convexe Lipschitz, ses dérivées à gauche/droite $g'_-,g'_+$ existent partout, sont croissantes et bornées.
+Un outil clé: si $Z$ est centrée sans atome et $g$ convexe Lipschitz croissante, alors
+\[
+Q(g)(x,u)=\E[g(x+uZ)]
+\]
+est dérivable en $u>0$ avec
+\[
+\partial_u Q(g)(x,u)=\E[g'_+(x+uZ)\,Z],
+\]
+et $Q(g)$ est croissante en $u$, convexe, Lipschitz en $(x,u)$.
+
+\subsection{3--5 -- Schéma d'Euler, opérateur $Q_+$ et propagation}
+Pour l'Euler discret, on écrit (avec $Z_k\sim\mathcal N(0,1)$ i.i.d.)
+\[
+\bar X_{t_k}^n=\bar X_{t_{k-1}}^n\Big(1+\sigma(\bar X_{t_{k-1}}^n)Z_k\sqrt{T/n}\Big),
+\]
+et $(\bar X_{t_k}^n)_+$ est une chaîne de Markov.
+En posant
+\[
+\bar M_k^n=\E[\varphi((\bar X_T^n)_+)\mid \sigma(Z_1,\dots,Z_k)],
+\]
+on montre par récurrence qu'il existe des fonctions $\varphi_k$ telles que $\bar M_k^n=\varphi_k((\bar X_{t_k}^n)_+)$ et
+\[
+\varphi_k(x)=Q_+(\varphi_{k+1})\Big(x,\;x\sigma(x)\sqrt{T/n}\Big),
+\qquad \varphi_n=\varphi,
+\]
+où $Q_+(h)(x,u)=\E[h((x+uZ)_+)]$.
+Si $\varphi$ et $x\mapsto x\sigma(x)$ sont convexes Lipschitz, la convexité se propage aux $\varphi_k$.
+Enfin, sous des hypothèses de domination $0\le \varphi\le \psi$ et $\sigma\le \vartheta$, on obtient des inégalités de prix par passage à la limite $n\to\infty$.
 
 \part{Sujet 09 (10 janvier 2013)}
 
@@ -79,7 +517,7 @@ X_t=x+\int_0^t b(s,X_s)\,ds+\int_0^t \sigma(s,X_s)\,dW_s.
 Par $(a+b+c)^2\le 3(a^2+b^2+c^2)$,
 \[
 \sup_{u\le t}|X_u|^2 \le 3|x|^2 + 3\sup_{u\le t}\Big|\int_0^u b(s,X_s)\,ds\Big|^2
-3\sup_{u\le t}\Big|\int_0^u \sigma(s,X_s)\,dW_s\Big|^2.
+ +3\sup_{u\le t}\Big|\int_0^u \sigma(s,X_s)\,dW_s\Big|^2.
 \]
 Pour le terme de drift, par Cauchy--Schwarz,
 \[
@@ -265,7 +703,7 @@ dZ_t=-\lambda Z_t\,dt+\sigma\,dW_t,\qquad Z_0=z.
 Par Itô,
 \[
 d(Z_t^2)=2Z_t\,dZ_t+d\langle Z\rangle_t
-(\sigma^2-2\lambda Z_t^2)\,dt+2\sigma Z_t\,dW_t.
++(\sigma^2-2\lambda Z_t^2)\,dt+2\sigma Z_t\,dW_t.
 \]
 En posant $X_t=Z_t^2$ et en notant que $Z_t=\pm\sqrt{X_t}$, on reconnaît une dynamique de type CIR
 \[
@@ -315,7 +753,7 @@ d(\log S_t)=\Big(r-\frac12 v_t\Big)dt+\sqrt{v_t}\big(\rho\,dW_t+\sqrt{1-\rho^2}\
 Donc
 \[
 \log S_T=\log S_0+rT-\frac12\int_0^T v_tdt+\rho\int_0^T\sqrt{v_t}\,dW_t
-\sqrt{1-\rho^2}\int_0^T\sqrt{v_t}\,dB_t.
+ +\sqrt{1-\rho^2}\int_0^T\sqrt{v_t}\,dB_t.
 \]
 Conditionnellement à $\cF_T^W=\sigma(W_s,0\le s\le T)$, le terme
 $\int_0^T\sqrt{v_t}\,dB_t$ est gaussien centré de variance $\int_0^T v_tdt$, donc $S_T$ est un log-normal conditionnel.
@@ -575,23 +1013,72 @@ Un choix équilibré est $\varepsilon_n\asymp n^{-\frac14(1-\delta)}$, puis $M\a
 
 \part{Fiche de révision (à connaître)}
 
-\section{Outils généraux EDS}
+\section{Outils généraux EDS (à savoir utiliser)}
 \begin{itemize}[leftmargin=*]
-  \item \textbf{Itô (scalaire)}: si $dX_t=b_tdt+\sigma_t dW_t$ et $f\in C^2$, alors
+  \item \textbf{Itô (scalaire)}: si $dX_t=b_t\,dt+\sigma_t\,dW_t$ et $f\in C^2$,
   \[
-  df(X_t)=f'(X_t)b_t\,dt+f'(X_t)\sigma_t\,dW_t+\frac12 f''(X_t)\sigma_t^2\,dt.
+  df(X_t)=f'(X_t)\,dX_t+\frac12 f''(X_t)\sigma_t^2\,dt.
   \]
-  \item \textbf{BDG}: pour une martingale continue $M_t=\int_0^t H_s\,dW_s$,
-  $\E[\sup_{u\le t}|M_u|^p]\le C_p\,\E[(\int_0^t |H_s|^2ds)^{p/2}]$.
-  \item \textbf{Gronwall}: si $u(t)\le a+b\int_0^t u(s)ds$, alors $u(t)\le ae^{bt}$.
-  \item \textbf{Existence/unicité forte}: Lipschitz + croissance linéaire.
+  \item \textbf{Itô (vectoriel)}: $dX_t=b_tdt+\Sigma_t dW_t$, alors $df(X_t)=\nabla f^\top dX_t+\frac12 \mathrm{Tr}(\Sigma_t\Sigma_t^\top \nabla^2 f)\,dt$.
+  \item \textbf{BDG} (contrôle du $\sup$): pour $M_t=\int_0^t H_s dW_s$, $\E[\sup_{u\le t}|M_u|^p]\le C_p\E[(\int_0^t |H_s|^2ds)^{p/2}]$.
+  \item \textbf{Doob} (martingale): $\| \sup_{u\le t}M_u\|_{L^p}\le \frac{p}{p-1}\|M_t\|_{L^p}$ pour $p>1$.
+  \item \textbf{Gronwall} (continu/discret): fermer les inégalités intégrales/récurrences.
+  \item \textbf{Girsanov} (changement de drift brownien): si $\theta\in L^2$, alors sous $d\Q=\mathcal E(-\int\theta dW)_T\,d\Pp$, $W_t^\Q=W_t+\int_0^t\theta_sds$ est brownien.
+  \item \textbf{Cameron--Martin (gaussien)}: pour $Z\sim\mathcal N(0,I_d)$,
+  \[
+  \E[h(Z)]=\E\big[h(Z+\theta)e^{-\langle\theta,Z\rangle-\|\theta\|^2/2}\big].
+  \]
+  \item \textbf{Intégration par parties gaussienne}: si $Z\sim\mathcal N(0,1)$ et $H$ régulière,
+  $\E[H(Z)Z]=\E[H'(Z)]$ (utile pour greeks).
+  \item \textbf{Borel--Cantelli} (passer de $L^p$ à p.s.): si $\sum_n\Pp(A_n)<\infty$ alors $\Pp(A_n\ i.o.)=0$.
+  \item \textbf{Existence/unicité forte (critère standard)}: coefficients Lipschitz + croissance linéaire (ou variantes monotones/locales).
 \end{itemize}
 
-\section{Schémas numériques}
+\section{Schémas numériques (Euler, Milstein) et ordres}
 \begin{itemize}[leftmargin=*]
-  \item \textbf{Euler}: ordre fort $1/2$ (cas Lipschitz).
-  \item \textbf{Milstein (scalaire)}: ajoute le terme $\frac12\sigma\sigma'((\Delta W)^2-\Delta)$; ordre fort $1$ (régularité suffisante).
-  \item \textbf{Astuce positivité} (CIR, etc.): écrire la mise à jour en trinôme en $\Delta W$ et forcer le minimum à être $\ge 0$.
+  \item \textbf{Euler discret}:
+  $\bar X_{t_{i+1}}=\bar X_{t_i}+b(t_i,\bar X_{t_i})\Delta+\sigma(t_i,\bar X_{t_i})\Delta W_i$.
+  \item \textbf{Euler continu (authentique)} sur $[t_i,t_{i+1}]$:
+  $\bar X_t=\bar X_{t_i}+b(t_i,\bar X_{t_i})(t-t_i)+\sigma(t_i,\bar X_{t_i})(W_t-W_{t_i})$.
+  \item \textbf{Milstein (scalaire)}:
+  \[
+  X_{t_{i+1}}^{\mathrm{mil}}=X_i+b_i\Delta+\sigma_i\Delta W_i+\tfrac12\sigma_i\sigma_i'((\Delta W_i)^2-\Delta).
+  \]
+  \item \textbf{Ordres usuels} (coefficients Lipschitz):
+  Euler ordre \emph{fort} $1/2$, ordre \emph{faible} $1$; Milstein (scalaire régulier) ordre fort $1$.
+  \item \textbf{Astuce $L^p\Rightarrow$ p.s.}:
+  si $\E[\sup_{t\le T}|X_t-\bar X_t^n|^p]\le Cn^{-p/2}$ alors pour tout $\alpha<1/2$, choisir $p$ tel que $p(1/2-\alpha)>1$ et appliquer Borel--Cantelli pour obtenir $n^\alpha\sup_{t\le T}|X_t-\bar X_t^n|\to 0$ p.s.
+  \item \textbf{Positivité (CIR, etc.)}: écrire la mise à jour comme un trinôme en $\Delta W$ et forcer le minimum $\ge 0$ via des conditions du type
+  $b-\frac14(\sigma^2)'\ge 0$ et $\sigma/\sigma'\le 2x$ sur $\R_+$ (ou ajouter un paramètre $\kappa$ via $e^{\kappa t}X_t$).
+\end{itemize}
+
+\section{Sensibilités (greeks) : méthodes et pièges}
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Différences finies}:
+  \[
+  f'(x)\approx \frac{f(x+\varepsilon)-f(x-\varepsilon)}{2\varepsilon}
+  \quad\text{(biais typiquement }O(\varepsilon^2)\text{)}.
+  \]
+  \item \textbf{Richardson (accélération)}:
+  si $D(\varepsilon)=f'(x)+c\varepsilon^2+O(\varepsilon^3)$, alors
+  $-\frac13D(\varepsilon)+\frac43D(\varepsilon/2)=f'(x)+O(\varepsilon^3)$.
+  \item \textbf{Common Random Numbers (CRN)}: utiliser le \emph{même} bruit pour $x+\varepsilon$ et $x-\varepsilon$ diminue souvent la variance (covariance négative utile).
+  \item \textbf{Pathwise derivative} (quand payoff régulier): dériver $X_T(\theta)$ par rapport au paramètre et passer la dérivée sous l'espérance.
+  \item \textbf{Likelihood ratio / score function} (quand payoff non régulier): dériver la densité (ou la loi) au lieu du payoff (utile pour digitales).
+  \item \textbf{Piège digital}:
+  si $x\mapsto \1_{\{X_T^x\ge K\}}$ n'est que Hölder $1/2$ en $L^2$, alors
+  $\Var(\text{différence finie})\sim 1/(\varepsilon M)$ : diminuer $\varepsilon$ \emph{augmente} la variance.
+  \item \textbf{Règle} : toujours faire un bilan \emph{biais$^2$ vs variance} pour choisir $(\varepsilon,M)$.
+\end{itemize}
+
+\section{Réduction de variance (les ``astuces'' classiques)}
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Rao--Blackwell / MC conditionnel}: remplacer $H$ par $\E[H\mid\mathcal G]$ réduit la variance.
+  Ex.: Heston en conditionnant par $\mathcal F_T^W$ donne un prix Black--Scholes conditionnel.
+  \item \textbf{Variables de contrôle}: $H-\beta(C-\E[C])$ avec $\beta=\Cov(H,C)/\Var(C)$.
+  \item \textbf{Antithétiques}: coupler $Z$ et $-Z$ (efficace si l'intégrande est monotone).
+  \item \textbf{Stratification}: découper l'espace en strates et échantillonner conditionnellement.
+  \item \textbf{Importance sampling gaussien} (shift): utiliser Cameron--Martin avec paramètre $\theta$; optimiser $\theta$ en minimisant le second moment $g(\theta)$ (convexe, gradient explicite).
 \end{itemize}
 
 \section{Pont brownien et barrières}
@@ -614,10 +1101,12 @@ Un choix équilibré est $\varepsilon_n\asymp n^{-\frac14(1-\delta)}$, puis $M\a
 
 \section{Quasi--Monte Carlo}
 \begin{itemize}[leftmargin=*]
+  \item \textbf{Équidistribution}: la mesure empirique converge vers Lebesgue; critère de Weyl.
   \item \textbf{Discrépance étoile} $D_n^*$: mesure d'écart à l'uniformité.
-  \item \textbf{Koksma--Hlawka}: erreur $\le V(f)D_n^*$.
-  \item \textbf{Random shift} $x\mapsto\{x+U\}$: rend l'estimateur \emph{non biaisé} et permet des IC.
-  \item \textbf{Suites usuelles}: Sobol', Halton, etc. typiquement $D_n^*\sim(\log n)^d/n$.
+  \item \textbf{Koksma--Hlawka}: $|\frac1n\sum f(\xi_k)-\int f|\le V(f)D_n^*$.
+  \item \textbf{Random shift (Cranley--Patterson)}: $\xi_k\mapsto\{\xi_k+U\}$ rend l'estimateur non biaisé et permet IC via $M$ shifts.
+  \item \textbf{Scrambling}: randomisation des suites digitales (Sobol') pour réduire corrélations (utile en grande dimension).
+  \item \textbf{Attention aux corrélations arithmétiques}: éviter des constructions naïves de points multivariés à partir de sous-suites trop liées (ex. van der Corput).
 \end{itemize}
 
 \section{Digitales: $f(K)=\Pp(X_T\ge K)$}
@@ -625,6 +1114,7 @@ Un choix équilibré est $\varepsilon_n\asymp n^{-\frac14(1-\delta)}$, puis $M\a
   \item Si $X_T$ a une densité $p$, alors $f'(K)=-p(K)$.
   \item \textbf{Différence finie}: $f'(K)\approx (f(K+\varepsilon)-f(K))/\varepsilon$.
   \item \textbf{Biais/variance}: équilibrer $\varepsilon$, $n$ (discrétisation), et $M$ (MC).
+  \item \textbf{Truc barrière/digitale}: remplacer l'indicatrice par une \emph{espérance conditionnelle} via un pont (brownien/Euler) pour lisser et réduire variance.
 \end{itemize}
 
 \end{document}
