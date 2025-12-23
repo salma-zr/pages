@@ -1,0 +1,631 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{geometry}
+\geometry{margin=2.5cm}
+
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{bbm}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue,citecolor=blue}
+
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Pp}{\mathbb{P}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\1}{\mathbbm{1}}
+\newcommand{\cF}{\mathcal{F}}
+\newcommand{\cA}{\mathcal{A}}
+\newcommand{\cB}{\mathcal{B}}
+\newcommand{\Lip}{\mathrm{Lip}}
+\newcommand{\Var}{\mathrm{Var}}
+\newcommand{\Cov}{\mathrm{Cov}}
+
+\theoremstyle{plain}
+\newtheorem{theorem}{Théorème}
+\newtheorem{proposition}{Proposition}
+\newtheorem{lemma}{Lemme}
+\newtheorem{corollary}{Corollaire}
+
+\theoremstyle{definition}
+\newtheorem{definition}{Définition}
+\newtheorem{remark}{Remarque}
+
+\title{Probabilités numériques -- Corrigés (Sujets 09 et 10) \\
+\large et fiche de révision (définitions, théorèmes, méthodes)}
+\author{}
+\date{Décembre 2025}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\bigskip
+
+\section*{Avant-propos}
+Ce document regroupe une correction rigoureuse et rédigée des deux sujets:
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Sujet 09} (10 janvier 2013): schéma de Milstein, positivité, modèles CIR/OU, Heston, ponts de diffusion et barrières.
+  \item \textbf{Sujet 10} (5 janvier 2015): quasi-Monte Carlo, randomisation, et estimation de la sensibilité d'une digitale (``kappa'').
+\end{itemize}
+Les notations suivent celles usuelles du cours: $W$ désigne un mouvement brownien standard; pour un pas de discrétisation $\Delta=T/n$ on note $t_i=i\Delta$ et $\Delta W_i = W_{t_{i+1}}-W_{t_i}\sim\mathcal{N}(0,\Delta)$.
+
+\part{Sujet 09 (10 janvier 2013)}
+
+\section{Problème 1 -- Autour du schéma de Milstein}
+\subsection{Cadre}
+On considère l'équation différentielle stochastique (EDS)
+\begin{equation}\label{eq:eds-general}
+  dX_t=b(t,X_t)\,dt+\sigma(t,X_t)\,dW_t,\qquad X_0=x,\quad t\in[0,T],
+\end{equation}
+où $b$ et $\sigma$ sont continues sur $[0,T]\times\R$, à croissance linéaire en $x$ uniformément en $t$.
+
+\subsection{1.a -- Borne de moment quadratique du supremum}
+\begin{proposition}\label{prop:sup2}
+Sous les hypothèses précédentes (et existence d'une solution forte), il existe $C_{b,\sigma,T}\in(0,\infty)$ tel que
+\[
+  \E\Big[\sup_{t\in[0,T]}|X_t|^2\Big]\le C_{b,\sigma,T}(1+|x|^2).
+\]
+\end{proposition}
+\begin{proof}
+On écrit l'intégrale stochastique
+\[
+X_t=x+\int_0^t b(s,X_s)\,ds+\int_0^t \sigma(s,X_s)\,dW_s.
+\]
+Par $(a+b+c)^2\le 3(a^2+b^2+c^2)$,
+\[
+\sup_{u\le t}|X_u|^2 \le 3|x|^2 + 3\sup_{u\le t}\Big|\int_0^u b(s,X_s)\,ds\Big|^2
+3\sup_{u\le t}\Big|\int_0^u \sigma(s,X_s)\,dW_s\Big|^2.
+\]
+Pour le terme de drift, par Cauchy--Schwarz,
+\[
+\sup_{u\le t}\Big|\int_0^u b(s,X_s)\,ds\Big|^2
+\le \Big(\int_0^t |b(s,X_s)|\,ds\Big)^2
+\le t\int_0^t |b(s,X_s)|^2ds.
+\]
+Pour le terme martingale, l'inégalité de Burkholder--Davis--Gundy (BDG) donne l'existence d'une constante universelle $C>0$ telle que
+\[
+\E\Big[\sup_{u\le t}\Big|\int_0^u \sigma(s,X_s)\,dW_s\Big|^2\Big]
+\le C\,\E\Big[\int_0^t |\sigma(s,X_s)|^2\,ds\Big].
+\]
+En combinant, on obtient
+\[
+\E\sup_{u\le t}|X_u|^2
+\le 3|x|^2 + C\int_0^t \E\big[|b(s,X_s)|^2+|\sigma(s,X_s)|^2\big]\,ds.
+\]
+Par croissance linéaire, il existe $A>0$ tel que $|b(t,y)|+|\sigma(t,y)|\le A(1+|y|)$, donc
+$|b|^2+|\sigma|^2\le C(1+|y|^2)$. D'où
+\[
+\E\sup_{u\le t}|X_u|^2
+\le C(1+|x|^2)+C\int_0^t \E\sup_{r\le s}|X_r|^2\,ds.
+\]
+La conclusion résulte du lemme de Gronwall.
+\end{proof}
+
+\subsection{1.b -- Conditions suffisantes d'existence et d'unicité forte}
+\begin{proposition}
+Si $b(t,\cdot)$ et $\sigma(t,\cdot)$ sont globalement Lipschitz en $x$ (uniformément en $t\in[0,T]$) et à croissance linéaire, alors \eqref{eq:eds-general} admet une \emph{solution forte unique} sur $[0,T]$.
+\end{proposition}
+\begin{remark}
+Des variantes existent avec des hypothèses locales + non explosion, ou monotonicité; ici on retient le critère standard de cours.
+\end{remark}
+
+\subsection{1.c -- Schéma d'Euler à pas $\Delta=T/n$}
+On définit le schéma d'Euler discret $(\bar X_{t_i})_{i=0,\dots,n}$ par
+\[
+\bar X_{t_0}=x,\qquad
+\bar X_{t_{i+1}}=\bar X_{t_i}+b(t_i,\bar X_{t_i})\Delta+\sigma(t_i,\bar X_{t_i})\Delta W_i,\quad i=0,\dots,n-1.
+\]
+
+\subsection{Rappel -- Schéma de Milstein (scalaire)}
+Sous régularité en $x$ de $\sigma$, le schéma de Milstein discret s'écrit
+\begin{equation}\label{eq:milstein}
+X^{\mathrm{mil}}_{t_{i+1}}
+=X^{\mathrm{mil}}_{t_i}+b(t_i,X^{\mathrm{mil}}_{t_i})\Delta+\sigma(t_i,X^{\mathrm{mil}}_{t_i})\Delta W_i
++\frac12\sigma(t_i,X^{\mathrm{mil}}_{t_i})\partial_x\sigma(t_i,X^{\mathrm{mil}}_{t_i})\big((\Delta W_i)^2-\Delta\big).
+\end{equation}
+
+\subsection{2.a -- Positivité du Milstein discret (trinôme)}
+On suppose désormais:
+\begin{itemize}[leftmargin=*]
+  \item $b(t,\cdot),\sigma(t,\cdot)$ dérivables en $x$;
+  \item pour tout $t$, la fonction $x\mapsto \sigma^2(t,x)$ est croissante sur $\R_+$;
+  \item $\sigma$ ne s'annule pas sur $[0,T]\times\R_+$ (donc de signe constant sur ce domaine).
+\end{itemize}
+On suppose en outre que pour tout $t\in[0,T]$ et $\xi\in\R_+$,
+\begin{equation}\label{eq:cond-pos-milstein}
+b(t,\xi)-\frac14(\sigma^2)'(t,\xi)\ge 0
+\qquad\text{et}\qquad
+\frac{\sigma(t,\xi)}{\partial_x\sigma(t,\xi)}\le 2\xi.
+\end{equation}
+\begin{proposition}
+Si $x\ge 0$ et \eqref{eq:cond-pos-milstein} est satisfaite, alors pour tout $i\in\{0,\dots,n\}$,
+$X^{\mathrm{mil}}_{t_i}\ge 0$ p.s.
+\end{proposition}
+\begin{proof}
+On procède par récurrence. Supposons $X_i:=X^{\mathrm{mil}}_{t_i}\ge 0$. Écrivons \eqref{eq:milstein} à l'instant $t_i$ en posant
+$\sigma_i=\sigma(t_i,X_i)$, $\sigma_i'=\partial_x\sigma(t_i,X_i)$, $b_i=b(t_i,X_i)$, et $u=\Delta W_i$.
+On obtient
+\[
+X_{i+1}=X_i+b_i\Delta+\sigma_i u+\frac12\sigma_i\sigma_i'(u^2-\Delta)
+=Au^2+Bu+C,
+\]
+avec $A=\frac12\sigma_i\sigma_i'$, $B=\sigma_i$ et $C=X_i+b_i\Delta-\frac12\sigma_i\sigma_i'\Delta$.
+
+Comme $x\mapsto \sigma^2(t_i,x)$ est croissante sur $\R_+$, on a $(\sigma^2)'(t_i,X_i)=2\sigma_i\sigma_i'\ge 0$, donc $A\ge 0$.
+Si $A=0$ alors $\sigma_i\sigma_i'=0$; avec $\sigma_i\neq 0$ sur $\R_+$, cela impose $\sigma_i'=0$ et \eqref{eq:cond-pos-milstein} donne $\sigma_i/\sigma_i'$ non défini: ce cas est exclu (ou traité séparément) en pratique. On suppose donc $A>0$.
+
+Le minimum du trinôme $Au^2+Bu+C$ sur $\R$ vaut $C-\frac{B^2}{4A}$. Ici
+\[
+C-\frac{B^2}{4A}=X_i+\Delta\Big(b_i-\frac12\sigma_i\sigma_i'\Big)-\frac{\sigma_i}{2\sigma_i'}.
+\]
+Or $b_i-\frac12\sigma_i\sigma_i'=b_i-\frac14(\sigma^2)'(t_i,X_i)\ge 0$ par \eqref{eq:cond-pos-milstein}, donc
+\[
+C-\frac{B^2}{4A}\ge X_i-\frac{\sigma_i}{2\sigma_i'}.
+\]
+Enfin $\frac{\sigma_i}{\sigma_i'}\le 2X_i$ implique $X_i-\frac{\sigma_i}{2\sigma_i'}\ge 0$. Ainsi $X_{i+1}\ge 0$ p.s.
+\end{proof}
+
+\subsection{2.b -- Positivité du Milstein continu}
+Le schéma de Milstein \emph{continu} sur $[t_i,t_{i+1}]$ s'écrit (interpolation ``authentique''):
+\[
+\bar X^{\mathrm{mil}}_t
+=X_i+b_i(t-t_i)+\sigma_i(W_t-W_{t_i})+\frac12\sigma_i\sigma_i'\Big((W_t-W_{t_i})^2-(t-t_i)\Big).
+\]
+Pour $s=t-t_i$ fixé, c'est un trinôme en $u=W_t-W_{t_i}$ dont le minimum vaut
+\[
+X_i+s\Big(b_i-\frac12\sigma_i\sigma_i'\Big)-\frac{\sigma_i}{2\sigma_i'}\ge 0
+\]
+par les mêmes arguments que ci-dessus. Donc $\bar X^{\mathrm{mil}}_t\ge 0$ p.s. pour tout $t$.
+
+\subsection{3.a -- Transformation $Y_t=e^{\kappa t}X_t$}
+Soit $\kappa\in\R$ et $Y_t=e^{\kappa t}X_t$. Par Itô et la règle de dérivation,
+\[
+dY_t=\kappa e^{\kappa t}X_t\,dt+e^{\kappa t}dX_t
+=\Big(\kappa Y_t+e^{\kappa t}b(t,e^{-\kappa t}Y_t)\Big)dt+e^{\kappa t}\sigma(t,e^{-\kappa t}Y_t)\,dW_t.
+\]
+Ainsi $Y$ résout une EDS de la forme $dY_t=\tilde b(t,Y_t)dt+\tilde\sigma(t,Y_t)dW_t$ avec
+\[
+\tilde b(t,y)=\kappa y+e^{\kappa t}b(t,e^{-\kappa t}y),
+\qquad
+\tilde\sigma(t,y)=e^{\kappa t}\sigma(t,e^{-\kappa t}y).
+\]
+
+\subsection{3.b -- Conditions de positivité avec le paramètre $\kappa$}
+On souhaite appliquer \eqref{eq:cond-pos-milstein} à $(\tilde b,\tilde\sigma)$.
+On calcule
+\[
+\partial_y\tilde\sigma(t,y)=\partial_x\sigma(t,e^{-\kappa t}y),
+\qquad
+(\tilde\sigma^2)'_y(t,y)=e^{\kappa t}(\sigma^2)'_x(t,e^{-\kappa t}y).
+\]
+En posant $x=e^{-\kappa t}y$ (donc $y=e^{\kappa t}x$), les conditions deviennent:
+\[
+\frac{\tilde\sigma(t,y)}{\partial_y\tilde\sigma(t,y)}\le 2y
+\iff
+\frac{\sigma(t,x)}{\partial_x\sigma(t,x)}\le 2x,
+\]
+et
+\[
+\tilde b(t,y)-\frac14(\tilde\sigma^2)'_y(t,y)\ge 0
+\iff
+b(t,x)-\frac14(\sigma^2)'(t,x)+\kappa x\ge 0
+\quad\text{pour tout }x\ge 0.
+\]
+Ainsi, un choix de $\kappa$ suffisamment grand (si besoin) peut rétablir la condition de drift.
+
+\subsection{4.a -- Conditions suffisantes de convergence $L^p$ des schémas de Milstein}
+Un jeu d'hypothèses standard (suffisant) pour la convergence forte $L^p$ du Milstein sur $[0,T]$ est:
+\begin{itemize}[leftmargin=*]
+  \item $b$ et $\sigma$ globalement Lipschitz en $x$ (uniformément en $t$), croissance linéaire;
+  \item $\sigma$ de classe $C^1$ en $x$, et la fonction $x\mapsto \sigma(t,x)\partial_x\sigma(t,x)$ Lipschitz en $x$ (uniformément en $t$).
+\end{itemize}
+Alors, pour tout $p\in[1,\infty)$,
+\[
+\Big\|\sup_{t\le T}|Y_t-\bar Y^{\mathrm{mil}}_t|\Big\|_{L^p}\xrightarrow[n\to\infty]{}0
+\quad\text{et typiquement l'ordre fort est }1.
+\]
+
+\subsection{4.b -- Positivité de la solution de l'EDS}
+Si, pour tout $n$, le schéma $\bar X^{\mathrm{mil},n}$ (ou $\bar Y^{\mathrm{mil},n}$) est positif p.s. sur $[0,T]$ et converge vers la solution $X$ (ou $Y$) dans $C([0,T])$ en probabilité (ou en loi), alors la limite est également positive p.s. puisque l'ensemble
+\[
+\{ \omega\in C([0,T]) : \forall t,\ \omega(t)\ge 0\}
+\]
+est fermé pour la norme sup.
+
+\section{Modèles CIR et OU (questions 5--6)}
+\subsection{5.a -- Quand les théorèmes standards ne s'appliquent pas}
+Pour
+\[
+dX_t=(a-bX_t)\,dt+\vartheta |X_t|^\alpha\,dW_t,\qquad X_0=x\ge 0,\quad \alpha\in\Big[\frac12,1\Big],
+\]
+les théorèmes les plus standards d'existence/unicité forte supposent que le coefficient de diffusion $x\mapsto \vartheta|x|^\alpha$ est globalement Lipschitz. Or ce n'est pas le cas au voisinage de $0$ dès que $\alpha<1$. On ne peut donc pas conclure directement par ces résultats.
+
+\subsection{5.b -- Discussion de la positivité via le critère Milstein}
+Sur $\R_+$, $\sigma(x)=\vartheta x^\alpha$ et $\sigma'(x)=\vartheta\alpha x^{\alpha-1}$, donc
+\[
+\frac{\sigma(x)}{\sigma'(x)}=\frac{x}{\alpha}\le 2x \iff \alpha\ge \frac12.
+\]
+De plus $(\sigma^2)'(x)=2\alpha\vartheta^2 x^{2\alpha-1}$ et la condition de drift (avec paramètre $\kappa$) devient
+\[
+a-bx+\kappa x-\frac14(\sigma^2)'(x)
+a+(\kappa-b)x-\frac{\alpha\vartheta^2}{2}x^{2\alpha-1}\ge 0,\qquad \forall x\ge 0.
+\]
+Pour $\alpha=\frac12$, le terme $x^{2\alpha-1}$ est constant et l'inégalité à l'origine impose notamment $a\ge \vartheta^2/4$ (condition suffisante ici).
+
+\subsection{6.a -- OU et CIR via la transformation $X_t=Z_t^2$}
+Considérons l'OU
+\[
+dZ_t=-\lambda Z_t\,dt+\sigma\,dW_t,\qquad Z_0=z.
+\]
+Par Itô,
+\[
+d(Z_t^2)=2Z_t\,dZ_t+d\langle Z\rangle_t
+(\sigma^2-2\lambda Z_t^2)\,dt+2\sigma Z_t\,dW_t.
+\]
+En posant $X_t=Z_t^2$ et en notant que $Z_t=\pm\sqrt{X_t}$, on reconnaît une dynamique de type CIR
+\[
+dX_t=(a-bX_t)\,dt+\vartheta\sqrt{X_t}\,d\widetilde W_t,
+\]
+avec $a=\sigma^2$, $b=2\lambda$, $\vartheta=2\sigma$ (donc $a=\vartheta^2/4$).
+
+\subsection{6.b -- Euler pour OU}
+Avec $\Delta=T/n$,
+\[
+\bar Z_{t_{i+1}}=(1-\lambda\Delta)\bar Z_{t_i}+\sigma\Delta W_i.
+\]
+
+\subsection{6.c -- Bornes uniformes de moments en $L^2$}
+Comme $Z_T$ est gaussien (formule explicite), $\E|Z_T|^2<\infty$. De plus, $\bar Z_{t_i}$ vérifie une récurrence affine gaussienne; un calcul de variance récursif fournit
+\[
+\sup_{n\ge 1}\E|\bar Z_T|^2<\infty,
+\]
+donc $\sup_n \E(|Z_T|+|\bar Z_T|)^2<\infty$.
+
+\subsection{6.d -- Schéma pour CIR quand $a=\vartheta^2/4$}
+Dans le cas $a=\vartheta^2/4$, on peut simuler (ou approximer) $Z_T$ puis poser
+\[
+\bar X_T=(\bar Z_T)^2,
+\]
+ce qui donne un schéma pour $X_T$.
+Sous les hypothèses de régularité de cours, une erreur faible d'ordre $1/n$ le long des fonctions Lipschitz $f:\R_+\to\R$ se déduit de la régularité du modèle OU et du transfert $X=Z^2$.
+
+\subsection{6.e -- Simulation exacte du CIR quand $a=\vartheta^2/4$}
+Simuler exactement $Z_T$ (gaussien explicite) puis retourner $X_T=Z_T^2$.
+(Plus généralement, la loi exacte de $X_T$ est une $\chi^2$ non centrale.)
+
+\section{Heston (questions 7--8)}
+\subsection{7.a -- Interprétation de $\rho$}
+Dans Heston,
+\[
+dS_t=rS_t\,dt+\sqrt{v_t}\,S_t(\rho\,dW_t+\sqrt{1-\rho^2}\,dB_t),\qquad
+dv_t=(a-bv_t)\,dt+\sigma\sqrt{v_t}\,dW_t,
+\]
+le paramètre $\rho\in[-1,1]$ représente la \emph{corrélation instantanée} entre le bruit $W$ pilotant la variance $v$ et la composante corrélée du bruit du sous-jacent $S$.
+
+\subsection{7.b -- Conditionnement et représentation type Black--Scholes}
+On écrit la dynamique de $\log S_t$:
+\[
+d(\log S_t)=\Big(r-\frac12 v_t\Big)dt+\sqrt{v_t}\big(\rho\,dW_t+\sqrt{1-\rho^2}\,dB_t\big).
+\]
+Donc
+\[
+\log S_T=\log S_0+rT-\frac12\int_0^T v_tdt+\rho\int_0^T\sqrt{v_t}\,dW_t
+\sqrt{1-\rho^2}\int_0^T\sqrt{v_t}\,dB_t.
+\]
+Conditionnellement à $\cF_T^W=\sigma(W_s,0\le s\le T)$, le terme
+$\int_0^T\sqrt{v_t}\,dB_t$ est gaussien centré de variance $\int_0^T v_tdt$, donc $S_T$ est un log-normal conditionnel.
+En posant
+\[
+\Xi=S_0\exp\Big(\rho\int_0^T\sqrt{v_t}\,dW_t-\frac{\rho^2}{2}\int_0^T v_tdt\Big),
+\qquad
+s=\sqrt{\frac{1-\rho^2}{T}\int_0^T v_tdt},
+\]
+on obtient, pour un payoff $\varphi$ de croissance polynomiale,
+\[
+\E\big[e^{-rT}\varphi(S_T)\mid\cF_T^W\big]=\mathrm{PBS}(\Xi,r,s).
+\]
+
+\subsection{7.c -- Estimateur de Monte Carlo conditionnel}
+Algorithme: simuler $v$ (et donc $W$) puis calculer $\Xi$ et $\int_0^T v_tdt$; remplacer la simulation de $B$ par la formule fermée $\mathrm{PBS}$. C'est un \emph{Rao--Blackwellisation}, donc variance en général plus faible qu'un estimateur ``naïf'' simulant aussi $B$.
+La méthode est réellement implémentable si $\varphi$ est un payoff dont le prix Black--Scholes $\mathrm{PBS}$ se calcule (au moins numériquement) de manière stable.
+
+\subsection{8 -- Schéma de Milstein et positivité de $v$}
+On met en œuvre un schéma (Milstein ou autre) sur $v$ garantissant $v\ge 0$ (par exemple un Milstein ``positif'' comme étudié plus haut, ou un schéma exact/implicitement biaisé adapté au CIR). Les conditions portent sur le couple $(a,b,\sigma)$ du CIR pour que le schéma reste dans $\R_+$.
+
+\section{Problème 2 -- Autour du pont de diffusion}
+\subsection{1.a -- Loi de l'infimum d'un pont brownien}
+Pour le pont brownien $Y^{B,T,y}$ allant de $0$ à $y$ en temps $T$, on rappelle la loi du supremum:
+\[
+\Pp\Big(\sup_{t\le T}Y^{B,T,y}_t\le z\Big)=
+\begin{cases}
+1-\exp\!\big(-\frac{2}{T}z(z-y)\big), & z\ge \max(y,0),\\
+0, & z\le \max(y,0).
+\end{cases}
+\]
+Par symétrie, $-Y^{B,T,y}$ est un pont allant de $0$ à $-y$, donc
+\[
+\Pp\Big(\inf_{t\le T}Y^{B,T,y}_t\le z\Big)
+=\Pp\Big(\sup_{t\le T}(-Y^{B,T,y}_t)\ge -z\Big)
+=
+\begin{cases}
+\exp\!\big(-\frac{2}{T}z(z-y)\big), & z\le \min(y,0),\\
+1, & z\ge \min(y,0).
+\end{cases}
+\]
+
+\subsection{1.b -- Loi de l'infimum d'un pont affine (cas demandé)}
+Fixons $x,y\in\R$ et $\lambda>0$. Considérons
+\[
+X_t=x+\frac{t}{T}(y-x)+\lambda Y_t^{B,T,0}.
+\]
+C'est un pont gaussien allant de $x$ à $y$ dont la fluctuation est de variance $\lambda^2$.
+Pour $z\le \min(x,y)$ on a
+\[
+\Pp\Big(\inf_{t\le T}X_t\le z\Big)=\exp\!\Big(-\frac{2(x-z)(y-z)}{\lambda^2 T}\Big),
+\]
+et pour $z\ge \min(x,y)$ la probabilité vaut $1$.
+
+\subsection{1.c -- Simulation par inversion}
+Si $U\sim\mathrm{Unif}(0,1)$, posez $d=-(\lambda^2T/2)\log U\ge 0$ puis définissez
+\[
+Z=\frac{x+y-\sqrt{(x-y)^2+4d}}{2}.
+\]
+Alors $Z$ a la loi de $\inf_{t\le T}X_t$.
+
+\subsection{2.a -- Loi conditionnelle du schéma d'Euler continu}
+Le schéma d'Euler continu associé à
+\[
+dX_t=b(X_t)\,dt+\sigma(X_t)\,dW_t
+\]
+sur $[t_i,t_{i+1}]$ s'écrit
+\[
+\bar X_t=\bar X_{t_i}+b(\bar X_{t_i})(t-t_i)+\sigma(\bar X_{t_i})(W_t-W_{t_i}).
+\]
+Conditionnellement au squelette $\sigma(\bar X_{t_k},k=0,\dots,n)$, sur chaque intervalle $[t_i,t_{i+1}]$, le processus $(W_t-W_{t_i})_{t\in[t_i,t_{i+1}]}$ conditionné à sa valeur finale est un \emph{pont brownien}. Ainsi, conditionnellement au squelette, $(\bar X_t)$ est un \emph{pont gaussien affine} entre les extrémités $\bar X_{t_i}$ et $\bar X_{t_{i+1}}$.
+
+\subsection{2.b -- MC pour $\E[f(X_T,\inf_{t\le T}X_t)]$ (méthode pont d'Euler)}
+Méthode:
+\begin{itemize}[leftmargin=*]
+  \item Simuler le squelette Euler $(\bar X_{t_i})_{i=0..n}$.
+  \item Sur chaque intervalle $[t_i,t_{i+1}]$, conditionnellement à $(\bar X_{t_i},\bar X_{t_{i+1}})$, simuler l'infimum du pont gaussien affine via la formule de la question 1.c (après réduction au cas $x\to y$ et variance $\lambda=\sigma(\bar X_{t_i})$).
+  \item Prendre le minimum global des infimums sur les $n$ intervalles.
+  \item Moyenner $f(\bar X_T,\inf \bar X)$.
+\end{itemize}
+
+\subsection{2.c -- Vitesse de convergence}
+Sous hypothèses Lipschitz et si $f$ est Lipschitz, l'erreur due à la discrétisation en temps est contrôlée par la convergence forte du schéma d'Euler: typiquement d'ordre $1/2$, i.e. $O(n^{-1/2})$.
+
+\subsection{3 -- Option barrière et facteur correctif}
+Pour une barrière basse $L<x_0$, on veut approximer
+\[
+\E[g(X_T)\1_{\{\inf_{t\le T}X_t\ge L\}}].
+\]
+\paragraph{Idée.}
+Remplacer $X$ par l'Euler continu $\bar X$ et conditionner par le squelette. Sur chaque intervalle, la probabilité conditionnelle de ne pas franchir $L$ est explicite via le pont brownien, ce qui donne un \emph{poids correctif}.
+\medskip
+
+Si $x_{i-1}=\bar X_{t_{i-1}}$ et $x_i=\bar X_{t_i}$ sont $\ge L$, alors
+\[
+\Pp\Big(\inf_{t\in[t_{i-1},t_i]}\bar X_t\ge L\ \big|\ \bar X_{t_{i-1}}=x_{i-1},\bar X_{t_i}=x_i\Big)
+=1-\exp\!\Big(-\frac{2(x_{i-1}-L)(x_i-L)}{\Delta\,\sigma^2(x_{i-1})}\Big).
+\]
+Ainsi,
+\[
+\E\big[g(\bar X_T)\1_{\{\inf_{t\le T}\bar X_t\ge L\}}\big]
+=\E\Big[g(\bar X_T)\1_{\{\min_{0\le k\le n}\bar X_{t_k}\ge L\}}\prod_{i=1}^n\Big(1-e^{-\frac{2(\bar X_{t_{i-1}}-L)(\bar X_{t_i}-L)}{\Delta\,\sigma^2(\bar X_{t_{i-1}})}}\Big)\Big].
+\]
+Le produit est un \emph{correctif} car il réintroduit (en moyenne conditionnelle) les franchissements \emph{entre} dates de discrétisation.
+
+\part{Sujet 10 (5 janvier 2015)}
+
+\section{Quasi--Monte Carlo I}
+\subsection{1.a -- Box--Müller en quasi--Monte Carlo}
+La transformation de Box--Müller: si $U_1,U_2\sim\mathrm{Unif}(0,1)$ indépendantes, alors
+\[
+Z_1=\sqrt{-2\log U_1}\cos(2\pi U_2),\qquad
+Z_2=\sqrt{-2\log U_1}\sin(2\pi U_2)
+\]
+fournit $(Z_1,Z_2)$ i.i.d. $\mathcal{N}(0,1)$.
+\medskip
+
+En quasi--Monte Carlo (QMC), on remplace $(U_1,U_2)$ par une suite à faible discrépance $(u_k)_{k\ge 1}\subset[0,1]^2$ (par ex. Sobol' ou Halton) et on pose
+$(U_1,U_2)=(u_k^{(1)},u_k^{(2)})$, ce qui produit une suite quasi--déterministe $(Z_{1,k},Z_{2,k})$.
+
+\subsection{1.b -- Simulation de $\mathcal{N}(0,I_d)$}
+Pour $d\ge 1$, on simule $d$ normales indépendantes par transformation composante par composante:
+\begin{itemize}[leftmargin=*]
+  \item soit via $\Phi^{-1}$: $Z_j=\Phi^{-1}(U_j)$, où $(U_1,\dots,U_d)$ provient d'une suite QMC sur $[0,1]^d$;
+  \item soit par blocs de 2 via Box--Müller en dimension 2 répétée.
+\end{itemize}
+
+\section{Quasi--Monte Carlo II (randomisation)}
+\subsection{2.a -- Définitions: discrépance, variation finie (Hardy--Krause), Koksma--Hlawka}
+\begin{definition}[Discrépance étoile]
+Pour des points $\xi_1,\dots,\xi_n\in[0,1]^d$, la discrépance étoile est
+\[
+D_n^*(\xi_1,\dots,\xi_n)
+=\sup_{x\in[0,1]^d}\Big|\frac{1}{n}\sum_{k=1}^n \1_{[0,x)}(\xi_k)-\lambda_d([0,x))\Big|,
+\]
+où $\lambda_d$ est la mesure de Lebesgue.
+\end{definition}
+
+\begin{definition}[Variation au sens de Hardy--Krause]
+Une fonction $f:[0,1]^d\to\R$ est dite de variation finie (Hardy--Krause) si la somme des variations (au sens de Vitali) de toutes les restrictions de $f$ aux faces de $[0,1]^d$ est finie; on la note $V(f)$.
+\end{definition}
+
+\begin{theorem}[Inégalité de Koksma--Hlawka]
+Si $f$ est de variation finie sur $[0,1]^d$, alors pour tout $\xi_1,\dots,\xi_n\in[0,1]^d$,
+\[
+\Big|\frac1n\sum_{k=1}^n f(\xi_k)-\int_{[0,1]^d}f(u)\,du\Big|
+\le V(f)\,D_n^*(\xi_1,\dots,\xi_n).
+\]
+\end{theorem}
+
+\subsection{2.b -- Conclusion pour des intégrales gaussiennes sur $\R^d$}
+On ramène une intégrale gaussienne $\int_{\R^d} g(z)\,\varphi_d(z)\,dz$ à une intégrale sur $[0,1]^d$ par transport (par exemple $z=\Phi^{-1}(u)$ composante par composante). Les bornes a priori de type Koksma--Hlawka s'appliquent alors si $f(u)=g(\Phi^{-1}(u))$ est de variation finie; en pratique, la transformation peut dégrader la variation et les bornes deviennent pessimistes en dimension élevée.
+
+\subsection{Randomisation par \emph{shift} modulo 1}
+Pour $\xi\in(0,1)^d$, définissons $f_\xi(u)=f(\{u+\xi\})$.
+\begin{proposition}
+Si $f$ est Riemann-intégrable, alors $f_\xi$ l'est aussi et
+\[
+\int_{[0,1]^d} f(\{u+\xi\})\,du=\int_{[0,1]^d}f(u)\,du.
+\]
+\end{proposition}
+
+\subsection{Estimateur randomisé et variance}
+Avec $U_k$ i.i.d. uniformes et une suite déterministe $(\xi_\ell)_{\ell=1..n}\subset(0,1)^d$,
+\[
+\widehat I_{n,M}(f)=\frac1{Mn}\sum_{k=1}^M\sum_{\ell=1}^n f(\{U_k+\xi_\ell\}).
+\]
+Alors $\widehat I_{n,M}(f)\to \int f$ p.s. quand $M\to\infty$ et
+\[
+\Var(\widehat I_{n,M}(f))=\frac{\sigma_n(f)^2}{M},
+\qquad
+\sigma_n(f)^2=\Var\Big(\frac1n\sum_{\ell=1}^n f(\{U+\xi_\ell\})\Big).
+\]
+
+\subsection{Cas périodique isotrope}
+Si $f$ est $1$-périodique dans chaque direction, alors $f(\{x+\xi\})=f(x+\xi)$. Sous hypothèse ``$V(f)<\infty$'' et invariance de variation par translation, on obtient
+\[
+\sigma_n(f)\le D_n^*(\xi_1,\dots,\xi_n)\,V(f),
+\]
+et pour des suites type Sobol'/Halton, $D_n^*\lesssim (\log n)^d/n$, d'où
+\[
+\Var(\widehat I_{n,M}(f))\lesssim \frac{(\log n)^{2d}}{n^2M}V(f)^2.
+\]
+
+\section{Problème -- Couvrir une option digitale (estimation de $f'(K)$)}
+\subsection{Cadre}
+Soit $X$ solution de
+\[
+dX_t=b(X_t)\,dt+\sigma(X_t)\,dW_t,\qquad X_0=x_0,
+\]
+avec $b,\sigma$ Lipschitz. On définit
+\[
+f(K)=\Pp(X_T\ge K).
+\]
+\subsection{Préliminaires}
+Schéma d'Euler discret:
+\[
+\bar X_{t_{i+1}}=\bar X_{t_i}+b(\bar X_{t_i})\Delta+\sigma(\bar X_{t_i})\Delta W_i.
+\]
+On rappelle la convergence forte (cours): pour tout $p\ge 1$,
+\[
+\Big\|\sup_{t\le T}|X_t-\bar X_t|\Big\|_{L^p}=O(n^{-1/2}).
+\]
+
+\subsection{1 -- Inégalités de comparaison de probabilités}
+Pour des v.a. $Y,\bar Y$ et un seuil $K$,
+\[
+\Pp(Y\ge K)-\Pp(\bar Y\ge K)\le \Pp(\bar Y<K\le Y)+\Pp(Y<K\le \bar Y).
+\]
+De plus, pour tout $\eta>0$ et $p\ge 1$,
+\[
+\Pp(\bar Y<K\le Y)\le \eta^{-p}\E\big[|Y-\bar Y|^p\big]+\Pp(K\le Y\le K+\eta),
+\]
+et de même pour $\Pp(Y<K\le \bar Y)$, ce qui donne
+\[
+|\Pp(Y\ge K)-\Pp(\bar Y\ge K)|
+\le \eta^{-p}\E|Y-\bar Y|^p+\Pp(K-\eta\le Y\le K+\eta).
+\]
+
+\subsection{2 -- Application à $f(K)-\bar f_n(K)$}
+Supposons que $X_T$ admet une densité $p(\cdot)$ bornée par $\Lambda$ sur un voisinage $[K-\eta_0,K+\eta_0]$. Alors
+\[
+\Pp(K-\eta\le X_T\le K+\eta)\le 2\Lambda\eta
+\quad\text{(pour }\eta\le\eta_0\text{).}
+\]
+Avec $\E|X_T-\bar X_T|^p\le C n^{-p/2}$, on obtient
+\[
+|f(K)-\bar f_n(K)|\le C\eta^{-p}n^{-p/2}+2\Lambda\eta.
+\]
+En optimisant (ou en choisissant $\eta=n^{-(1-\delta)/2}$ et $p$ grand), on obtient une vitesse $n^{-\frac12(1-\delta)}$ (pour tout $\delta\in(0,1/2]$).
+
+\subsection{3 -- Dérivabilité de $f$ et approximation de $f'(K)$}
+Si $p$ est Lipschitz sur $[K-\eta_0,K+\eta_0]$, alors $f$ est dérivable en $K$ avec
+\[
+f'(K)=-p(K),
+\]
+et, pour $\varepsilon\in(0,\eta_0]$,
+\[
+\left|f'(K)-\frac{f(K+\varepsilon)-f(K)}{\varepsilon}\right|
+\le \frac{\varepsilon}{2}[p]_{\Lip}.
+\]
+
+\subsection{4 -- Estimateur MC de $f'(K)$ par différence finie}
+Pour $n,M\ge 1$ et $\varepsilon>0$, poser
+\[
+\widehat\kappa_{n}^{\varepsilon,M}
+\;:=\;\frac{1}{M\varepsilon}\sum_{k=1}^M
+\Big(\1_{\{\bar X_T^{n,k}\ge K+\varepsilon\}}-\1_{\{\bar X_T^{n,k}\ge K\}}\Big),
+\]
+où $(\bar X_T^{n,k})_{k\ge 1}$ sont i.i.d. de loi $\bar X_T^n$ (simulation Euler).
+Le biais se décompose en ``différence finie'' ($\propto \varepsilon$) et ``discrétisation'' ($\propto n^{-\frac12(1-\delta)}/\varepsilon$). La variance vérifie typiquement
+\[
+\Var(\widehat\kappa_{n}^{\varepsilon,M})
+\lesssim \frac{1}{M\varepsilon^2}\Big(\varepsilon\Lambda+C_\delta n^{-\frac12(1-\delta)}\Big).
+\]
+Un choix équilibré est $\varepsilon_n\asymp n^{-\frac14(1-\delta)}$, puis $M\asymp n^{\frac34(1-\delta)}$.
+
+\part{Fiche de révision (à connaître)}
+
+\section{Outils généraux EDS}
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Itô (scalaire)}: si $dX_t=b_tdt+\sigma_t dW_t$ et $f\in C^2$, alors
+  \[
+  df(X_t)=f'(X_t)b_t\,dt+f'(X_t)\sigma_t\,dW_t+\frac12 f''(X_t)\sigma_t^2\,dt.
+  \]
+  \item \textbf{BDG}: pour une martingale continue $M_t=\int_0^t H_s\,dW_s$,
+  $\E[\sup_{u\le t}|M_u|^p]\le C_p\,\E[(\int_0^t |H_s|^2ds)^{p/2}]$.
+  \item \textbf{Gronwall}: si $u(t)\le a+b\int_0^t u(s)ds$, alors $u(t)\le ae^{bt}$.
+  \item \textbf{Existence/unicité forte}: Lipschitz + croissance linéaire.
+\end{itemize}
+
+\section{Schémas numériques}
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Euler}: ordre fort $1/2$ (cas Lipschitz).
+  \item \textbf{Milstein (scalaire)}: ajoute le terme $\frac12\sigma\sigma'((\Delta W)^2-\Delta)$; ordre fort $1$ (régularité suffisante).
+  \item \textbf{Astuce positivité} (CIR, etc.): écrire la mise à jour en trinôme en $\Delta W$ et forcer le minimum à être $\ge 0$.
+\end{itemize}
+
+\section{Pont brownien et barrières}
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Pont brownien}: $Y_t=B_t-\frac{t}{T}(B_T-y)$.
+  \item \textbf{Non-franchissement} (pont $x\to y$ variance $\lambda^2$):
+  \[
+  \Pp\Big(\inf_{t\le T} \text{bridge}\ge L\Big)
+  =1-\exp\!\Big(-\frac{2(x-L)(y-L)}{\lambda^2T}\Big).
+  \]
+  \item \textbf{Correctif barrière} (Euler): produit des probabilités conditionnelles de non-franchissement sur chaque pas; réduction de biais et souvent de variance.
+\end{itemize}
+
+\section{CIR / OU}
+\begin{itemize}[leftmargin=*]
+  \item \textbf{OU}: $dZ_t=-\lambda Z_tdt+\sigma dW_t$; loi explicite gaussienne.
+  \item \textbf{CIR}: $dX_t=(a-bX_t)dt+\vartheta\sqrt{X_t}dW_t$.
+  \item \textbf{Lien}: si $X_t=Z_t^2$ alors $X$ est de type CIR avec $a=\sigma^2$, $b=2\lambda$, $\vartheta=2\sigma$, donc $a=\vartheta^2/4$.
+\end{itemize}
+
+\section{Quasi--Monte Carlo}
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Discrépance étoile} $D_n^*$: mesure d'écart à l'uniformité.
+  \item \textbf{Koksma--Hlawka}: erreur $\le V(f)D_n^*$.
+  \item \textbf{Random shift} $x\mapsto\{x+U\}$: rend l'estimateur \emph{non biaisé} et permet des IC.
+  \item \textbf{Suites usuelles}: Sobol', Halton, etc. typiquement $D_n^*\sim(\log n)^d/n$.
+\end{itemize}
+
+\section{Digitales: $f(K)=\Pp(X_T\ge K)$}
+\begin{itemize}[leftmargin=*]
+  \item Si $X_T$ a une densité $p$, alors $f'(K)=-p(K)$.
+  \item \textbf{Différence finie}: $f'(K)\approx (f(K+\varepsilon)-f(K))/\varepsilon$.
+  \item \textbf{Biais/variance}: équilibrer $\varepsilon$, $n$ (discrétisation), et $M$ (MC).
+\end{itemize}
+
+\end{document}
+
