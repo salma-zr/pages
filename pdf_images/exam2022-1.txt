@@ -1,0 +1,197 @@
+Probabilités numériques (G. Pagès, V: Lemaire)
+
+M2 Probabilités & Finance, Sorbonne Université-École Polytechnique
+M2 P.M.A., Sorbonne Université
+
+6 janvier 2022
+
+3 h, polycopié, notes de cours, livres, téléphones mobiles et montres connectées non autorisés
+
+Avertissement :
+de la copie.
+
+La précision et la rigueur des arguments seront des éléments déterminants de l'évaluation
+
+Exercice (Quasi-Monte Carlo : Hammersley revisité) Dans cet exercice on adopte la notation u =
+(u? … ,u‘)e Rd pour désigner les coordonnées d’un vecteur de « de R£.
+
+1.a. Soit (£,..- ë un n-uplet à coodonnées strictement croissantes à valeurs dans 0, 1] d’une part et, d’autre
+
+part, n + 1 réels Gositifs 41, ---,Gn ét b. On pose pour tout yE {0,1}, —
+
+d n
+Qu = + D arltreu] — PU
+k=1
+
+Montrer que y est càdlàg (w(y—) désignera la limite à gauche de y en ye]0,1]) et que
+max [o(éx)| V Ip(Ek=)| V PQ)
+
+sup [e()| (= ex,
+k k—1
+1 1
+D: ag — bék 2 ae — bEk
+Pi ei
+
+ve{0,1] a
+
+V V
+
+Inax
+1<k<n
+
+1 n
+LSu-1
+0 CE
+avec la convention > = 0.
+1.b. Rappeler la définition de la discrépance à l’origine d’un n-uplet (£1,...,ên) € ([0, 14)" (d > 1), que l'on
+V notera D'(é1,-..,€n) dans la suite, en accord avec le cours. Fe
+2. On se donne maintenant un n-uplet (é1,-..,ên) de (10, 1j), d > 2, tel que le n-uplet de ses d-ème
+coordonnées, noté (£4,… éd) [0,1]", soit strictement croissant avec EL
+2.b. Montrer que la discrépance à l’origine de (£4, .:.,€d) vérifie
+
+k-1
+DA(E--)e
+
+d _ _—|.
+rs
+
+max
+1<k<n
+
+&-#|v
+
+2.c. On considère le n-uplet (En 4) où = (me (0,1, k=1,...,n. Montrer (avec les
+notations vues en cours) que
+
+V
+
+a, 5 1 k re = à 1 #1 si RS ;
+{ . pr Qaus de () pe Lyo.21(Ée) —
+/ Di(Ens- s6n) = Di(Es 6) V mx, |. 2 11210) &TT* 12 pei@o 6 IT
+
+Ga)en déduire que j
+él: 4
+
+PC)
+
+3.a. Rappeler la définition de la suite de Halton pour une dimension d donnée ainsi qu'une majoration licite
+non asymptotique de sa discrépance à l’origine en fonction de n. ;
+3.b. Soit d > 2. Montrer l'existence d’une constante Ca > 0 telle que, pour tout entier n > 1, il existe un
+n-uplet (£1,:2;ên)€ ([0, 1]4)" tel que
+logn){T1
+DC la
+On proposera en outre une heuristique pour un choix performant de la d-ème coordonnée de ce n-uplet.
+
+Rappeler brièvement les principes de base d’un estimateur QuasiMonte Carlo et quel rôle y joue la discré-
+pance à l'origine dans son analyse
+
+AY
+
+SK
+
+A
+V4
+
+x
+
+N
+
+VW En déduire un algorithme de simulation de type Monte Carlo.
+
+A
+
+(Bo On suppose en outre que la fonction f est lipschitzienne. À quelle vitesse de convergence est-on assuré
+
+3h. En quoi le terme produit [ [1 (: — exp ( _
+
+Qu
+
+Exercice (Autour du pont de diffusion). On considère un processus de diffusion solution de EDS.
+
+(ŒDS)=  dXi=WX)dt+o(Xi)dWe, Xo = € R, te [0,7], (T >0),
+
+où b,o : R —+ R sont lipschitziennes et (W);>0 est un mouvement brownien standard défini sur un
+, > espace de
+probabilités (92, A,P).
+
+On rappelle que le pont brownien(Y 2 T%).cym associé à un mouvement brownien standard B = (B)seor]
+issu de 0 en {= 0 et valant ye R en t=T est défini par :
+
+—_—_——
+
+BT, u
+K = B-T(Br 9)
+et que la loi de son supremum Sur [0, T] est donnée à travers sa fonction de répartition par
+
+_2/(7— >
+sup Y1< 2) = { De
+
+VzeR, P
+(sw 0 si z & max(y, 0).
+
+1.a. Montrer par un argument de symétrie approprié que
+
++421)
+He re) { É
+tE[0,T] a &
+
+si z < min(y, 0)
+
+v: P
+2ER P( si z > min(y,0).
+
+1.b. En déduire pour tous z, ye R fixés et tout Xe R;, la fonction de répartition de
+nn. —<
+inf
+
+HE BT0
+A (+ TY x) + AY, ie
+
+1.0) En déduire une méthode simple de simulation de cette variable aléatoire.
+
+2.a. On considère le schéma d’Euler continu (ou authentique) de la diffusion de pas Z, noté (ire T|)-
+Rappeler avec soin le résultat du cours sur la loi conditionnelle de (Xeo,r] sachant la tribu o({Xi, k =
+0,...,n}) et sa version régulière ie. “sachant” {Xin =, E=0 D 7e
+
+2.b. Proposer à partir de ce schéma d'Euler une méthode de calcul approché par simulation de Monte Carlo
+de E(f(Xr, infteor Xe)) OÙ TER? RSt borélienne à croissance linéaire.
+
+fe
+
+——
+
+que disparaîtra l'erreur due à la discrétisation en temps 2?
+3.a. On souhaite calculer par simulation de Monte Carlo du schéma d’Euler une quantité de type barrière
+basse (ou doun-and-out) E(g(Xr)L{inrep.r X>L ) où Le (—0o, ro). Montrer que
+
+P— {infrep.r X2L}
+
+L k LS an(Xer — L\(Xe, = L)
+E(g (Xr)Linticjorr) x>n) =E (o (Xr)L{minocren Xy21} Il ( A : Te) ))) : à NT
+i=1 n ! &. F
+
+an(X Rate)
+Ti CG aù
+
+a.
+
+de la représentation DATE peut-il
+an JS ere? a
+
+être considéré comme un terme correctif ? ; :
+3.) Comparer les variances des estimateurs obtenus aux questions 3.b. et 2.b. (unejustification rigoureuse
+èst demandée).
+
+Problème : du flot du schéma d’Euler au modèle pseudo-CEV- On considère un Processus SLGERS
+solution de l'EDS | Ha :
+axe = dX)dt+ a(Xr)dWr, tE (0, T}, (f>0).
+
+un mouvement brownien standard
+À, P) et Xo est un vecteur aléatoire également défini
+
+(EDS) =
+
+où D: Ré > Rd, o : R —+ Ma(d, g, R) sont lipschitziennes, (Wie 8
+g-dimensionnel défini sut un espace de probabilités e
+sur (Q, 4, P), indépendant de W.
+

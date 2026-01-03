@@ -1,0 +1,136 @@
+éfinition des schéma d'Euler à temps discret (Xx) k=0,.,n Et Constant par morceaux (XF) telo7]
+D (ne N°). [Les notations sont celles du cours]. .
+ippeler la définition du schéma d'Euler authentique (X{'}kejo.r] de Pas DATE NE) ctlénoncer avec
+le théorème de contrôle des moments dans le cadre du problème (b et a autonomes et Lipschitz)
+Rappeler dans el cadre de problème les théorèmes relatifs à la vitesse de convergence dans les espaces
+(EP) (en norme-sup sur (0, T]) des schémas précédents vers la diffusion X ci-dessus.
+
+sur |
+
+IPpose pour simplifier que d=q= 1 dans la suite.
+
+TE FAITES
+2. Montrer que lei \ d'Euler authentique (X}°")sejo,rj issu de æ € R est un processus d’Itô que l’on
+_ explicitera (on pourra introduire la notation £ vue en cours dont on rappellera la définition le cas échéant).
+7 Énoncer un résultat de contrôle des moments d’ordre p d’un tel processus (aucune demonstration demandée
+
+ee tout TE UT],
+V Montrer que f\ est bien a croissante de [0,7] dans R;. Montrer en vous inspirant
+
+d'une démonstration vue en cours que, pour tout € {0,T])
+2
+fes) — a(xu)am ) ;
+k »
+
+La précision des arguments donnés sera déterminante dans l'évaluation de cette question et de la suivante.
+4.a. En déduire que pour tout #€ [0,7],
+
+Sa 3 (eu + (Te +4) / 1107)
+
+fn) =E sup [XP — Fear
+8€{0,t]
+
+1
+fn(t) < 3 (e y +t | Ejb(Xe7) —b(X#")Pds+E sup
+0
+
+s€{0;t]
+
+à
+
+4
+
+4.b. En conclure qu'il existe une constante C5,,,r > 0 que l’on précisera telle que
+
+Viepo,7}, || sup [X7" 37] AB eert|r — y.
+s€[0,t] 2
+
+\ 5. On considère maintenant un modèlé pseudo-CEV sur un marché de maturité T > 0 où le numéraire est
+; donné par 5? = e!! et l'actif risqué est régi sous probabilité risque-neutre par l'EDS
+
+dXs=rXidt+o(X:)dW,, Xo=20>0,teE [0,7]
+
+où 0(9)= 0, £e R avec ÿ
+for ,7>0et Be (0,1].
+
+5.a. Montrer que a est lipschitzienne que R. Que peut-on en déduire ?
+ÉSDMontrer à l’aide de la formule d’Itô que le processus #
+
+{
+
+= (3 28 L B
+M = zoexp(rt- À MP y 1X3|
+2 k X2 T T 5 ep] — à c112)
+
+vérifie l'EDS ci-dessus. En déduire que X, > 0 pour tout te [0,71.
+5-c. Ecrire le schéma d'Euler du processus pseudo-CEV.
+6. On se donne un payoff européen À : R R; hit j
+
+| Ge 0 - Le prix C(x0,r,0, B,T) du contrat d'option
+1 P Le paye dans un modèle pseudo-CEV est donc donné par e "TE A(X. j. Rue une te
+e ce prix à l’aide du schéma d’Euler. Quelle erreur comrmet-on en se {on ï
+Ÿ
+
+dant sur les résultats de vitesse di
+conver, $ iffusi PTT ni
+. forte du : éma er de cette diffusion ? Pour quelle régularité du payoft # peut-on cépérer
+ppuyer sur les résultats d'erreur faible associés à ce même schéma ? [Pour les M2 P &F: Est-ce un
+
+pra
+
+hypothèse réaliste en matière de produits dérivés ?]
+
+Su CAES LR US D. Vi ee D
+9 & : AT 2 L ni) 0 Col
+PRET ANT (PAR a \/ 2£88 le) & &
+
+7. On suppose r — 0 dans la suite pour simplifier et l'on note C(xo, T) le prix du contrat d’option.
+7-a. Proposer, dans l'hypothèse (irréaliste) où la diffusion pseudo-CEV serait simulable de façon exacte avec
+une complexité “raisonnable”, une méthode de calcul de la couverture (le 6-hedge) 2 (ro, T). 3 N
+Proposer une ou RÉ Re heuristique.
+7.b. On privilégie dans la suite du problème une approche par différences finies et l’on suppose que pour
+£e (0,%), € assez petit, Pre
+h(Xr0te) ce —.
+= :
+
+oc
+3x wo T) = E |
+
+Montrer que l’on peut borner la variance de l’estimateur Monte Carlo associé au membre de droite lorsque € \
+GR RE
+
+tend vers 0.
+7.c. On suppose que La finction payoff h est suffisamment régulière pour que
+Ÿ-n,To h Xmzot+e TA Xmr0—E
+Eee un] ( Et 2]\<
+
+où € = Ch,r0,8,0,n > 0. Proposer une décomposition (d’un majorant) de l’erreur L? (RMSE ou root mean
+; : dE h(X"*0) ARR rs ù à
+
+squared error en anglais) commise en approchant (20, T') par l’estimateur Monte Carlo évoqué à la
+question 7.b.. Expliquer comment choisir théoriquement € et la “taille” M de l’estimateur Monte Carlo pour
+équilibrer les deux termes de cette erreur et pourquoi une telle approche ne peut généralement pas être mise
+en pratique sous cette forme naïve.
+
+Expliquer comment modifier « et M pour diviser cette erreur par un facteur 2 7
+
+[Indication : On pourra raisonner indfféremment sur l'erreur L? elle-même ou, pour plus de commodité, sur
+son carré (la MSE pour Mean Squered Error sens pour autant changer la nature et les termes de la question
+
+* poséel
+
+7.d. Proposer et analyser rapidement une méthode de construction d’un estimateur asymptotiquement sans
+
+biais.
+AC
+se
+
+ee
+
+A
+FR AE - # or le
+| NAME
+
+LAN Je en
+5 RATE ANS DE:
+KR «sr 2aS

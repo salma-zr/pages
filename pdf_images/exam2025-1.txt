@@ -1,0 +1,122 @@
+2
+
+© Théo Jalabert
+
+Probalihtés Numénques et Méthode de Moute Carlo (G. Pagès & V. Lemaire)
+N°2 Probaluülhtés & Finance (SU:LP. Paris)
+M2 Probabilités & Modèles Aléatoires (SU )
+
+ae
+
+G jauvicr 2025
+
+3h
+
+Polycopié, notes de cours, livres, téléphones mobiles et montres connectées non
+autorisés
+Handouts. course notes, books, mobile phones and smart watches not allowed
+
+Exercise 1 (Correlation, regression and et variance reduction). Let À and À be
+two square integrable random variables defined on a probbaility space (02,4. P) satisiving
+
+EX -E X' mm (quautity of interest) and Var(X — X°) > 0
+
+PRELIMINARY QUESTIONS. a. For every À€ R, we set Xi = (1 A)A 4 AX'"= X—-A(X—X")
+Determine À such that Var(X,) is minimal and explain bricfly how exploit À, 16 reduce the
+variance of the computation by sumulation of the quantity mm. One practical method to be
+
+unplounented should be descnbed
+We assume in what follows that we have access to an accurate enough estimate for À,,,,:
+
+b. Prove that if ex xn = «x (where #y denotes the complexity of the sunulation of a
+random variable ŸY } then such à method alwavs ontperforms any other to estimate mm with
+a prescnbed budget 4/3 1or the simulation. Give a classical example classique in Finance of
+derivative prodnets where such an asstinption 1 satished
+
+c. Assume Var{X}) Var X')}. Prove that An 2 Deuce that if ny = Kx and
+
+hox x ny + #y. the method can improve the global performance of the sunulation
+only if Cov(X. X') < 0. Give à classical example of such a situation.
+
+d. Let Z -(Q AP) = R be à random vañable with hstribution W(0.1). Prove that for
+
+auv continnously differentiable function g : R — R such that limissixe 2g(:) =0
+Eg(7) = Elg(2)2
+1. Let f:R —R be a Borel function with (at most) exponential growth in the sense that
+30 - Cy such that Vre R f(x) < Cet
+
+and let (7. 7) :(9.A.P) — R2 be a random vector with distnbution NW(0. Bb).
+We set. for every p€ [-1.1}, p = VT- grand
+
+X19 = (1 — À)/(7) + A (pZ + p7) and (hp) Elf(2)/(P7 TA]E
+
+Prove that p being fixed, EI — À1)/(2) # A/(nZ + np) E (7) au that
+
+V(p) := min Var(Xx,) Var(Xip) = Var J(Z) + J(p7 + nf)
+
+R 2
+
++
+
+Var(f(7)) ' Cov(f(7).[(rZ + àZ))
+
+Var([(Z)) + #(p) — (E (2)
+
+HDi NI
+
+2.a. Prove that. if f is differentiable and [' has an exponential growth (see above), then
+
+Vpell.1l, #(p) = E[/(2)f'(pZ + 217] - = E[/(2)/' (04 DTAIA
+/
+
+2.b. Assume that {is twice (coutinnously) differentiable with f° et [" baving an exponential
+growth. Prove using an integration by parts on the state space R that. for all u € K.
+
+ElJ(2)l'(p2 + a)Z] = E[S'(2)/'(pZ + à)] + pE[(2)L"(rZ + a)|
+Deduce that. for every pe LI, 1
+E[(2)/' (02 + 222] - [2024 + 2)] + PE[I(2)S" (62 + 2)
+3.a. The function { being still like in 2.b. show using one of the preliminary questions that.
+
+for cverv 2€ R.
+
+| er …#, 1 ' PTT
+Vpel-1.1l Ef"(pz + 7) : EU'(e: + pZ)/)
+
+—!
+
+and then that
+
+1
+i
+
+“ , 7, l , n , -? y
+Vpel-1.1l, E/(Z)J"(rZ + p7) - 3 EUUAY (pZ + p2)7]
+
+3.b. Conclude that the following identity holds true (treat the case p = +1 apart)
+Vpel-11}  #{o) = E[S(2)S'(pZ + p2))
+
+We will admit that the above formula is still valid as soon as / is continuously
+differentiable, with an at most exponential growth as well as 7 à
+
+4. Show that if f is (stnictlv)} monotonx
+1
+V(-1) = 5 Var(f(Z) + Cov(f(Z).f(-2))) - nf V{p) < V(1) = Var(f(Z))
+PE
+
+Wlhich condition do we retrieve in this framework concerning the interest of the variance
+reduction method associated to the computation of m1 1f we assume k(p(2 10-29 © 2K (2) 4
+
+5a. We assume that f is even (svimmetric) and such that Ef'{ZY > 0. Prove that
+2-1) < 0. What can we deduce 7 Show that. in fact nuder the hypothesis. y 1s even ns
+well and minimal at 0. What does this correspond to in terms of sunulation?
+
+5.b. Propose (at least heuristically) à condition on f eusuring the stnet convexity of À
+With which consequences ?
+
+5.c. Propose in that case a method based on simulation (Le stochastic) to determine (at
+lcast roughly) argmin,_, ,V = arguin,_,,,9. [No prool of convergence is asked.
+
+“
+
+.
+

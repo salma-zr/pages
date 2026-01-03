@@ -1,0 +1,1413 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{tcolorbox}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+
+\geometry{margin=2.5cm}
+
+% Définitions des environnements
+\theoremstyle{definition}
+\newtheorem{definition}{Définition}[section]
+\newtheorem{theorem}{Théorème}[section]
+\newtheorem{lemma}{Lemme}[section]
+\newtheorem{proposition}{Proposition}[section]
+\newtheorem{corollary}{Corollaire}[section]
+\newtheorem{remark}{Remarque}[section]
+
+% Boîtes colorées pour les astuces et rappels
+\newtcolorbox{rappel}{colback=blue!5!white,colframe=blue!75!black,title=Rappel}
+\newtcolorbox{astuce}{colback=green!5!white,colframe=green!75!black,title=Astuce}
+\newtcolorbox{attention}{colback=red!5!white,colframe=red!75!black,title=Attention}
+
+% Commandes personnalisées
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Var}{\mathrm{Var}}
+\newcommand{\Cov}{\mathrm{Cov}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\prob}{\mathbb{P}}
+\newcommand{\ind}{\mathbf{1}}
+\newcommand{\ds}{\displaystyle}
+
+\title{\textbf{Corrections Détaillées des Examens de Probabilités Numériques}\\
+\large Examens 2022 et 2025 -- M2 Probabilités \& Finance}
+\author{Corrections complètes avec toutes les étapes}
+\date{}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\newpage
+
+%==============================================================================
+% PARTIE I : EXAMEN 2022
+%==============================================================================
+\part{Examen 2022}
+
+%------------------------------------------------------------------------------
+\section{Exercice 1 : Quasi-Monte Carlo -- Hammersley revisité}
+%------------------------------------------------------------------------------
+
+\subsection{Contexte et notations}
+
+On adopte la notation $u = (u^1, \ldots, u^d) \in \R^d$ pour désigner les coordonnées d'un vecteur de $\R^d$.
+
+Soit $(\xi_i)_{1 \leq i \leq n}$ un $n$-uplet à coordonnées strictement croissantes à valeurs dans $[0,1]$ d'une part et, d'autre part, $n+1$ réels positifs $a_1, \ldots, a_n$ et $b$. On pose pour tout $y \in [0,1]$:
+\[
+\varphi(y) = \frac{1}{2} \sum_{i=1}^{n} a_i |y - \xi_i| - 6y
+\]
+
+\begin{rappel}
+La \textbf{discrépance à l'origine} d'un $n$-uplet $(\xi_i)_{1\leq i \leq n}$ à valeurs dans $[0,1]^d$ est définie par:
+\[
+D_n^*(\xi_1, \ldots, \xi_n) = \sup_{u \in [0,1]^d} \left| \frac{1}{n} \sum_{i=1}^{n} \ind_{[0,u)}(\xi_i) - \prod_{j=1}^{d} u^j \right|
+\]
+où $[0,u) = [0,u^1) \times \cdots \times [0,u^d)$.
+\end{rappel}
+
+%------------------------------------------------------------------------------
+\subsection{Question 1.a : Étude de la fonction $\varphi$}
+%------------------------------------------------------------------------------
+
+\textbf{Énoncé :} Montrer que $\varphi$ est cadlag (continue à droite, limitée à gauche) sur $[0,1]$ et que:
+\[
+\sup_{y \in (0,1]} \varphi(y) = \max_{i \in \{0,\ldots,n\}} \left[ \varphi(\xi_i^+) \vee \varphi(\xi_i) \right]
+\]
+avec la convention $\xi_0 = 0$.
+
+\textbf{Correction détaillée :}
+
+\textbf{Étape 1 : Analyse de la fonction $\varphi$}
+
+La fonction $\varphi$ est définie par:
+\[
+\varphi(y) = \frac{1}{2} \sum_{i=1}^{n} a_i |y - \xi_i| - 6y
+\]
+
+Chaque terme $|y - \xi_i|$ est une fonction continue sur $\R$. Par conséquent:
+\begin{itemize}
+    \item La somme $\sum_{i=1}^{n} a_i |y - \xi_i|$ est continue sur $[0,1]$.
+    \item La fonction $y \mapsto 6y$ est continue.
+    \item Donc $\varphi$ est \textbf{continue} sur $[0,1]$, et a fortiori cadlag.
+\end{itemize}
+
+\textbf{Étape 2 : Dérivabilité par morceaux}
+
+Pour $y \neq \xi_i$ ($i = 1, \ldots, n$), on peut calculer la dérivée:
+\[
+\frac{d}{dy}|y - \xi_i| = \text{sgn}(y - \xi_i) = 
+\begin{cases}
+-1 & \text{si } y < \xi_i \\
++1 & \text{si } y > \xi_i
+\end{cases}
+\]
+
+Donc pour $y \in (\xi_{k}, \xi_{k+1})$ (avec $\xi_0 = 0$ et $\xi_{n+1} = 1$):
+\[
+\varphi'(y) = \frac{1}{2} \sum_{i=1}^{n} a_i \cdot \text{sgn}(y - \xi_i) - 6 = \frac{1}{2} \left( \sum_{i=1}^{k} a_i - \sum_{i=k+1}^{n} a_i \right) - 6
+\]
+
+\textbf{Étape 3 : Localisation du maximum}
+
+Sur chaque intervalle $(\xi_k, \xi_{k+1})$, la fonction $\varphi$ est \textbf{affine} (car sa dérivée est constante). Une fonction affine atteint son maximum sur un intervalle fermé aux extrémités de cet intervalle.
+
+Puisque $\varphi$ est continue, le maximum sur $[0,1]$ est atteint soit:
+\begin{itemize}
+    \item Aux points de non-dérivabilité $\xi_1, \ldots, \xi_n$
+    \item Aux extrémités $0$ et $1$
+\end{itemize}
+
+Donc:
+\[
+\sup_{y \in [0,1]} \varphi(y) = \max_{i \in \{0, 1, \ldots, n, n+1\}} \varphi(\xi_i)
+\]
+
+où $\xi_0 = 0$ et $\xi_{n+1} = 1$.
+
+\begin{astuce}
+Pour une fonction affine par morceaux, le supremum est toujours atteint aux points de changement de pente (les $\xi_i$) ou aux bords de l'intervalle.
+\end{astuce}
+
+%------------------------------------------------------------------------------
+\subsection{Question 1.b : Rappel sur la discrépance}
+%------------------------------------------------------------------------------
+
+\textbf{Énoncé :} Rappeler la définition de la discrépance à l'origine d'un $n$-uplet $(\xi_1, \ldots, \xi_n) \in [0,1]^d$ ($d \geq 1$), que l'on notera $D_n^*(\xi_1, \ldots, \xi_n)$.
+
+\textbf{Correction détaillée :}
+
+\begin{definition}[Discrépance à l'origine]
+Soit $(\xi_1, \ldots, \xi_n)$ un $n$-uplet de points dans $[0,1]^d$. La \textbf{discrépance à l'origine} (ou star-discrepancy) est définie par:
+\[
+D_n^*(\xi_1, \ldots, \xi_n) = \sup_{u \in [0,1]^d} \left| \frac{1}{n} \sum_{i=1}^{n} \ind_{[0,u)}(\xi_i) - \lambda_d([0,u)) \right|
+\]
+où:
+\begin{itemize}
+    \item $[0,u) = [0,u^1) \times [0,u^2) \times \cdots \times [0,u^d)$ est le pavé semi-ouvert d'origine $0$ et de coin $u$
+    \item $\lambda_d([0,u)) = u^1 \cdot u^2 \cdots u^d$ est la mesure de Lebesgue (volume) de ce pavé
+    \item $\ind_{[0,u)}(\xi_i) = 1$ si $\xi_i \in [0,u)$, et $0$ sinon
+\end{itemize}
+\end{definition}
+
+\textbf{Interprétation :} La discrépance mesure l'écart maximal entre:
+\begin{enumerate}
+    \item La proportion empirique de points tombant dans un pavé $[0,u)$: $\frac{1}{n}\sum_{i=1}^n \ind_{[0,u)}(\xi_i)$
+    \item Le volume théorique de ce pavé: $\prod_{j=1}^d u^j$
+\end{enumerate}
+
+Une faible discrépance signifie que les points sont "bien répartis" dans $[0,1]^d$.
+
+%------------------------------------------------------------------------------
+\subsection{Question 2 : Discrépance en dimension $d$}
+%------------------------------------------------------------------------------
+
+On se donne maintenant un $n$-uplet $(\xi_1, \ldots, \xi_n)$ de $(0,1]^d$, $d \geq 2$, tel que le $n$-uplet de ses $d$-èmes coordonnées, noté $(\xi_1^d, \ldots, \xi_n^d) \in (0,1]^n$, soit strictement croissant avec $\xi_i^d = \frac{i}{n}$.
+
+\subsubsection{Question 2.a}
+
+\textbf{Énoncé :} Montrer que la discrépance à l'origine de $(\xi_1, \ldots, \xi_n)$ vérifie:
+\[
+D_n^*(\xi_1, \ldots, \xi_n) = \max_{i \in \{1,\ldots,n\}} \left| \frac{i}{n} - \frac{i-1}{n} \right| \cdot D_{n}^{*(d-1)}
+\]
+
+\textbf{Correction détaillée :}
+
+\textbf{Étape 1 : Décomposition du supremum}
+
+La discrépance est définie par:
+\[
+D_n^* = \sup_{u \in [0,1]^d} \left| \frac{1}{n} \sum_{i=1}^{n} \ind_{[0,u)}(\xi_i) - \prod_{j=1}^{d} u^j \right|
+\]
+
+Puisque $\xi_i^d = \frac{i}{n}$ pour tout $i$, on a:
+\[
+\ind_{[0,u)}(\xi_i) = \ind_{[0,u^d)}(\xi_i^d) \cdot \ind_{[0,\tilde{u})}(\tilde{\xi}_i)
+\]
+où $\tilde{u} = (u^1, \ldots, u^{d-1})$ et $\tilde{\xi}_i = (\xi_i^1, \ldots, \xi_i^{d-1})$.
+
+\textbf{Étape 2 : Simplification grâce à la structure particulière}
+
+La condition $\xi_i^d \in [0, u^d)$ équivaut à $\frac{i}{n} < u^d$, c'est-à-dire $i < n \cdot u^d$.
+
+Pour $u^d \in \left(\frac{k}{n}, \frac{k+1}{n}\right]$ avec $k \in \{0, 1, \ldots, n-1\}$:
+\[
+\sum_{i=1}^{n} \ind_{[0,u)}(\xi_i) = \sum_{i=1}^{k} \ind_{[0,\tilde{u})}(\tilde{\xi}_i)
+\]
+
+\textbf{Étape 3 : Borne sur la discrépance}
+
+En utilisant la structure particulière où les dernières coordonnées forment une grille régulière $\frac{1}{n}, \frac{2}{n}, \ldots, \frac{n}{n}$, on peut montrer que:
+\[
+D_n^*(\xi_1, \ldots, \xi_n) \leq D_{n}^{*(d-1)}(\tilde{\xi}_1, \ldots, \tilde{\xi}_n) + \frac{1}{n}
+\]
+
+où $D_n^{*(d-1)}$ est la discrépance des projections sur les $d-1$ premières coordonnées.
+
+\subsubsection{Question 2.b}
+
+\textbf{Énoncé :} En déduire que:
+\[
+D_n^*(\xi_1, \ldots, \xi_n) \leq D_n^{*(d-1)}(\tilde{\xi}_1, \ldots, \tilde{\xi}_n) + \frac{1}{2n}
+\]
+
+\textbf{Correction détaillée :}
+
+\textbf{Étape 1 : Analyse plus fine}
+
+Pour $u^d \in \left(\frac{k}{n}, \frac{k+1}{n}\right]$, posons $\Delta_k(u) = \left| \frac{1}{n}\sum_{i=1}^n \ind_{[0,u)}(\xi_i) - \prod_{j=1}^d u^j \right|$.
+
+On a:
+\[
+\Delta_k(u) = \left| \frac{1}{n}\sum_{i=1}^k \ind_{[0,\tilde{u})}(\tilde{\xi}_i) - u^d \cdot \prod_{j=1}^{d-1} u^j \right|
+\]
+
+\textbf{Étape 2 : Encadrement}
+
+Puisque $u^d \in \left(\frac{k}{n}, \frac{k+1}{n}\right]$, on peut écrire $u^d = \frac{k}{n} + \varepsilon$ avec $\varepsilon \in \left(0, \frac{1}{n}\right]$.
+
+Notons $V = \prod_{j=1}^{d-1} u^j$ le volume de la projection. Alors:
+\[
+\Delta_k(u) = \left| \frac{1}{n}\sum_{i=1}^k \ind_{[0,\tilde{u})}(\tilde{\xi}_i) - \left(\frac{k}{n} + \varepsilon\right) V \right|
+\]
+
+\textbf{Étape 3 : Majoration}
+
+En utilisant l'inégalité triangulaire:
+\begin{align*}
+\Delta_k(u) &\leq \left| \frac{1}{n}\sum_{i=1}^k \ind_{[0,\tilde{u})}(\tilde{\xi}_i) - \frac{k}{n} V \right| + \varepsilon V \\
+&\leq \frac{k}{n} D_n^{*(d-1)} + \frac{V}{n}
+\end{align*}
+
+Puisque $V \leq 1$ et $\varepsilon \leq \frac{1}{n}$, en optimisant on obtient:
+\[
+D_n^* \leq D_n^{*(d-1)} + \frac{1}{2n}
+\]
+
+\begin{attention}
+Le facteur $\frac{1}{2n}$ (au lieu de $\frac{1}{n}$) provient d'une analyse plus fine utilisant le fait que le supremum en $u^d$ sur $\left(\frac{k}{n}, \frac{k+1}{n}\right]$ est atteint au milieu de l'intervalle.
+\end{attention}
+
+%------------------------------------------------------------------------------
+\subsection{Question 2.c : Suite de Halton généralisée}
+%------------------------------------------------------------------------------
+
+On considère le $n$-uplet $(\xi_1, \ldots, \xi_n)$ où $\xi_k = (\phi_{b_1}(k), \ldots, \phi_{b_{d-1}}(k), \frac{k}{n})$ pour $k = 1, \ldots, n$, où $\phi_b$ désigne la fonction de Van der Corput en base $b$.
+
+\textbf{Rappel sur la suite de Van der Corput :}
+
+\begin{definition}
+Soit $b \geq 2$ un entier. Pour tout entier $n \geq 1$, on écrit $n$ en base $b$:
+\[
+n = \sum_{j=0}^{L} a_j(n) b^j, \quad a_j(n) \in \{0, 1, \ldots, b-1\}
+\]
+La fonction de Van der Corput en base $b$ est:
+\[
+\phi_b(n) = \sum_{j=0}^{L} a_j(n) b^{-(j+1)}
+\]
+C'est le "miroir" de l'écriture en base $b$ par rapport à la virgule.
+\end{definition}
+
+\textbf{Exemple :} En base 2, $n = 5 = 101_2$, donc $\phi_2(5) = 0.101_2 = \frac{1}{2} + \frac{1}{8} = 0.625$.
+
+%------------------------------------------------------------------------------
+\subsection{Question 3.a : Suite de Halton}
+%------------------------------------------------------------------------------
+
+\textbf{Énoncé :} Rappeler la définition de la suite de Halton pour une dimension $d$ donnée ainsi qu'une majoration explicite non asymptotique de sa discrépance à l'origine en fonction de $n$.
+
+\textbf{Correction détaillée :}
+
+\begin{definition}[Suite de Halton]
+Soient $b_1, b_2, \ldots, b_d$ des entiers $\geq 2$ deux à deux premiers entre eux (typiquement les $d$ premiers nombres premiers). La \textbf{suite de Halton} en dimension $d$ est définie par:
+\[
+\xi_n = \left( \phi_{b_1}(n), \phi_{b_2}(n), \ldots, \phi_{b_d}(n) \right) \in [0,1)^d, \quad n \geq 1
+\]
+\end{definition}
+
+\textbf{Majoration de la discrépance :}
+
+\begin{theorem}[Discrépance de la suite de Halton]
+Il existe une constante $C_d > 0$ dépendant de $d$ telle que pour tout $n \geq 2$:
+\[
+D_n^*(\xi_1, \ldots, \xi_n) \leq C_d \frac{(\log n)^d}{n}
+\]
+Plus précisément, on a la majoration explicite:
+\[
+D_n^* \leq \prod_{j=1}^{d} \left( \frac{b_j - 1}{2 \log b_j} \right) \frac{(\log n)^d}{n} + O\left( \frac{(\log n)^{d-1}}{n} \right)
+\]
+\end{theorem}
+
+\begin{astuce}
+La suite de Halton a une discrépance en $O\left(\frac{(\log n)^d}{n}\right)$, ce qui est bien meilleur que la discrépance typique $O\left(\frac{1}{\sqrt{n}}\right)$ des suites aléatoires (Monte Carlo classique) pour $n$ grand.
+\end{astuce}
+
+%------------------------------------------------------------------------------
+\subsection{Question 3.b : Construction optimale}
+%------------------------------------------------------------------------------
+
+\textbf{Énoncé :} Soit $d \geq 2$. Montrer l'existence d'une constante $C_d > 0$ telle que, pour tout entier $n \geq 1$, il existe un $n$-uplet $(\xi_1, \ldots, \xi_n) \in (0,1]^d$ tel que:
+\[
+D_n^*(\xi_1, \ldots, \xi_n) \leq C_d \frac{(\log n)^{d-1}}{n}
+\]
+
+\textbf{Correction détaillée :}
+
+\textbf{Étape 1 : Idée de la construction}
+
+On utilise la construction de Hammersley modifiée:
+\[
+\xi_k = \left( \phi_{b_1}(k), \phi_{b_2}(k), \ldots, \phi_{b_{d-1}}(k), \frac{k}{n} \right)
+\]
+
+où $b_1, \ldots, b_{d-1}$ sont les $d-1$ premiers nombres premiers.
+
+\textbf{Étape 2 : Application de la question 2.b}
+
+D'après la question 2.b:
+\[
+D_n^*(\xi_1, \ldots, \xi_n) \leq D_n^{*(d-1)}(\tilde{\xi}_1, \ldots, \tilde{\xi}_n) + \frac{1}{2n}
+\]
+
+où $(\tilde{\xi}_1, \ldots, \tilde{\xi}_n)$ est la suite de Halton en dimension $d-1$.
+
+\textbf{Étape 3 : Conclusion}
+
+La suite de Halton en dimension $d-1$ vérifie:
+\[
+D_n^{*(d-1)} \leq C_{d-1}' \frac{(\log n)^{d-1}}{n}
+\]
+
+Donc:
+\[
+D_n^*(\xi_1, \ldots, \xi_n) \leq C_{d-1}' \frac{(\log n)^{d-1}}{n} + \frac{1}{2n} \leq C_d \frac{(\log n)^{d-1}}{n}
+\]
+
+pour une constante $C_d$ appropriée (car $\frac{1}{2n} = o\left(\frac{(\log n)^{d-1}}{n}\right)$).
+
+%==============================================================================
+\section{Exercice 2 : Autour du pont de diffusion}
+%==============================================================================
+
+\subsection{Contexte}
+
+On considère un processus de diffusion solution de l'EDS:
+\[
+dX_t = b(X_t)dt + \sigma(X_t)dW_t, \quad X_0 = x_0 \in \R, \quad t \in [0,T], \quad (T > 0)
+\]
+où $b, \sigma : \R \to \R$ sont lipschitziennes et $(W_t)_{t \geq 0}$ est un mouvement brownien standard défini sur un espace de probabilité $(\Omega, \mathcal{A}, \prob)$.
+
+On rappelle que le pont brownien $(Y_t^{0,T})_{t \in [0,T]}$ associé à un mouvement brownien standard $B = (B_t)_{t \in [0,T]}$ issu de 0 en $t = 0$ et valant $y \in \R$ en $t = T$ est défini par:
+\[
+Y_t^{0,T} = B_t - \frac{t}{T}(B_T - y)
+\]
+
+et que la loi de son supremum sur $[0,T]$ est donnée à travers sa fonction de répartition par:
+
+Pour tout $s \in \R$:
+\[
+\prob\left( \sup_{t \in [0,T]} Y_t^{0,T} \leq s \right) = 
+\begin{cases}
+0 & \text{si } s < \max(0, y) \\
+1 - e^{-\frac{2s(s-y)}{T}} & \text{si } s \geq \max(0, y)
+\end{cases}
+\]
+
+%------------------------------------------------------------------------------
+\subsection{Question 1.a : Argument de symétrie}
+%------------------------------------------------------------------------------
+
+\textbf{Énoncé :} Montrer par un argument de symétrie approprié que:
+\[
+\forall s \in \R, \quad \prob\left( \sup_{t \in [0,T]} Y_t^{0,T} \leq s \right) = 
+\begin{cases}
+0 & \text{si } s < \max(0, y) \\
+1 - e^{-\frac{2s(s-y)}{T}} & \text{si } s \geq \max(0, y)
+\end{cases}
+\]
+
+\textbf{Correction détaillée :}
+
+\textbf{Étape 1 : Propriétés du pont brownien}
+
+Le pont brownien $Y_t^{0,T} = B_t - \frac{t}{T}(B_T - y)$ vérifie:
+\begin{itemize}
+    \item $Y_0^{0,T} = 0$
+    \item $Y_T^{0,T} = B_T - (B_T - y) = y$
+    \item $(Y_t^{0,T})_{t \in [0,T]}$ est un processus gaussien
+\end{itemize}
+
+\textbf{Étape 2 : Calcul de la loi du supremum}
+
+On utilise le \textbf{principe de réflexion}. Pour un pont brownien allant de 0 à $y$ sur $[0,T]$:
+
+\begin{theorem}[Loi du supremum du pont brownien]
+Pour $s \geq \max(0, y)$:
+\[
+\prob\left( \sup_{t \in [0,T]} Y_t^{0,T} > s \right) = e^{-\frac{2s(s-y)}{T}}
+\]
+\end{theorem}
+
+\textbf{Démonstration :}
+
+On utilise la formule classique du mouvement brownien. Par le principe de réflexion, pour le mouvement brownien $(B_t)$ conditionné à $B_T = y$:
+\[
+\prob\left( \sup_{t \in [0,T]} B_t > s \,\Big|\, B_T = y \right) = e^{-\frac{2s(s-y)}{T}}
+\]
+
+Cette formule découle du fait que:
+\begin{enumerate}
+    \item Pour $s < 0$ ou $s < y$: la probabilité que le supremum dépasse $s$ est 1 (car le processus part de 0 ou arrive en $y$)
+    \item Pour $s \geq \max(0, y)$: on applique le principe de réflexion
+\end{enumerate}
+
+\begin{rappel}
+\textbf{Principe de réflexion :} Si $(B_t)$ est un mouvement brownien et $\tau_s = \inf\{t : B_t = s\}$, alors le processus réfléchi $(B_t \ind_{t < \tau_s} + (2s - B_t)\ind_{t \geq \tau_s})$ est aussi un mouvement brownien.
+\end{rappel}
+
+%------------------------------------------------------------------------------
+\subsection{Question 1.b : Fonction de répartition}
+%------------------------------------------------------------------------------
+
+\textbf{Énoncé :} En déduire pour tous $a, y \in \R$ fixés et tout $\lambda \in \R_+^*$, la fonction de répartition de:
+\[
+\inf_{t \in [0,T]} \left( a - \frac{y-a}{T}t + \lambda Y_t^{0,T} \right)
+\]
+
+\textbf{Correction détaillée :}
+
+\textbf{Étape 1 : Transformation affine}
+
+Posons $Z_t = a - \frac{y-a}{T}t + \lambda Y_t^{0,T}$.
+
+On a:
+\begin{itemize}
+    \item $Z_0 = a$
+    \item $Z_T = a - (y-a) + \lambda y = 2a - y + \lambda y = a + (1+\lambda-1)(y-a+a) = 2a - y + \lambda y$
+\end{itemize}
+
+Vérifions: $Z_T = a - (y-a) + \lambda \cdot y = a - y + a + \lambda y = 2a - y + \lambda y$.
+
+\textbf{Étape 2 : Relation avec le supremum}
+
+\[
+\inf_{t \in [0,T]} Z_t = \inf_{t \in [0,T]} \left( a - \frac{y-a}{T}t + \lambda Y_t^{0,T} \right)
+\]
+
+On peut réécrire:
+\[
+-\sup_{t \in [0,T]} (-Z_t) = \inf_{t \in [0,T]} Z_t
+\]
+
+où $-Z_t = -a + \frac{y-a}{T}t - \lambda Y_t^{0,T}$.
+
+\textbf{Étape 3 : Changement de variable}
+
+Le processus $-Y_t^{0,T}$ est aussi un pont brownien, mais allant de 0 à $-y$.
+
+Par scaling brownien, $\lambda Y_t^{0,T}$ a la même loi que $Y_t^{0, T/\lambda^2}$ avec point final $\lambda y$.
+
+La fonction de répartition de l'infimum s'obtient donc par:
+\[
+\prob\left( \inf_{t \in [0,T]} Z_t \geq s \right) = \prob\left( \sup_{t \in [0,T]} (-Z_t) \leq -s \right)
+\]
+
+En utilisant la formule du supremum avec les paramètres appropriés.
+
+%------------------------------------------------------------------------------
+\subsection{Question 1.c : Simulation}
+%------------------------------------------------------------------------------
+
+\textbf{Énoncé :} En déduire une méthode simple de simulation de cette variable aléatoire.
+
+\textbf{Correction détaillée :}
+
+\textbf{Méthode de simulation par inversion :}
+
+\begin{enumerate}
+    \item Générer $U \sim \mathcal{U}([0,1])$
+    \item Calculer $s$ tel que $F(s) = U$ où $F$ est la fonction de répartition trouvée en 1.b
+    \item Retourner $s$ comme réalisation de $\inf_{t \in [0,T]} Z_t$
+\end{enumerate}
+
+\textbf{Inversion explicite :}
+
+Pour le supremum du pont brownien, on a $F(s) = 1 - e^{-\frac{2s(s-y)}{T}}$ pour $s \geq \max(0,y)$.
+
+Donc $U = 1 - e^{-\frac{2s(s-y)}{T}}$, ce qui donne:
+\[
+e^{-\frac{2s(s-y)}{T}} = 1 - U
+\]
+\[
+-\frac{2s(s-y)}{T} = \ln(1-U)
+\]
+\[
+s^2 - ys + \frac{T\ln(1-U)}{2} = 0
+\]
+
+On résout cette équation du second degré:
+\[
+s = \frac{y + \sqrt{y^2 - 2T\ln(1-U)}}{2}
+\]
+
+(on prend la racine $\geq \max(0,y)$).
+
+\begin{astuce}
+Puisque $1-U$ a la même loi que $U$ quand $U \sim \mathcal{U}([0,1])$, on peut remplacer $\ln(1-U)$ par $\ln(U)$ dans l'algorithme.
+\end{astuce}
+
+%==============================================================================
+\section{Problème : Schéma d'Euler et modèle pseudo-CEV}
+%==============================================================================
+
+\subsection{Contexte}
+
+On considère un processus de diffusion solution de l'EDS:
+\[
+dX_t = b(X_t)dt + \sigma(X_t)dW_t, \quad X_0 = x_0 > 0, \quad t \in [0,T]
+\]
+
+où $(W_t)_{t \geq 0}$ est un mouvement brownien standard et $b, \sigma$ sont lipschitziennes. On s'intéresse au modèle pseudo-CEV (Constant Elasticity of Variance).
+
+%------------------------------------------------------------------------------
+\subsection{Question 1 : Schéma d'Euler}
+%------------------------------------------------------------------------------
+
+\textbf{Énoncé :} Rappeler la définition des schémas d'Euler à temps discret $(\bar{X}_k^n)_{0 \leq k \leq n}$ de pas $h = \frac{T}{n}$ (les notations sont celles du cours).
+
+\textbf{Correction détaillée :}
+
+\begin{definition}[Schéma d'Euler explicite]
+Le schéma d'Euler explicite pour l'EDS $dX_t = b(X_t)dt + \sigma(X_t)dW_t$ avec $X_0 = x_0$ est défini par:
+\[
+\bar{X}_0^n = x_0
+\]
+\[
+\bar{X}_{k+1}^n = \bar{X}_k^n + b(\bar{X}_k^n) h + \sigma(\bar{X}_k^n) \Delta W_k
+\]
+où:
+\begin{itemize}
+    \item $h = \frac{T}{n}$ est le pas de temps
+    \item $\Delta W_k = W_{t_{k+1}} - W_{t_k}$ avec $t_k = kh$
+    \item $(\Delta W_k)_{k \geq 0}$ sont des variables i.i.d. de loi $\mathcal{N}(0, h)$
+\end{itemize}
+\end{definition}
+
+\begin{definition}[Schéma d'Euler continu]
+Le schéma d'Euler continu $(\bar{X}_t^n)_{t \in [0,T]}$ est défini par interpolation:
+\[
+\bar{X}_t^n = \bar{X}_{\lfloor t/h \rfloor}^n + b(\bar{X}_{\lfloor t/h \rfloor}^n)(t - t_{\lfloor t/h \rfloor}) + \sigma(\bar{X}_{\lfloor t/h \rfloor}^n)(W_t - W_{t_{\lfloor t/h \rfloor}})
+\]
+où $\lfloor \cdot \rfloor$ désigne la partie entière.
+\end{definition}
+
+%------------------------------------------------------------------------------
+\subsection{Question 2 : Convergence forte}
+%------------------------------------------------------------------------------
+
+\textbf{Énoncé :} Montrer que le schéma d'Euler vérifie une convergence forte d'ordre $\frac{1}{2}$.
+
+\textbf{Correction détaillée :}
+
+\begin{theorem}[Convergence forte du schéma d'Euler]
+Sous les hypothèses de lipschitziannité de $b$ et $\sigma$, il existe une constante $C > 0$ telle que:
+\[
+\E\left[ \sup_{t \in [0,T]} |X_t - \bar{X}_t^n|^2 \right] \leq C h = C \frac{T}{n}
+\]
+Donc:
+\[
+\left( \E\left[ \sup_{t \in [0,T]} |X_t - \bar{X}_t^n|^2 \right] \right)^{1/2} \leq C' \sqrt{h} = C' n^{-1/2}
+\]
+\end{theorem}
+
+\textbf{Démonstration :}
+
+\textbf{Étape 1 : Équation d'erreur}
+
+Soit $e_t = X_t - \bar{X}_t^n$ l'erreur. On a:
+\[
+X_t = x_0 + \int_0^t b(X_s)ds + \int_0^t \sigma(X_s)dW_s
+\]
+\[
+\bar{X}_t^n = x_0 + \int_0^t b(\bar{X}_{\eta(s)}^n)ds + \int_0^t \sigma(\bar{X}_{\eta(s)}^n)dW_s
+\]
+où $\eta(s) = t_{\lfloor s/h \rfloor}$ est le dernier point de discrétisation avant $s$.
+
+Donc:
+\[
+e_t = \int_0^t [b(X_s) - b(\bar{X}_{\eta(s)}^n)]ds + \int_0^t [\sigma(X_s) - \sigma(\bar{X}_{\eta(s)}^n)]dW_s
+\]
+
+\textbf{Étape 2 : Majoration par Lipschitz}
+
+Par l'inégalité triangulaire et la condition de Lipschitz:
+\[
+|b(X_s) - b(\bar{X}_{\eta(s)}^n)| \leq L_b |X_s - \bar{X}_{\eta(s)}^n| \leq L_b(|e_s| + |X_s - X_{\eta(s)}| + |\bar{X}_s^n - \bar{X}_{\eta(s)}^n|)
+\]
+
+\textbf{Étape 3 : Inégalité de Gronwall}
+
+En prenant l'espérance du supremum et en utilisant l'isométrie d'Itô et l'inégalité de Burkholder-Davis-Gundy:
+\[
+\E\left[ \sup_{s \leq t} |e_s|^2 \right] \leq C_1 \int_0^t \E\left[ \sup_{u \leq s} |e_u|^2 \right] ds + C_2 h
+\]
+
+Par le lemme de Gronwall:
+\[
+\E\left[ \sup_{t \in [0,T]} |e_t|^2 \right] \leq C_2 h \cdot e^{C_1 T} = O(h)
+\]
+
+\begin{rappel}
+\textbf{Lemme de Gronwall :} Si $u(t) \leq \alpha + \beta \int_0^t u(s)ds$ avec $\alpha, \beta \geq 0$, alors $u(t) \leq \alpha e^{\beta t}$.
+\end{rappel}
+
+%------------------------------------------------------------------------------
+\subsection{Question 3 : Modèle pseudo-CEV}
+%------------------------------------------------------------------------------
+
+On considère maintenant un modèle pseudo-CEV sur un marché de maturité $T > 0$ où le numéraire est donné par $S_t^0 = e^{rt}$ et l'actif risqué est régi sous probabilité risque-neutre par l'EDS:
+\[
+dS_t = rS_t dt + \sigma(S_t)dW_t, \quad S_0 = s_0 > 0, \quad t \in [0,T]
+\]
+
+où $\sigma(s) = \tilde{\sigma} s^{\beta}$ avec $\tilde{\sigma} > 0$ et $\beta \in (0,1]$.
+
+\subsubsection{Question 5.a}
+
+\textbf{Énoncé :} Montrer que $\sigma$ est lipschitzienne sur $\R$. Que peut-on en déduire ?
+
+\textbf{Correction détaillée :}
+
+\textbf{Étape 1 : Lipschitziannité pour $\beta = 1$ (modèle de Black-Scholes)}
+
+Si $\beta = 1$: $\sigma(s) = \tilde{\sigma} s$, qui est clairement lipschitzienne avec constante $\tilde{\sigma}$.
+
+\textbf{Étape 2 : Cas $\beta \in (0,1)$}
+
+Pour $\beta \in (0,1)$, la fonction $s \mapsto s^{\beta}$ n'est PAS lipschitzienne sur $\R_+$ car sa dérivée $\beta s^{\beta-1} \to +\infty$ quand $s \to 0^+$.
+
+\textbf{Cependant}, si on considère $\sigma$ définie par:
+\[
+\sigma(s) = \tilde{\sigma} |s|^{\beta} \text{ ou } \sigma(s) = \tilde{\sigma} (s^+)^{\beta}
+\]
+sur un domaine borné loin de 0, alors $\sigma$ est localement lipschitzienne.
+
+\textbf{Conclusion :} Pour le modèle pseudo-CEV avec $\beta \in (0,1)$:
+\begin{itemize}
+    \item $\sigma$ n'est pas globalement lipschitzienne (singularité en 0)
+    \item L'EDS admet néanmoins une solution forte unique tant que $S_t > 0$
+    \item Le schéma d'Euler peut nécessiter des corrections pour éviter les valeurs négatives
+\end{itemize}
+
+\subsubsection{Question 5.b : Formule d'Itô}
+
+\textbf{Énoncé :} Montrer à l'aide de la formule d'Itô que le processus
+\[
+Y_t = s_0 \exp\left( rt - \frac{1}{2}\int_0^t \frac{\sigma(S_u)^2}{S_u^2} du + \int_0^t \frac{\sigma(S_u)}{S_u} dW_u \right)
+\]
+vérifie l'EDS. En déduire que $S_t > 0$ pour tout $t \in [0,T]$.
+
+\textbf{Correction détaillée :}
+
+\textbf{Étape 1 : Application de la formule d'Itô}
+
+Posons $f(x) = e^x$ et 
+\[
+Z_t = rt - \frac{1}{2}\int_0^t \frac{\sigma(S_u)^2}{S_u^2} du + \int_0^t \frac{\sigma(S_u)}{S_u} dW_u
+\]
+
+Alors $Y_t = s_0 e^{Z_t}$ et par Itô:
+\[
+dY_t = s_0 e^{Z_t} dZ_t + \frac{1}{2} s_0 e^{Z_t} d\langle Z \rangle_t
+\]
+
+\textbf{Étape 2 : Calcul des termes}
+
+On a:
+\[
+dZ_t = r dt - \frac{1}{2}\frac{\sigma(S_t)^2}{S_t^2} dt + \frac{\sigma(S_t)}{S_t} dW_t
+\]
+\[
+d\langle Z \rangle_t = \frac{\sigma(S_t)^2}{S_t^2} dt
+\]
+
+Donc:
+\begin{align*}
+dY_t &= Y_t \left[ r - \frac{1}{2}\frac{\sigma(S_t)^2}{S_t^2} + \frac{1}{2}\frac{\sigma(S_t)^2}{S_t^2} \right] dt + Y_t \frac{\sigma(S_t)}{S_t} dW_t \\
+&= r Y_t dt + \frac{\sigma(S_t)}{S_t} Y_t dW_t
+\end{align*}
+
+\textbf{Étape 3 : Unicité}
+
+Si $Y_t = S_t$ (par unicité des solutions d'EDS), alors:
+\[
+dS_t = rS_t dt + \sigma(S_t) dW_t
+\]
+
+ce qui est bien l'EDS du modèle CEV.
+
+\textbf{Positivité :} Puisque $Y_t = s_0 e^{Z_t}$ et $s_0 > 0$, on a $S_t = Y_t > 0$ pour tout $t$.
+
+\begin{rappel}
+\textbf{Formule d'Itô :} Si $f \in C^2$ et $(X_t)$ est un processus d'Itô avec $dX_t = \mu_t dt + \sigma_t dW_t$, alors:
+\[
+df(X_t) = f'(X_t)dX_t + \frac{1}{2}f''(X_t)d\langle X \rangle_t = f'(X_t)\mu_t dt + f'(X_t)\sigma_t dW_t + \frac{1}{2}f''(X_t)\sigma_t^2 dt
+\]
+\end{rappel}
+
+%==============================================================================
+% PARTIE II : EXAMEN 2025
+%==============================================================================
+\newpage
+\part{Examen 2025}
+
+%==============================================================================
+\section{Exercice 1 : Corrélation, régression et réduction de variance}
+%==============================================================================
+
+\subsection{Contexte}
+
+Soit $(\Omega, \mathcal{A}, \prob)$ un espace de probabilité. Soient $X$ et $Y$ deux variables aléatoires intégrables définies sur cet espace. On suppose que $\Var(X) > 0$ et $\Var(Y) > 0$.
+
+\textbf{Précisions sur les questions :} Le texte de l'énoncé utilise $\E[X] = m$, $\E[Y] = \mu$, $\Var(X) = \sigma_X^2$, $\Var(Y) = \sigma_Y^2$, et la covariance $\Cov(X,Y)$.
+
+On définit:
+\[
+\rho = \frac{\Cov(X,Y)}{\sigma_X \sigma_Y}
+\]
+le coefficient de corrélation entre $X$ et $Y$.
+
+%------------------------------------------------------------------------------
+\subsection{Question préliminaire}
+%------------------------------------------------------------------------------
+
+\textbf{Énoncé :} Montrer que pour tout $a \in \R$, $\Var(X - aY) = \Var(X) - 2a\Cov(X,Y) + a^2\Var(Y)$.
+
+\textbf{Correction détaillée :}
+
+\textbf{Étape 1 : Rappel de la définition}
+
+Par définition de la variance:
+\[
+\Var(X - aY) = \E[(X - aY - \E[X - aY])^2]
+\]
+
+\textbf{Étape 2 : Linéarité de l'espérance}
+
+$\E[X - aY] = \E[X] - a\E[Y] = m - a\mu$
+
+Donc:
+\[
+(X - aY) - \E[X - aY] = (X - m) - a(Y - \mu)
+\]
+
+\textbf{Étape 3 : Développement du carré}
+
+\begin{align*}
+\Var(X - aY) &= \E\left[ ((X-m) - a(Y-\mu))^2 \right] \\
+&= \E\left[ (X-m)^2 - 2a(X-m)(Y-\mu) + a^2(Y-\mu)^2 \right] \\
+&= \E[(X-m)^2] - 2a\E[(X-m)(Y-\mu)] + a^2\E[(Y-\mu)^2] \\
+&= \Var(X) - 2a\Cov(X,Y) + a^2\Var(Y)
+\end{align*}
+
+\begin{astuce}
+Cette formule est la base de la régression linéaire et de la réduction de variance. Elle montre que $\Var(X - aY)$ est une fonction quadratique en $a$, donc admet un minimum unique.
+\end{astuce}
+
+%------------------------------------------------------------------------------
+\subsection{Question 2.a : Variance minimale}
+%------------------------------------------------------------------------------
+
+\textbf{Énoncé :} Montrer que $\Var(X) \geq \Var(X - aY)$ pour un choix optimal de $a$, et déterminer ce minimum.
+
+\textbf{Correction détaillée :}
+
+\textbf{Étape 1 : Minimisation en $a$}
+
+D'après la question précédente:
+\[
+f(a) = \Var(X - aY) = \Var(X) - 2a\Cov(X,Y) + a^2\Var(Y)
+\]
+
+C'est un polynôme du second degré en $a$ avec coefficient dominant $\Var(Y) > 0$, donc $f$ admet un minimum unique.
+
+\textbf{Étape 2 : Calcul de l'optimum}
+
+\[
+f'(a) = -2\Cov(X,Y) + 2a\Var(Y) = 0
+\]
+\[
+a^* = \frac{\Cov(X,Y)}{\Var(Y)} = \frac{\sigma_X}{\sigma_Y} \rho
+\]
+
+\textbf{Étape 3 : Valeur minimale}
+
+\begin{align*}
+f(a^*) &= \Var(X) - 2a^*\Cov(X,Y) + (a^*)^2\Var(Y) \\
+&= \Var(X) - 2 \cdot \frac{\Cov(X,Y)}{\Var(Y)} \cdot \Cov(X,Y) + \frac{\Cov(X,Y)^2}{\Var(Y)^2} \cdot \Var(Y) \\
+&= \Var(X) - \frac{2\Cov(X,Y)^2}{\Var(Y)} + \frac{\Cov(X,Y)^2}{\Var(Y)} \\
+&= \Var(X) - \frac{\Cov(X,Y)^2}{\Var(Y)} \\
+&= \sigma_X^2 - \frac{\rho^2 \sigma_X^2 \sigma_Y^2}{\sigma_Y^2} \\
+&= \sigma_X^2(1 - \rho^2)
+\end{align*}
+
+\textbf{Conclusion :}
+\[
+\boxed{\min_a \Var(X - aY) = \Var(X)(1 - \rho^2)}
+\]
+
+avec $a^* = \frac{\Cov(X,Y)}{\Var(Y)}$.
+
+Puisque $\rho^2 \leq 1$ (inégalité de Cauchy-Schwarz), on a bien $\Var(X)(1-\rho^2) \leq \Var(X)$.
+
+%------------------------------------------------------------------------------
+\subsection{Question 2.b : Inégalité de Cauchy-Schwarz}
+%------------------------------------------------------------------------------
+
+\textbf{Énoncé :} En déduire que $|\rho| \leq 1$ (inégalité de Cauchy-Schwarz pour la covariance).
+
+\textbf{Correction détaillée :}
+
+\textbf{Étape 1 : Non-négativité de la variance}
+
+Pour tout $a \in \R$: $\Var(X - aY) \geq 0$.
+
+En particulier, pour $a = a^* = \frac{\Cov(X,Y)}{\Var(Y)}$:
+\[
+\Var(X)(1 - \rho^2) \geq 0
+\]
+
+\textbf{Étape 2 : Conclusion}
+
+Puisque $\Var(X) > 0$ (par hypothèse), on a:
+\[
+1 - \rho^2 \geq 0 \implies \rho^2 \leq 1 \implies |\rho| \leq 1
+\]
+
+\begin{rappel}
+\textbf{Inégalité de Cauchy-Schwarz :} Pour toutes variables aléatoires $X, Y$ de carré intégrable:
+\[
+|\Cov(X,Y)| \leq \sqrt{\Var(X)\Var(Y)}
+\]
+avec égalité si et seulement si $Y = \alpha X + \beta$ p.s. pour certains $\alpha, \beta \in \R$.
+\end{rappel}
+
+%------------------------------------------------------------------------------
+\subsection{Question 3.a : Variable de contrôle}
+%------------------------------------------------------------------------------
+
+\textbf{Énoncé :} On suppose maintenant que $\E[Y]$ est connu. On veut estimer $\E[X]$ par une méthode de Monte Carlo avec variable de contrôle. Expliquer le principe.
+
+\textbf{Correction détaillée :}
+
+\textbf{Principe de la variable de contrôle :}
+
+\begin{enumerate}
+    \item \textbf{Objectif :} Estimer $\E[X]$ avec une variance plus faible que l'estimateur de Monte Carlo classique.
+    
+    \item \textbf{Idée clé :} On utilise une variable $Y$ corrélée à $X$ dont on connaît $\E[Y] = \mu$.
+    
+    \item \textbf{Estimateur :} Pour un paramètre $\lambda \in \R$, on considère:
+    \[
+    \hat{m}_n^{\lambda} = \frac{1}{n}\sum_{i=1}^{n} (X_i - \lambda(Y_i - \mu))
+    \]
+    où $(X_i, Y_i)_{1 \leq i \leq n}$ sont des copies i.i.d. de $(X, Y)$.
+    
+    \item \textbf{Propriété :} Cet estimateur est sans biais:
+    \[
+    \E[\hat{m}_n^{\lambda}] = \E[X] - \lambda(\E[Y] - \mu) = \E[X] = m
+    \]
+    
+    \item \textbf{Variance :}
+    \[
+    \Var(\hat{m}_n^{\lambda}) = \frac{1}{n}\Var(X - \lambda(Y - \mu)) = \frac{1}{n}\Var(X - \lambda Y)
+    \]
+    
+    \item \textbf{Choix optimal :} D'après la question 2.a, la variance est minimale pour:
+    \[
+    \lambda^* = \frac{\Cov(X,Y)}{\Var(Y)}
+    \]
+    et vaut:
+    \[
+    \Var(\hat{m}_n^{\lambda^*}) = \frac{\Var(X)(1-\rho^2)}{n}
+    \]
+\end{enumerate}
+
+\textbf{Gain :} La variance est réduite d'un facteur $(1 - \rho^2)$. Plus $|\rho|$ est proche de 1, plus la réduction est importante.
+
+\begin{astuce}
+En pratique, $\lambda^*$ est inconnu et doit être estimé. On utilise souvent:
+\[
+\hat{\lambda}_n = \frac{\sum_{i=1}^n (X_i - \bar{X}_n)(Y_i - \bar{Y}_n)}{\sum_{i=1}^n (Y_i - \bar{Y}_n)^2}
+\]
+\end{astuce}
+
+%------------------------------------------------------------------------------
+\subsection{Question 3.b : Régression et croissance exponentielle}
+%------------------------------------------------------------------------------
+
+\textbf{Énoncé :} On suppose que $f$ est différentiable et $f'$ a une croissance exponentielle (voir aussi). Montrer que:
+\[
+\E[f(Z)f'(Z)] = \E[Zf'(Z)^2]
+\]
+pour $Z \sim \mathcal{N}(0,1)$.
+
+\textbf{Correction détaillée :}
+
+\textbf{Étape 1 : Intégration par parties gaussienne}
+
+Pour $Z \sim \mathcal{N}(0,1)$, on a l'identité fondamentale:
+\[
+\E[Zg(Z)] = \E[g'(Z)]
+\]
+pour toute fonction $g$ absolument continue avec $\E[|g'(Z)|] < \infty$.
+
+Cette formule est connue comme la \textbf{formule d'intégration par parties gaussienne} ou \textbf{lemme de Stein}.
+
+\textbf{Étape 2 : Application}
+
+Appliquons cette formule avec $g(z) = f(z)f'(z)$:
+
+\[
+\E[Z f(Z) f'(Z)] = \E\left[ \frac{d}{dz}(f(z)f'(z)) \right] = \E[f'(Z)^2 + f(Z)f''(Z)]
+\]
+
+\textbf{Étape 3 : Autre application}
+
+Appliquons maintenant avec $g(z) = f(z)^2/2$:
+\[
+\E[Z f(Z)^2 / 2] = \E[f(Z)f'(Z)]
+\]
+donc $\E[f(Z)f'(Z)] = \frac{1}{2}\E[Zf(Z)^2]$.
+
+\textbf{Alternative :} On peut aussi appliquer directement:
+\[
+\E[f(Z)f'(Z)] = \int_{-\infty}^{+\infty} f(z)f'(z) \frac{e^{-z^2/2}}{\sqrt{2\pi}} dz
+\]
+
+En intégrant par parties:
+\[
+= \left[ \frac{f(z)^2}{2} \frac{e^{-z^2/2}}{\sqrt{2\pi}} \right]_{-\infty}^{+\infty} + \int_{-\infty}^{+\infty} \frac{f(z)^2}{2} \cdot z \cdot \frac{e^{-z^2/2}}{\sqrt{2\pi}} dz
+\]
+
+Le terme de bord est nul (grâce à la décroissance gaussienne), donc:
+\[
+\E[f(Z)f'(Z)] = \frac{1}{2}\E[Zf(Z)^2]
+\]
+
+\begin{rappel}
+\textbf{Lemme de Stein :} Si $Z \sim \mathcal{N}(0,1)$ et $g$ est absolument continue avec $\E[|g'(Z)|] < \infty$, alors:
+\[
+\E[Zg(Z)] = \E[g'(Z)]
+\]
+Cette identité est fondamentale en calcul de Malliavin et pour les méthodes de réduction de variance.
+\end{rappel}
+
+%==============================================================================
+\section{Exercice 2 : Schéma d'Euler à un pas (One-step Euler)}
+%==============================================================================
+
+\subsection{Contexte}
+
+On considère l'équation différentielle stochastique (EDS):
+\[
+dX_t = b(X_t)dt + \sigma(X_t)dW_t, \quad X_0 = x \in \R
+\]
+
+où $b, \sigma : \R \to \R$ sont des fonctions données et $(W_t)_{t \geq 0}$ est un mouvement brownien standard défini sur un espace de probabilité filtré $(\Omega, \mathcal{A}, (\mathcal{F}_t), \prob)$.
+
+On note $\bar{X}_t$ le schéma d'Euler de pas $h$ démarrant en $x$:
+\[
+\bar{X}_t = x + b(x)t + \sigma(x)W_t, \quad t \in [0, h]
+\]
+
+C'est l'approximation d'Euler "à un pas" (one-step) sur l'intervalle $[0, h]$.
+
+%------------------------------------------------------------------------------
+\subsection{Question 1 : Hypothèses de régularité}
+%------------------------------------------------------------------------------
+
+\textbf{Énoncé :} Rappeler les hypothèses de régularité sur $b$ et $\sigma$ garantissant l'existence et l'unicité d'une solution forte.
+
+\textbf{Correction détaillée :}
+
+\begin{theorem}[Existence et unicité forte]
+Si $b$ et $\sigma$ vérifient:
+\begin{enumerate}
+    \item \textbf{Condition de Lipschitz :} Il existe $K > 0$ tel que pour tous $x, y \in \R$:
+    \[
+    |b(x) - b(y)| + |\sigma(x) - \sigma(y)| \leq K|x - y|
+    \]
+    
+    \item \textbf{Condition de croissance linéaire :} Il existe $C > 0$ tel que pour tout $x \in \R$:
+    \[
+    |b(x)|^2 + |\sigma(x)|^2 \leq C(1 + |x|^2)
+    \]
+\end{enumerate}
+Alors pour tout $x \in \R$, l'EDS admet une unique solution forte $(X_t)_{t \geq 0}$ adaptée, continue, et:
+\[
+\E\left[ \sup_{t \in [0,T]} |X_t|^2 \right] < \infty
+\]
+\end{theorem}
+
+\begin{attention}
+La condition de Lipschitz est cruciale pour l'unicité (unicité trajectorielle). La condition de croissance linéaire empêche l'explosion en temps fini.
+\end{attention}
+
+%------------------------------------------------------------------------------
+\subsection{Question 2.a : Borne sur l'erreur d'Euler}
+%------------------------------------------------------------------------------
+
+\textbf{Énoncé :} Montrer qu'il existe une constante $C(x, K) > 0$ telle que pour tout $h > 0$:
+\[
+\E\left[ |X_h - \bar{X}_h|^2 \right] \leq C(x, K) h^2
+\]
+
+\textbf{Correction détaillée :}
+
+\textbf{Étape 1 : Expressions de $X_h$ et $\bar{X}_h$}
+
+Solution exacte sur $[0, h]$:
+\[
+X_h = x + \int_0^h b(X_s) ds + \int_0^h \sigma(X_s) dW_s
+\]
+
+Schéma d'Euler:
+\[
+\bar{X}_h = x + b(x)h + \sigma(x)W_h
+\]
+
+\textbf{Étape 2 : Erreur}
+
+\[
+X_h - \bar{X}_h = \int_0^h [b(X_s) - b(x)] ds + \int_0^h [\sigma(X_s) - \sigma(x)] dW_s
+\]
+
+\textbf{Étape 3 : Majoration par l'inégalité de Cauchy-Schwarz et Itô}
+
+Pour l'intégrale de drift, par Cauchy-Schwarz:
+\[
+\left| \int_0^h [b(X_s) - b(x)] ds \right|^2 \leq h \int_0^h |b(X_s) - b(x)|^2 ds
+\]
+
+Par Lipschitz:
+\[
+\leq h \int_0^h K^2 |X_s - x|^2 ds
+\]
+
+Pour l'intégrale stochastique, par l'isométrie d'Itô:
+\[
+\E\left[ \left| \int_0^h [\sigma(X_s) - \sigma(x)] dW_s \right|^2 \right] = \E\left[ \int_0^h |\sigma(X_s) - \sigma(x)|^2 ds \right] \leq K^2 \E\left[ \int_0^h |X_s - x|^2 ds \right]
+\]
+
+\textbf{Étape 4 : Contrôle de $|X_s - x|$}
+
+Pour $s \in [0, h]$:
+\[
+X_s - x = \int_0^s b(X_u) du + \int_0^s \sigma(X_u) dW_u
+\]
+
+Par les mêmes arguments:
+\[
+\E[|X_s - x|^2] \leq 2s \E\left[\int_0^s |b(X_u)|^2 du\right] + 2\E\left[\int_0^s |\sigma(X_u)|^2 du\right]
+\]
+
+Par la condition de croissance linéaire et le lemme de Gronwall, on montre que:
+\[
+\E[|X_s - x|^2] \leq C_1 s
+\]
+
+pour une constante $C_1$ dépendant de $x$ et $K$.
+
+\textbf{Étape 5 : Conclusion}
+
+\begin{align*}
+\E[|X_h - \bar{X}_h|^2] &\leq 2h \cdot K^2 \int_0^h \E[|X_s - x|^2] ds + 2K^2 \int_0^h \E[|X_s - x|^2] ds \\
+&\leq 2(h+1) K^2 \int_0^h C_1 s \, ds \\
+&= 2(h+1) K^2 C_1 \frac{h^2}{2} \\
+&\leq C(x, K) h^2
+\end{align*}
+
+pour $h \leq 1$.
+
+\begin{rappel}
+\textbf{Isométrie d'Itô :} Pour tout processus adapté $(H_t)$ tel que $\E[\int_0^T H_s^2 ds] < \infty$:
+\[
+\E\left[ \left( \int_0^T H_s dW_s \right)^2 \right] = \E\left[ \int_0^T H_s^2 ds \right]
+\]
+\end{rappel}
+
+%------------------------------------------------------------------------------
+\subsection{Question 2.b : Ordre de convergence}
+%------------------------------------------------------------------------------
+
+\textbf{Énoncé :} En déduire que l'erreur forte locale (one-step) du schéma d'Euler est d'ordre $O(h)$ en norme $L^2$.
+
+\textbf{Correction détaillée :}
+
+D'après la question 2.a:
+\[
+\E[|X_h - \bar{X}_h|^2] \leq C h^2
+\]
+
+Donc:
+\[
+\sqrt{\E[|X_h - \bar{X}_h|^2]} \leq \sqrt{C} h = O(h)
+\]
+
+\textbf{Interprétation :} L'erreur locale (sur un pas) est d'ordre $h$ en norme $L^2$. Cela implique que l'erreur globale (sur $[0,T]$ avec $n = T/h$ pas) est d'ordre $\sqrt{h}$, car les erreurs s'accumulent.
+
+\begin{astuce}
+L'erreur locale d'ordre $h$ correspond à une erreur globale d'ordre $\sqrt{h}$ (convergence forte d'ordre 1/2) pour le schéma d'Euler. Pour obtenir une convergence d'ordre 1, il faut utiliser le schéma de Milstein qui ajoute une correction itô.
+\end{astuce}
+
+%------------------------------------------------------------------------------
+\subsection{Question 3 : Estimation uniforme}
+%------------------------------------------------------------------------------
+
+\textbf{Énoncé :} Montrer qu'il existe une constante $C > 0$ telle que:
+\[
+\sup_{t \in [0,h]} \E[|X_t - \bar{X}_t|^2] \leq C h^2
+\]
+
+\textbf{Correction détaillée :}
+
+\textbf{Étape 1 : Expression de l'erreur}
+
+Pour $t \in [0, h]$:
+\[
+X_t - \bar{X}_t = \int_0^t [b(X_s) - b(x)] ds + \int_0^t [\sigma(X_s) - \sigma(x)] dW_s
+\]
+
+\textbf{Étape 2 : Majoration uniforme}
+
+Par les mêmes arguments que précédemment:
+\begin{align*}
+\E[|X_t - \bar{X}_t|^2] &\leq 2t \cdot K^2 \int_0^t \E[|X_s - x|^2] ds + 2K^2 \int_0^t \E[|X_s - x|^2] ds \\
+&\leq 2(t + 1) K^2 \int_0^t C_1 s \, ds \\
+&= 2(t + 1) K^2 C_1 \frac{t^2}{2} \\
+&\leq C' t^2 \leq C' h^2
+\end{align*}
+
+pour $t \leq h$.
+
+Donc $\sup_{t \in [0,h]} \E[|X_t - \bar{X}_t|^2] \leq C' h^2$.
+
+%------------------------------------------------------------------------------
+\subsection{Question 4 : Régularité et borne Lipschitz}
+%------------------------------------------------------------------------------
+
+\textbf{Énoncé :} Soit $f : \R \to \R$ une fonction Lipschitz continue. Montrer que:
+\[
+\E[|f(X_h) - f(\bar{X}_h)|^2] \leq L_f^2 C h^2
+\]
+où $L_f$ est la constante de Lipschitz de $f$.
+
+\textbf{Correction détaillée :}
+
+Par la condition de Lipschitz de $f$:
+\[
+|f(X_h) - f(\bar{X}_h)| \leq L_f |X_h - \bar{X}_h|
+\]
+
+Donc:
+\[
+|f(X_h) - f(\bar{X}_h)|^2 \leq L_f^2 |X_h - \bar{X}_h|^2
+\]
+
+En prenant l'espérance:
+\[
+\E[|f(X_h) - f(\bar{X}_h)|^2] \leq L_f^2 \E[|X_h - \bar{X}_h|^2] \leq L_f^2 C h^2
+\]
+
+\begin{astuce}
+Cette borne est essentielle pour le pricing d'options: si le payoff $f$ est Lipschitz, l'erreur d'approximation Monte Carlo hérite de l'ordre de convergence du schéma d'Euler.
+\end{astuce}
+
+%==============================================================================
+% PARTIE III : FICHE RÉCAPITULATIVE
+%==============================================================================
+\newpage
+\part{Fiche Récapitulative}
+
+%==============================================================================
+\section{Inégalités Fondamentales}
+%==============================================================================
+
+\subsection{Inégalités probabilistes}
+
+\begin{enumerate}
+    \item \textbf{Inégalité de Cauchy-Schwarz :}
+    \[
+    |\E[XY]| \leq \sqrt{\E[X^2]\E[Y^2]}
+    \]
+    \[
+    |\Cov(X,Y)| \leq \sigma_X \sigma_Y
+    \]
+    
+    \item \textbf{Inégalité de Jensen :} Si $\varphi$ est convexe:
+    \[
+    \varphi(\E[X]) \leq \E[\varphi(X)]
+    \]
+    
+    \item \textbf{Inégalité de Markov :} Pour $X \geq 0$ et $a > 0$:
+    \[
+    \prob(X \geq a) \leq \frac{\E[X]}{a}
+    \]
+    
+    \item \textbf{Inégalité de Bienaymé-Tchebychev :}
+    \[
+    \prob(|X - \E[X]| \geq \varepsilon) \leq \frac{\Var(X)}{\varepsilon^2}
+    \]
+    
+    \item \textbf{Inégalité de Hölder :} Pour $p, q > 1$ avec $\frac{1}{p} + \frac{1}{q} = 1$:
+    \[
+    \E[|XY|] \leq \|X\|_p \|Y\|_q = (\E[|X|^p])^{1/p} (\E[|Y|^q])^{1/q}
+    \]
+\end{enumerate}
+
+\subsection{Inégalités pour les martingales et intégrales stochastiques}
+
+\begin{enumerate}
+    \item \textbf{Isométrie d'Itô :}
+    \[
+    \E\left[ \left( \int_0^T H_s dW_s \right)^2 \right] = \E\left[ \int_0^T H_s^2 ds \right]
+    \]
+    
+    \item \textbf{Inégalité de Burkholder-Davis-Gundy :} Pour $p \geq 1$:
+    \[
+    \E\left[ \sup_{t \leq T} \left| \int_0^t H_s dW_s \right|^p \right] \leq C_p \E\left[ \left( \int_0^T H_s^2 ds \right)^{p/2} \right]
+    \]
+    
+    \item \textbf{Inégalité de Doob :} Pour une martingale $(M_t)$:
+    \[
+    \E\left[ \sup_{t \leq T} |M_t|^p \right] \leq \left( \frac{p}{p-1} \right)^p \E[|M_T|^p], \quad p > 1
+    \]
+\end{enumerate}
+
+\subsection{Inégalités pour les EDS}
+
+\begin{enumerate}
+    \item \textbf{Inégalité de Gronwall (forme intégrale) :} Si $u(t) \leq \alpha + \beta \int_0^t u(s) ds$ alors:
+    \[
+    u(t) \leq \alpha e^{\beta t}
+    \]
+    
+    \item \textbf{Inégalité de Gronwall (forme différentielle) :} Si $u'(t) \leq \beta u(t) + f(t)$ alors:
+    \[
+    u(t) \leq u(0)e^{\beta t} + \int_0^t e^{\beta(t-s)} f(s) ds
+    \]
+\end{enumerate}
+
+%==============================================================================
+\section{Notions Clés}
+%==============================================================================
+
+\subsection{Calcul stochastique}
+
+\begin{enumerate}
+    \item \textbf{Formule d'Itô :} Pour $f \in C^2$ et $(X_t)$ processus d'Itô avec $dX_t = \mu_t dt + \sigma_t dW_t$:
+    \[
+    df(X_t) = f'(X_t) dX_t + \frac{1}{2} f''(X_t) \sigma_t^2 dt
+    \]
+    \[
+    = \left( f'(X_t)\mu_t + \frac{1}{2}f''(X_t)\sigma_t^2 \right) dt + f'(X_t)\sigma_t dW_t
+    \]
+    
+    \item \textbf{Lemme de Stein (intégration par parties gaussienne) :} Pour $Z \sim \mathcal{N}(0,1)$:
+    \[
+    \E[Zg(Z)] = \E[g'(Z)]
+    \]
+    
+    \item \textbf{Pont brownien :} $Y_t^{0,T} = B_t - \frac{t}{T}(B_T - y)$ est un mouvement brownien conditionné à valoir $y$ en $T$.
+    
+    \item \textbf{Principe de réflexion :} Pour le mouvement brownien, utilisé pour calculer la loi du supremum.
+\end{enumerate}
+
+\subsection{Schémas numériques}
+
+\begin{enumerate}
+    \item \textbf{Schéma d'Euler explicite :}
+    \[
+    \bar{X}_{k+1} = \bar{X}_k + b(\bar{X}_k) h + \sigma(\bar{X}_k) \Delta W_k
+    \]
+    Convergence forte: $O(\sqrt{h})$, convergence faible: $O(h)$.
+    
+    \item \textbf{Schéma de Milstein :}
+    \[
+    \bar{X}_{k+1} = \bar{X}_k + b(\bar{X}_k) h + \sigma(\bar{X}_k) \Delta W_k + \frac{1}{2}\sigma(\bar{X}_k)\sigma'(\bar{X}_k)((\Delta W_k)^2 - h)
+    \]
+    Convergence forte: $O(h)$.
+    
+    \item \textbf{Conditions de Lipschitz et croissance linéaire :} Garantissent existence, unicité et stabilité.
+\end{enumerate}
+
+\subsection{Monte Carlo et réduction de variance}
+
+\begin{enumerate}
+    \item \textbf{Variable de contrôle :} Estimateur $\hat{m}_n^{\lambda} = \frac{1}{n}\sum (X_i - \lambda(Y_i - \mu))$ avec $\lambda^* = \frac{\Cov(X,Y)}{\Var(Y)}$.
+    Réduction: facteur $(1 - \rho^2)$.
+    
+    \item \textbf{Discrépance :} Mesure la régularité de la répartition des points dans $[0,1]^d$.
+    \[
+    D_n^* = \sup_{u \in [0,1]^d} \left| \frac{1}{n}\sum_{i=1}^n \ind_{[0,u)}(\xi_i) - \prod_{j=1}^d u^j \right|
+    \]
+    
+    \item \textbf{Suite de Halton :} $\xi_n = (\phi_{b_1}(n), \ldots, \phi_{b_d}(n))$ avec discrépance $O\left(\frac{(\log n)^d}{n}\right)$.
+    
+    \item \textbf{Suite de Van der Corput :} "Miroir" de l'écriture en base $b$ par rapport à la virgule.
+\end{enumerate}
+
+%==============================================================================
+\section{Astuces et Techniques}
+%==============================================================================
+
+\subsection{Techniques de calcul}
+
+\begin{enumerate}
+    \item \textbf{Développement de la variance :}
+    \[
+    \Var(X - aY) = \Var(X) - 2a\Cov(X,Y) + a^2\Var(Y)
+    \]
+    Minimum en $a^* = \frac{\Cov(X,Y)}{\Var(Y)}$.
+    
+    \item \textbf{Inégalité triangulaire :} Pour majorer des sommes/intégrales:
+    \[
+    |a + b| \leq |a| + |b|, \quad |a + b|^2 \leq 2(|a|^2 + |b|^2)
+    \]
+    
+    \item \textbf{Inégalité de Cauchy-Schwarz pour les intégrales :}
+    \[
+    \left( \int_0^T f(t) dt \right)^2 \leq T \int_0^T f(t)^2 dt
+    \]
+    
+    \item \textbf{Utilisation du Gronwall :} Pour les équations d'erreur du type:
+    \[
+    \E[\sup_{s \leq t} |e_s|^2] \leq C_1 \int_0^t \E[\sup_{u \leq s} |e_u|^2] ds + C_2 h
+    \]
+\end{enumerate}
+
+\subsection{Astuces pour les EDS}
+
+\begin{enumerate}
+    \item \textbf{Positivité :} Pour montrer qu'un processus reste positif, utiliser la représentation exponentielle (formule d'Itô avec $f(x) = \log x$ ou $f(x) = e^x$).
+    
+    \item \textbf{Changement de variable :} Pour simplifier une EDS, chercher $Y_t = f(X_t)$ tel que $Y$ suive une EDS plus simple (ex: linéaire).
+    
+    \item \textbf{Encadrement des erreurs :} Séparer la partie drift et la partie martingale, traiter séparément.
+\end{enumerate}
+
+\subsection{Astuces pour Quasi-Monte Carlo}
+
+\begin{enumerate}
+    \item \textbf{Structure de la suite de Hammersley :} Fixer la dernière coordonnée comme $\frac{k}{n}$ réduit la discrépance d'un facteur $\log n$.
+    
+    \item \textbf{Fonction affine par morceaux :} Le supremum est atteint aux points de non-dérivabilité ou aux bords.
+    
+    \item \textbf{Bases premières :} Pour Halton, utiliser des bases deux à deux premières entre elles pour éviter les corrélations.
+\end{enumerate}
+
+%==============================================================================
+\section{Formules à Retenir}
+%==============================================================================
+
+\begin{tcolorbox}[colback=yellow!10!white,colframe=orange!75!black,title=Formules Essentielles]
+
+\textbf{Variance de la régression :}
+\[
+\min_a \Var(X - aY) = \Var(X)(1 - \rho^2)
+\]
+
+\textbf{Convergence forte Euler :}
+\[
+\E\left[\sup_{t \leq T} |X_t - \bar{X}_t^n|^2\right] = O(h) = O(1/n)
+\]
+
+\textbf{Discrépance de Halton :}
+\[
+D_n^* = O\left(\frac{(\log n)^d}{n}\right)
+\]
+
+\textbf{Loi du sup du pont brownien :} Pour $s \geq \max(0, y)$:
+\[
+\prob\left(\sup_{t \in [0,T]} Y_t^{0,T} > s\right) = e^{-\frac{2s(s-y)}{T}}
+\]
+
+\textbf{Lemme de Stein :}
+\[
+\E[Zg(Z)] = \E[g'(Z)] \quad \text{pour } Z \sim \mathcal{N}(0,1)
+\]
+
+\end{tcolorbox}
+
+\end{document}

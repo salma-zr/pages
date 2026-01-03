@@ -1,0 +1,165 @@
+© Théo Jalabert
+
+SD
+
+AX AACAITE KW
+
+ed hA — n* |
+
+LA AL
+
+Exercise IT (One step Euler scheme) We consider à Stochastie Differential Equation
+(SDF)
+AXS = BOX? )dt + 0(X' MW, Xo=reR.
+
+where bo: R — R are two Lipschitz continmous functions with respective Lipsehitz ratios
+bip and lol And (W,)s0 is à standard Brownian motion defined on n probalility space
+(92,.4,P) We denote par (X {50 the unique (F ),s-adapted solution to the above SDE.
+
+he notations are those of the “polycopié”
+
+We denote by 7° > 0 à terminal time (or maturity). For every integer n > 1, we dchne
+step h = h, L We set lu (° L'kL=0. ...n
+
+mn nm
+
+La. Rocall the définitions of the three Euler schemes with step k = ZL: the discrete time
+
+nm
+nm
+
+the stepwise constant and the gennine (continuons) Enler schemes. denoted (NX, ja ons
+
+(X" hote and (X Loun respectivels
+1.b. Roecall the uniform LF-momnent control results for both the diffusion (X 2), 7 and the
+Euler above schemes in Uns setting (deterministe starting value). [No proof requested here.
+1.c. Static the L-convergence thcorems for the above three Euler schemes in au as svut het ic
+wav as possible,
+
+The result of 1.b. may be used without proof in what follows, but the aim of
+
+the problem being to investigate the strong and weak convergence performances
+of the Euler scheme on one step, 1.c. is definitely useless for that purpose
+
+2.a. Prove that. or everv € > 0.
+
+h
+
+E sup [X{ — X°'F < (ai + chlb pl! + (1 + 1/c)la Up) EIX" — rl°dt
+
+het<h U
+
+2.b. Deducce from what precedes (or by any other honest mean) that
+
+j 1/2
+
+EIX, — r|“di
+
+sup [X? - À]
+
+ O<r<hb
+
+= ({blue Vh + 2ja Lip)
+12
+
+Ja. Prove that there exists à real constant C5, > 0 only depending on b, à and T and
+related to à constant coming out in 1.b.. such that. for every £ > 0.
+
+sup [XT — x} |, € Ciar VU + |rl)
+
+ue € {
+
+3.b. Doeducce the existence of another real constant € "PA r >Û0 such that
+
+sup IX? — À, "| | <C ri + [rl)
+
+Le L: L
+
+What comment docs ts result inav suggest?
+
+4. Let Z = N(0:1) be a normally distnbuted random variable defined on (2,4, P). mde-
+
+pendeut of W (hence of (XE Leur). Let J : R — R be a bouvded Borel function (in all
+
+what follows)
+
+p! À le )
+
+> 0 the function { defined on the real line by
+
+(£ ry° de
+[re
+
+4. Show that for everv £
+
+is differentiable with a derivative given by
+
+L[/(r + VEZ)Z
+E 7
+
+an upper-bound of its Lipschitz ratio.
+and bounded. both
+
+fr)
+
+Deduce that {is Lipschitz continuous and sive
+
+5. We admit Fricdmans Theorem which says that fhis CT ait
+
+. , re , s
+with bounded existing derivatives and if morcover à is nniformly elliptie, that 1
+VrER. afr)>a>U,
+
+then. for every L > 0, the distribution of X7 adunits a density p,(1,y) satis{ving
+
+( {(” 2
+
+vo!
+
+1)
+
+(ru) SA
+
+{
+Tt'ul
+
+where # = 54 > 0 aud 5 = 104, > 0 denote positive real constants
+
+The above regularity and uniform ellipticity assumptions on b and à are in
+force until the end of the problem.
+
+5.a. Prove that. for cverv u € R.
+
+1 ., r
+JE JC + u) — EXO] < ZEN loupltl
+
+and deduce in turn that
+
+Ef(Xÿ) — EJ(Xÿ)] < nl flou 4) r
+
+5.b. Show that there exists an y = mr) > 0 such that
+EJ(X;" +u) E J,(x + u + hb(x))
+
+and denve that
+
+I Îlsup
+< =
+— Vhatlr) ve
+
+6.a. Deduce from questions 4, and 5. that there exists à real constant « st
+L#
+
+EJ.(X,")-E/(X;")
+
+C ha
+
++ ———
+
+h Ve
+
+6.b. Denive à (hrst) estinate of the one step weak error of the Euler scheme.
+
+EX - EX) < CE,
+
+COMMENT. Tluis error estimate can be significantly inproved to alinost reach
+
