@@ -1,0 +1,164 @@
+Probabilités numériques (G. Pagès, V. Lemaire)
+
+M2 Probabilités & Finance, Sorbonne Université-École Polytechnique
+M2 P.M.A., Sorbonne Université
+
+6 janvier 2022
+
+3 h, polycopié, notes de cours, livres, téléphones mobiles et montres connectées non autorisés
+
+Avertissement : La précision et la rigueur des arguments seront des éléments déterminants de l’évaluation
+de la copie.
+
+Exercice (Quasi-Monte Carlo : Hammersley revisité) Dans cet exercice on adopte la notation u =
+(u'.…,ud)€ Rd pour désigner les coordonnées d’un vecteur de u de Ré.
+
+das Soit (i,--
+part, n + 1 réelsositifs 4,
+
+un n-uplet à coodonnées-strictement croi es à valeurs dans [0, 1] d’une part et, d’autre
+...,@n êt b. On pose pour tout yE [0,1],
+
+1 n
+pu) = = D axltacu} — DU:
+=
+
+Montrer que’ y est càdlàg (w(y—) désignera la limite à gauche de y en ye]0,1]) et que
+
+sup |p(y)| [Lex lo(éx)] V 1p(éx—)| V Ip)!
+ye0,1] a er
+> 1 k 1 k—1 1 n
+= ex RD ur béx V =D ae bé V 15e 0
+=1 1 £—1
+
+W avec la convention } y = 0.
+
+1.b. Rappeler la définition de la discrépance à l’origine d’un n-uplet (£,2°6)e (0; 114)? (d > 1), que l'on
+
+\V4 notera D'(£1,...,ên) dans la suite, en accord avec le cours.
+2, On se donne maintenant un n-uplet (£1,-.-,ên) de ([0, 197 d > 2, tel que le n-uplet de ses d-ème
+coordonnées, noté (£4,.….,€d)€ [0,1], soit strictement croissant avec £d = 1.
+né,
+y 2.b. Montrer que la discrépance à l’origine de (é d) vérifie
+k k—1
+* (£d AN (RS (se Le
+DA (Ef,-- sn) = max Ék n M Ék n
+
+2.c. On considère le n-uplet (En) où & = (Et) E (0,141, k =1,...,n. Montrer (avec les
+notations vues en cours) que
+
+f.
+LV Di.
+
+At TE k À a li ÿ dt
+….ên) = EE, --rÉn) V Inax | sup = 32102160 — € LL | V 1 na Ale |:
+1 &=1. i=1
+
+(-a)En déduire que j
+4 #
+
+DE le D 0 (DiEL..60) + puce.)
+
+3.a. Rappeler la définition
+non asymptotique de sa discrépance à l'origine en fonction de n.
+
+3.b. Soit d > 2. Montrer l'existence d’une constante Ca > 0 telle que, pour tout entier n 1, il existe un
+n-uplet (6, .225ên) € ([0, 1]4)" tel que
+(logn)??
+
+D'(É1,:--;Ën) < Ca Fe
+
+uristique pour un choix performant de la d-ème coordonnée de ce n-uplet.
+
+(V4
+
+On proposera en outre une he
+
+[G)) Rappeler brièvement les principes
+pance à l'origine dans son analyse.
+
+de base d’un estimateur QuasiMonte Carlo et quel rôle y joue la discré-
+
+ne a ST Eye
+
+Exercice (Autour du pont de diffusion). On considère un processus de diffusion solution de EDS
+
+(EDS) = dX1 = b(X:)dt + o(X;)dWi, Xo = T0€ R, tE (0,71, (T > 0),
+
+où b,o : R _; R sont lipschitziennes et (W4):20 est un mouvement brownien standard
+probabilités (Q, 4, P). Le
+On rappelle que le pont brownien(Y, ” y, el0T] associé à un mouvement brownien standard B.— (Birejo 7]
+
+issu de 0 en t—0 et valant ye R en t=T est défini par
+
+=”
+
+B,T; 19
+= B=T(EBr 0)
+
+et que la loi de son supremum Sur (0, T] est donnée à travers sa fonction de répartition par
+
+ID :
+VzeR, P( sup Fo < 2) = { 120 #7 > max(y, 0)
+te[0,T] 0 si z < max(y, 0).
+
+1.a. Montrer par un argument de symétrie approprié que
+
+AUPDE e- F1) si z € min(y,0)
+or 1 si z > min(y,0).
+
+inf
+
+V vzeR, Pi
+
+V 1.b. En déduire pour tous %, yE€ R fixés et tout AE R', la fonction de répartition de
+=
+inf
+Q ; tef0,T]
+
+1.0) En déduire une méthode simple de simulation de cette variable aléatoire.
+
+t BT,
+2+ QU 2) + Fa
+
+2.a. On considère le schéma d’Euler continu (ou authentique) de la diffusion de pas T, noté (Xthrcjorp-
+:# Rappeler avec soin le résultat du cours sur la loi conditionnelle de (X4)sejo,r; sachant la tribu o({Xr, k =
+4 0,...,n}) et sa version régulière i.e. “sachant” {Xir = zx, k = 0,... no
+va 2.b. Proposer à partir de ce schéma d'Euler une méthode de calcul approché par simulation de Monte Carlo
+de E(f(Xr, inftejon Xt)) où: R?— Rest borélienne à croissance linéaire.
+7} (&© On suppose en outre que la fonction f est lipschitzienne. À quelle vitesse de convergence est-on assuré
+, que disparaîtra l’erreur due à la discrétisation en temps ATEDS ?
+
+\ 3.a. On souhaite calculer par simulation! de Monte Carlo du schéma d’Euler une quantité de type barrière
+
+basse (ou dounrand-out) E(9(X7)1{nfeum xe>23) Où BE (99,20) MAP
+
+fe
+
+nm
+> æ me
+E(g(Xr)L{infetor] 51) es E 9(Xr)L{minosren X2L} TE Le us To? (Xe ,)
+t=1 CE
+
+SR y
+N En déduire un algorithme de simulation de type Monte Carlo. |
+Xun=L) Xi —L ; Pa É
+1 — exp (Æ ag DA ) de la représentation AP peut-il
+
+dk ar de d'OS OV CRE
+ions 3.b. et 2.b. (une justification rigoureuse
+
+3h En quoi le terme produit [[;; (
+être considéré comme un terme correctif ?
+
+A 3.0 Comparer les variances des estimateurs obtenus aux quest
+\ st demandée).
+Problème : du flot du schéma d’Euler au modèle pseudo-CEV. On considère un processus de GÉREES
+solution de l'EDS | He |
+(EDS)=  dX=b(Xi)dt+ o(X:)dWe, te [b,T, (T >0)
+où b : Ré — Rd, o : R2 — Ma(d,q, R) sont li hitziennes, (W4)Lelo,T] est un mouvement brownien Standard
+so (, A, P) et % est un vecteur aléatoire également défini
+
+g-dimensionnel défini sut un espace de probabilit
+sur (0, A, P), indépendant de W.
+

@@ -1,0 +1,154 @@
+RE HOME NA,
+
+x SRE ‘ L£\1bls) hi! W2)
+
+x ST X
+
+Di
+
+exercise IT (One step Euler scheme) We co
+{SDE)
+
+AXE = DE )dt + o(XEMW Xo
+
+(9.4 P) We
+The
+
+We denote by T
+steph =, = L We set ti = 10 2 M
+
+s with
+) En
+
+La. Roc threc E
+
+stepwise «€
+
+WAV AS poss
+The result of 1.b. may be used without proof in what follows, but the aim of
+
+the problem being to investigate the strong and weak convergence performances
+of the Euler scheme on one step, 1.c. is definitely useless for that purpose
+
+2.a. we that, for ever € > 0
+
+E sup |X{
+
+t<h
+
+à
+_ x; P<( L+ cc) h + A(1 + 1/c)[a ) / EIXS = rf#dt
+
+2.b. Deduce from what preccdes (or by any other honest mean) that
+
+€ (blu Vh + 2oliin) (fe nn)
+
+uding on b, o and T and
+
+exists à real constant Car >
+
+a. Prove
+nning, out in 1.b.. such that. for every 4 > 0.
+
+related to
+
+< Car VU + |rl)
+
+that
+
+constant C7
+
++ of another re:
+
+3.b. Doduce the exist
+
+sup [AS —
+
+p1<h
+
+it à
+
+ally distnbuted r
+on). Ltf:R—Rbe
+
+sthis re
+
+QU
+Z = N{0:1) be a ne
+W° (hence of (A
+
+Ws )
+
+nv
+
+4.
+
+pe
+
+Her
+
+Deducs
+
+5. We
+with bi
+
+o(r)>e>û
+
+VrE
+
+of NZ adinits a dei
+
+h
+Ty <=
+Prey SZ
+
+dy
+
+ >04d e positive rl
+
+CR = ho > 0 à
+
+The above regularity and uniform ellipti
+force until the end of the problem.
+
+ue R.
+
+Ga. Prove that, for cv
+
+lEZCXE + u)-EJ(XA] <
+and deduce in turn that
+
+[EZ(X -E (x) < «7
+
+5.b. Show that there exists an 7 = mr) > 0 such that
+
+EJ(X,
+
+f+u)<E f(x +u + hh(r))
+
+and denve t
+
+HE M
+[EX -E (x; 1 eve
+
+on
+
+5. that there exists à real constant bal
+
+Ga. Deduce from questions 4.
+
+[EXO -ey
+
+of
+
+6.b. Derr
+COMMENT
+
+one step weak error of the e
+
+to almost reach Vh
+
+a (hist) est
+
+error cstimate can be significantly i
+
