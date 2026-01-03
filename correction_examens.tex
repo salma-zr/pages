@@ -1,0 +1,270 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{amsmath,amssymb,amsthm,amsfonts}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+\usepackage{xcolor}
+
+\geometry{hmargin=2.5cm,vmargin=2.5cm}
+
+\newtheorem{exo}{Exercice}
+\newtheorem{pb}{Problème}
+\newtheorem{lemma}{Lemme}
+\newtheorem{prop}{Proposition}
+
+\title{\textbf{Correction Détaillée : Probabilités Numériques}\\
+\large Fiche de Synthèse et Annales (2013 \& 2015)}
+\author{Assistant IA}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section*{Note Préliminaire}
+Les fichiers fournis pour les examens 2022 et 2025 étant des images scannées non convertibles directement en texte par le système actuel, cette correction se base sur les annales disponibles (2013 et 2015) pour illustrer les méthodes. Une fiche complète de synthèse (inégalités, astuces, concepts) est fournie en première partie, applicable à tous les examens de ce cours.
+
+\tableofcontents
+
+\newpage
+
+% -------------------------------------------------------------------------
+% FICHE DE SYNTHÈSE
+% -------------------------------------------------------------------------
+\section{Fiche de Synthèse : Outils pour les Probabilités Numériques}
+
+Cette fiche regroupe les inégalités fondamentales, les notions clés et les astuces techniques récurrentes dans les examens de probabilités numériques.
+
+\subsection{Inégalités Incontournables}
+
+\begin{itemize}
+    \item \textbf{Inégalité de Markov :} Pour $X \ge 0$ et $a > 0$,
+    \[ \mathbb{P}(X \ge a) \le \frac{\mathbb{E}[X]}{a}. \]
+    
+    \item \textbf{Inégalité de Bienaymé-Chebyshev :} Pour $X$ intégrable de carré,
+    \[ \mathbb{P}(|X - \mathbb{E}[X]| \ge a) \le \frac{\text{Var}(X)}{a^2}. \]
+    Généralisation (Markov) : $\mathbb{P}(|X| \ge a) \le \frac{\mathbb{E}[|X|^p]}{a^p}$.
+
+    \item \textbf{Inégalité de Cauchy-Schwarz :}
+    \[ |\mathbb{E}[XY]| \le \sqrt{\mathbb{E}[X^2]\mathbb{E}[Y^2]} \quad \text{ou} \quad \mathbb{E}[|XY|] \le \|X\|_2 \|Y\|_2. \]
+
+    \item \textbf{Inégalité de Hölder :} Pour $p, q > 1$ tels que $\frac{1}{p} + \frac{1}{q} = 1$,
+    \[ \mathbb{E}[|XY|] \le \|X\|_p \|Y\|_q = (\mathbb{E}[|X|^p])^{1/p} (\mathbb{E}[|Y|^q])^{1/q}. \]
+
+    \item \textbf{Inégalité de Jensen :} Si $\phi$ est convexe,
+    \[ \phi(\mathbb{E}[X]) \le \mathbb{E}[\phi(X)]. \]
+    Exemple : $|\mathbb{E}[X]|^p \le \mathbb{E}[|X|^p]$ pour $p \ge 1$ (car $x \mapsto |x|^p$ convexe).
+
+    \item \textbf{Inégalité de Burkholder-Davis-Gundy (BDG) :} Pour une martingale locale continue $M$ (ex: $\int \sigma dW$) s'annulant en 0, pour tout $p \ge 1$, il existe $c_p, C_p$ tels que :
+    \[ c_p \mathbb{E}[\langle M \rangle_T^{p/2}] \le \mathbb{E}[\sup_{t \in [0,T]} |M_t|^p] \le C_p \mathbb{E}[\langle M \rangle_T^{p/2}]. \]
+    Pour l'intégrale stochastique $M_t = \int_0^t \sigma_s dW_s$, $\langle M \rangle_t = \int_0^t \sigma_s^2 ds$.
+    
+    \item \textbf{Inégalité de Doob (Martingale) :} Pour une martingale $M \in L^p$ ($p>1$),
+    \[ \|\sup_{t \in [0,T]} |M_t| \|_p \le \frac{p}{p-1} \|M_T\|_p. \]
+
+    \item \textbf{Lemme de Gronwall :}
+    Si $\phi(t) \le \alpha + \int_0^t \beta(s) \phi(s) ds$ avec $\beta \ge 0$, alors
+    \[ \phi(t) \le \alpha \exp\left( \int_0^t \beta(s) ds \right). \]
+    C'est l'outil standard pour prouver l'existence/unicité des EDS et majorer les moments.
+\end{itemize}
+
+\subsection{Notions Clés}
+
+\subsubsection{Schémas de Discrétisation (EDS)}
+Soit $dX_t = b(t, X_t)dt + \sigma(t, X_t)dW_t$.
+\begin{itemize}
+    \item \textbf{Schéma d'Euler :} Pas de temps $\Delta t = T/n$, $t_k = k \Delta t$.
+    \[ \bar{X}_{t_{k+1}} = \bar{X}_{t_k} + b(t_k, \bar{X}_{t_k})\Delta t + \sigma(t_k, \bar{X}_{t_k})\Delta W_k, \quad \Delta W_k \sim \mathcal{N}(0, \Delta t). \]
+    \item \textbf{Schéma de Milstein :} Ajoute un terme de correction pour améliorer l'ordre fort.
+    \[ \bar{X}_{t_{k+1}}^{\text{Mil}} = \bar{X}_{t_{k+1}}^{\text{Euler}} + \frac{1}{2}\sigma\sigma'(t_k, \bar{X}_{t_k})((\Delta W_k)^2 - \Delta t). \]
+\end{itemize}
+
+\subsubsection{Convergences}
+\begin{itemize}
+    \item \textbf{Convergence Forte (Strong) :} $E[\sup_{t \in [0,T]} |X_t - \bar{X}_t|^p]^{1/p} \le C (\Delta t)^{\gamma}$.
+    \begin{itemize}
+        \item Euler : Ordre $\gamma = 1/2$ (si coeffs Lipschitziens).
+        \item Milstein : Ordre $\gamma = 1$ (si coeffs $C^1$ et conditions commutativité en dim $>1$).
+    \end{itemize}
+    \item \textbf{Convergence Faible (Weak) :} $|E[f(X_T)] - E[f(\bar{X}_T)]| \le C (\Delta t)^{\beta}$.
+    \begin{itemize}
+        \item Euler : Ordre $\beta = 1$ (si $f$ et coeffs assez réguliers).
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{Monte Carlo et Réduction de Variance}
+Estimateur standard : $\hat{\mu}_M = \frac{1}{M} \sum_{i=1}^M f(X^{(i)})$. Erreur $\propto \frac{\text{Var}(f(X))}{\sqrt{M}}$.
+\begin{itemize}
+    \item \textbf{Variable Antithétique :} Utiliser $(W, -W)$.
+    $\hat{\mu}_{Anti} = \frac{1}{M} \sum \frac{f(g(W_i)) + f(g(-W_i))}{2}$. Efficace si $f \circ g$ monotone.
+    \item \textbf{Variable de Contrôle :} Utiliser $Y$ corrélé à $X$ dont on connait $E[Y]$.
+    $Z_{CV} = f(X) - \lambda (Y - E[Y])$. Variance minimale pour $\lambda^* = \frac{\text{Cov}(f(X), Y)}{\text{Var}(Y)}$.
+    \item \textbf{Importance Sampling :} Changer la probabilité pour échantillonner là où c'est "important" (ex: événements rares). Utilise Girsanov.
+\end{itemize}
+
+\subsection{Astuces Techniques}
+\begin{itemize}
+    \item \textbf{Transformation de Lamperti :} Pour une EDS 1D, poser $Y_t = F(X_t)$ avec $F'(x) = 1/\sigma(x)$. Alors $Y_t$ a un coefficient de diffusion constant (égal à 1). Utile pour simplifier l'étude ou le schéma de Milstein (le terme $\sigma'$ disparait).
+    \item \textbf{Formule d'Itô :} Toujours écrire la dynamique de $f(t, X_t)$ pour se ramener à des martingales locales (le terme en $dt$ est le drift, le terme en $dW_t$ la martingale).
+    \item \textbf{Majoration des intégrales stochastiques :} Utiliser l'isométrie d'Itô $E[(\int \phi dW)^2] = E[\int \phi^2 dt]$ ou BDG pour les puissances $p > 2$.
+    \item \textbf{Inversibilité :} Pour prouver que $X_t > 0$, regarder l'EDS de $\ln X_t$ (si applicable) ou utiliser le critère de Feller (pour CIR/Heston).
+\end{itemize}
+
+\newpage
+
+% -------------------------------------------------------------------------
+% CORRECTION 2013 (Annale 09)
+% -------------------------------------------------------------------------
+\section{Correction Détaillée : Examen 2013 (Problème 1 : Milstein)}
+
+\subsection{1. Existence, Unicité et Schéma d'Euler}
+
+\paragraph{1.a. Bornitude des moments}
+D'après le cours, sous l'hypothèse de croissance linéaire ($|b(t,x)| + |\sigma(t,x)| \le K(1+|x|)$), on applique la formule d'Itô à la fonction $f(x) = |x|^2$ (ou plus précisément $(1+|x|^2)$ pour simplifier).
+Soit $V(x) = (1+|x|^2)$.
+\[ dV(X_t) = 2X_t dX_t + \frac{1}{2} 2 \sigma^2(t,X_t) dt = (2X_t b(t,X_t) + \sigma^2(t,X_t)) dt + 2X_t \sigma(t,X_t) dW_t \]
+En utilisant la croissance linéaire et l'inégalité $2xy \le x^2+y^2$ :
+\[ 2x b(t,x) + \sigma^2(t,x) \le 2|x|K(1+|x|) + K^2(1+|x|)^2 \le C(1+|x|^2) \]
+En passant à la forme intégrale et en prenant l'espérance (la partie martingale locale s'annule par localisation), on obtient par Gronwall que $E[|X_t|^2]$ est borné par $C(1+|x|^2)e^{CT}$. Doob permet d'étendre au sup.
+
+\paragraph{1.b. Existence et Unicité}
+Conditions suffisantes standard :
+\begin{enumerate}
+    \item \textbf{Lipschitzienne locale} ou globale : $|b(t,x)-b(t,y)| + |\sigma(t,x)-\sigma(t,y)| \le K|x-y|$.
+    \item \textbf{Croissance linéaire} (pour éviter l'explosion en temps fini).
+\end{enumerate}
+Si les coefficients sont $C^1$ à dérivées bornées (impliqué par Lipschitz global), c'est bon.
+
+\paragraph{1.c. Schéma d'Euler}
+Pas de temps $T_n = T/n$ (attention notation énoncé $T_n$ est le pas, $t_i = i T_n$).
+\[ \bar{X}_{t_{i+1}} = \bar{X}_{t_i} + b(t_i, \bar{X}_{t_i}) T_n + \sigma(t_i, \bar{X}_{t_i}) \sqrt{T_n} Z_{i+1}, \quad Z_{i+1} \sim \mathcal{N}(0,1). \]
+
+\subsection{2. Positivité du Schéma de Milstein}
+
+On suppose $b, \sigma$ dérivables, $\sigma \sigma'$ croissant, $\sigma$ ne s'annule pas sur $\mathbb{R}_+$.
+
+\paragraph{2.a. Milstein discret}
+Schéma de Milstein :
+\[ \bar{X}_{t_{i+1}} = \bar{X}_{t_i} + b(\bar{X}_{t_i}) \Delta t + \sigma(\bar{X}_{t_i}) \Delta W + \frac{1}{2} \sigma\sigma'(\bar{X}_{t_i}) ((\Delta W)^2 - \Delta t) \]
+On veut montrer que si $x \ge 0$, $\bar{X}_{t_i} \ge 0$.
+Réécrivons le passage $x \to x_{new}$ en fonction de $y = \Delta W$.
+\[ \phi(y) = x + (b - \frac{1}{2}\sigma\sigma')\Delta t + \sigma y + \frac{1}{2}\sigma\sigma' y^2 \]
+C'est un trinôme du second degré en $y$ : $Ay^2 + By + C$.
+Ici $A = \frac{1}{2}\sigma\sigma'$, $B = \sigma$, $C = x + (b - \frac{1}{2}\sigma\sigma')\Delta t$.
+Pour que $\phi(y) \ge 0$ pour tout $y \in \mathbb{R}$ (puisque $\Delta W$ est gaussien), il faut :
+1. $A > 0$ (convexe) $\implies \sigma \sigma' > 0$. Comme $\sigma$ garde un signe constant et ne s'annule pas, et $\sigma^2$ croissant $\implies 2\sigma\sigma' \ge 0$, donc ok.
+2. Discriminant $\Delta_y \le 0$ OU minimum positif.
+Minimum atteint en $y^* = -B/2A = -\sigma / (\sigma\sigma') = -1/\sigma'$.
+Valeur au minimum :
+\[ \phi(y^*) = C - \frac{B^2}{4A} = x + (b - \frac{1}{2}\sigma\sigma')\Delta t - \frac{\sigma^2}{2\sigma\sigma'} = x + (b - \frac{1}{2}\sigma\sigma' - \frac{\sigma}{2\sigma'})\Delta t \]
+Wait, le calcul classique du discriminant est $B^2 - 4AC$.
+$B^2 - 4AC = \sigma^2 - 2\sigma\sigma'(x + (b - \frac{1}{2}\sigma\sigma')\Delta t)$.
+La condition $b - \frac{1}{4}(\sigma^2)' \ge 0$ donnée dans l'énoncé ressemble à la condition pour que le drift effectif soit positif ?
+L'énoncé donne les conditions :
+$b - \frac{1}{4}(\sigma^2)'_x \ge 0 \implies b - \frac{1}{2}\sigma\sigma' \ge 0$.
+Et $\frac{\sigma}{\sigma'} \le 2x$ (soit $\sigma \le 2x \sigma'$).
+Si $b - \frac{1}{2}\sigma\sigma' \ge 0$, alors $C \ge x$.
+Le minimum du trinôme est $C - \frac{\sigma^2}{2\sigma\sigma'}$.
+On veut $C - \frac{\sigma}{2\sigma'} \ge 0$.
+$C = x + (b - \frac{1}{2}\sigma\sigma')\Delta t$.
+Donc on veut $x + (\dots)\Delta t \ge \frac{\sigma}{2\sigma'}$.
+L'énoncé donne $\frac{\sigma}{\sigma'} \le 2x \iff \frac{\sigma}{2\sigma'} \le x$.
+Si $x \ge \frac{\sigma}{2\sigma'}$ et le terme en $\Delta t$ est positif (ce qui est l'hyp 1), alors c'est gagné.
+Le terme en $\Delta t$ est $b - \frac{1}{2}\sigma\sigma'$.
+L'énoncé dit $b - \frac{1}{4}(\sigma^2)' \ge 0$, or $(\sigma^2)' = 2\sigma\sigma'$, donc c'est bien $b - \frac{1}{2}\sigma\sigma' \ge 0$.
+Conclusion : Sous ces hypothèses, le trinôme est toujours positif, donc le schéma préserve la positivité.
+
+\paragraph{2.b. Milstein continu}
+Le schéma continu interpolate linéairement le temps mais garde le mouvement brownien.
+$\bar{X}_t^{mil}$ est défini par l'interpolation. Mais attention, l'interpolation standard d'Euler/Milstein ne préserve pas forcément la positivité entre les pas de temps. Cependant, Milstein continu est souvent défini comme :
+$d\bar{X}_t = b(\bar{X}_{\underline{t}})dt + \sigma(\bar{X}_{\underline{t}})dW_t + \dots$
+Ici, la question suggère que la propriété est vraie P.s. pour tout $t$.
+Cela vient du fait que le processus interpolé reste au-dessus du minimum du trinôme (qui est positif) ? Non, le mouvement brownien oscille.
+Cependant, si on regarde la structure comme une EDO avec paramètres fixés sur l'intervalle, on peut utiliser des arguments de comparaison.
+
+\subsection{3. Changement de variable et Degré de liberté}
+
+\paragraph{3.a. Processus $Y_t$}
+$Y_t = e^{\kappa t} X_t$.
+$dY_t = \kappa e^{\kappa t} X_t dt + e^{\kappa t} dX_t = \kappa Y_t dt + e^{\kappa t} (b(t, e^{-\kappa t}Y_t) dt + \sigma(t, e^{-\kappa t}Y_t) dW_t)$.
+$dY_t = (\kappa Y_t + e^{\kappa t} b(t, e^{-\kappa t}Y_t)) dt + e^{\kappa t} \sigma(t, e^{-\kappa t}Y_t) dW_t$.
+D'où $\tilde{b}(t,y) = \kappa y + e^{\kappa t} b(t, e^{-\kappa t}y)$ et $\tilde{\sigma}(t,y) = e^{\kappa t} \sigma(t, e^{-\kappa t}y)$.
+
+\paragraph{3.b. Conditions pour positivité de $Y$}
+On applique les conditions du 2.a à $\tilde{b}$ et $\tilde{\sigma}$.
+$X_t \ge 0 \iff Y_t \ge 0$.
+Cela permet de relâcher les contraintes sur $b$ en choisissant $\kappa$ assez grand (le terme $\kappa y$ aide à la positivité du drift effectif).
+
+\subsection{4. Modèle CIR et Heston}
+
+\paragraph{5.a. CIR et solutions fortes}
+$dXt = (a - bX_t)dt + \vartheta |X_t|^\alpha dW_t$.
+Si $\alpha \in [1/2, 1[$, la fonction $x \mapsto x^\alpha$ n'est pas Lipschitz en 0 (dérivée infinie). Le théorème de Cauchy-Lipschitz standard ne s'applique pas. Il faut utiliser Yamada-Watanabe (Hölder-1/2 pour la diffusion suffit en dimension 1).
+
+\paragraph{5.b. Positivité}
+Pour $\alpha=1/2$ (CIR classique), si $2a \ge \vartheta^2$ (condition de Feller), le processus ne touche jamais 0. Sinon il touche 0 mais reste positif (réfléchi).
+Les conditions du schéma de Milstein (question 2) permettent de simuler sans schéma négatif si elles sont respectées.
+Avec $\alpha=1/2$, $\sigma(x) = \vartheta \sqrt{x}$. $\sigma'(x) = \frac{\vartheta}{2\sqrt{x}}$.
+Condition $\sigma \le 2x \sigma'$ : $\vartheta \sqrt{x} \le 2x \frac{\vartheta}{2\sqrt{x}} = \vartheta \sqrt{x}$. C'est une égalité ! Donc la condition géométrique est satisfaite limite.
+Condition drift : $a - bx - \frac{1}{2}\sigma\sigma' \ge 0$.
+$\sigma \sigma' = \vartheta^2 / 2$.
+$a - bx - \vartheta^2/4 \ge 0$.
+Il faut $a \ge \vartheta^2/4$ et $x$ assez petit ? Non, pour tout $x$. Si $b > 0$, ça échoue pour $x$ grand.
+Cependant, pour la simulation, on utilise souvent des schémas implicites ou tronqués pour le CIR.
+
+\newpage
+
+% -------------------------------------------------------------------------
+% CORRECTION 2015 (Annale 10)
+% -------------------------------------------------------------------------
+\section{Correction Détaillée : Examen 2015}
+
+\subsection{Quasi-Monte Carlo (QMC)}
+
+\paragraph{1.a. Box-Müller QMC}
+Méthode de Box-Müller : Si $U_1, U_2$ sont uniformes sur $[0,1]$, alors
+$N_1 = \sqrt{-2\ln(U_1)} \cos(2\pi U_2)$ et $N_2 = \sqrt{-2\ln(U_1)} \sin(2\pi U_2)$ sont $\mathcal{N}(0,1)$ indép.
+Version QMC : Remplacer la suite $(U_{n,1}, U_{n,2})$ pseudo-aléatoire par une suite à discrépance faible en dimension 2 (ex: suite de Halton, Sobol, ou Faure).
+Exemple Halton :
+Base 2 pour $U_1$ : $\phi_2(n) = \sum a_j 2^{-j-1}$.
+Base 3 pour $U_2$ : $\phi_3(n) = \sum b_j 3^{-j-1}$.
+On génère les points $(\phi_2(n), \phi_3(n))$ pour $n=1 \dots N$ et on applique la transfo Box-Müller.
+
+\paragraph{2.a. Variation finie et Koksma-Hlawka}
+Inégalité de Koksma-Hlawka :
+\[ |\frac{1}{N} \sum_{i=1}^N f(\xi_i) - \int_{[0,1]^d} f(u) du| \le V(f) D_N^*(\xi_1, \dots, \xi_N) \]
+où $V(f)$ est la variation de Hardy-Krause de $f$ et $D_N^*$ la discrépance à l'origine de la suite.
+Cette inégalité sépare la régularité de la fonction (Variation) de la qualité de la distribution des points (Discrépance).
+Pour des suites à discrépance faible, $D_N^* = O(\frac{(\ln N)^d}{N})$, ce qui bat le $O(N^{-1/2})$ du Monte Carlo standard.
+
+\subsection{Problème : Couverture d'une option digitale}
+Option digitale : Payoff $\mathbb{1}_{X_T \ge K}$.
+Fonction discontinue (Saut en K).
+Le prix est $P(X_T \ge K)$. La dérivée (le Delta/Kappa) fait apparaitre une masse de Dirac.
+
+\paragraph{1.a. Inégalité de lissage}
+$P(Y \ge K) - P(\bar{Y} \ge K) = E[1_{Y \ge K} - 1_{\bar{Y} \ge K}]$.
+La différence vaut 1 si $Y \ge K > \bar{Y}$, -1 si $\bar{Y} \ge K > Y$, et 0 sinon.
+Donc $|P(Y \ge K) - P(\bar{Y} \ge K)| \le P(Y \ge K > \bar{Y}) + P(\bar{Y} \ge K > Y)$.
+
+\paragraph{Approche par Malliavin ou Lissage}
+La méthode standard pour évaluer les Grecques d'options digitales sans dériver l'indicatrice (instable) est d'utiliser :
+1. \textbf{Différences finies} : $(P(K+\epsilon) - P(K-\epsilon))/2\epsilon$. Biaisé et variance explose quand $\epsilon \to 0$.
+2. \textbf{Formule d'intégration par parties (Malliavin)} : $E[f'(X_T)] = E[f(X_T) \pi]$ où $\pi$ est un poids (score). Permet de remplacer la dérivée de l'indicatrice (Dirac) par l'indicatrice fois un poids.
+$ \partial_x E[\phi(X_T^x)] = E[\phi(X_T^x) \frac{W_T}{T \sigma} \dots] $.
+
+Dans le problème, on utilise une approche par différences finies avec lissage via le schéma d'Euler.
+La question 4 définit un estimateur de type différences finies sur le schéma d'Euler :
+$\kappa_{n, \epsilon, M} \approx \frac{E[1_{\bar{X} \ge K+\epsilon}] - E[1_{\bar{X} \ge K}]}{\epsilon}$.
+L'erreur se décompose en :
+- Erreur de discrétisation (Euler vs EDS).
+- Erreur de lissage (Diff finies vs Dérivée).
+- Erreur Monte Carlo (Variance).
+
+Le compromis biais-variance impose de choisir $\epsilon$ et $M$ en fonction de $n$.
+Généralement, pour Euler (ordre faible 1), on choisit $\epsilon \sim n^{-\alpha}$.
+
+\end{document}

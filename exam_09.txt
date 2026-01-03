@@ -1,0 +1,243 @@
+Probabilités numériques (G. Pagès, V. Lemaire)
+M2 Probabilités & Finance, UPMC-École Polytechnique
+10 janvier 2013
+3 h, polycopié, notes de cours, livres et téléphones mobiles non autorisés
+Problème 1 (Autour du schéma de Milstein) On considère une équation de diffusion
+(EDS) ≡ dXt = b(t, Xt )dt + σ(t, Xt )dWt
+où b et σ sont des fonctions continues sur [0, T ] × R, à croissance linéaire en x uniformément
+en t et où W = (Wt )t∈[0,T ] est un mouvement brownien standard.
+1.a. Justifier en vous appuyant sur un théorème du cours l’existence d’une constante Cb,σ,T ∈
+]0, +∞[ telle que, toute solution forte d’(EDS) issue de x ∈ R, notée (Xtx )t∈[0,T ] vérifie
+E sup |Xtx |2 ≤ Cb,σ,T (1 + |x|2 ).
+t∈[0,T ]
+
+1.b. Donner des conditions suffisantes pour l’existence et l’unicité d’une solution forte à
+(EDS), issue de x ∈ R.
+1.c. Expliciter le schéma d’Euler à temps discret de pas Tn (n ≥ 1) associé à cette équation
+de diffusion brownienne (on notera comme c’est l’usage tni = iTn , i = 0, . . . , n les instants de
+discrétisation et (X̄tni )0≤i≤n le dit schéma d’Euler à ces instants).
+Dans toute la suite on suppose que b(t, .) et σ(t, .) sont dérivables en x sur R
+pour tout t ∈ [0, T ], que σ 2 (t, .) est une fonction croissante en x (à t fixé) et que σ
+ne s’annule pas sur [0, T ] × R+ (et est donc de signe constant).
+2.a. Montrer que si x ≥ 0 et
+1
+∀ t ∈ [0, T ], ∀ ξ ∈ R+ , b(t, ξ) − (σ 2 )0x (t, ξ) ≥ 0
+4
+
+et
+
+σ
+(t, ξ) ≤ 2ξ
+σx0
+
+alors, le schéma de Milstein constant par morceaux issu de x vérifie pour tout i ∈ {0, . . . , n},
+e mil
+e mil ≥ 0, t ∈ [0, T ]) [Indication : on pourra procéder par
+X
+≥ 0 où tni = iTn (et donc X
+tn
+t
+i
+récurrence sur i].
+2.b. Montrer que sous les mêmes hypothèses, le schéma de Milstein continu vérifie également:
+P-p.s. X̄tmil ≥ 0, t ∈ [0, T ].
+3. Soit κ ∈ R. Pour tout t ∈ [0, T ], on pose
+Yt = eκt Xtx .
+3.a. Montrer que le processus (Yt )t∈[0,T ] est solution d’une équation différentielle stochastique
+dYt = eb(t, Yt )dt + σ
+e(t, Yt )dWt ,
+où l’on exprimera eb et σ
+e en fonction de b, σ et de la constante κ.
+1
+
+3.b. En déduire à partir des questions 2.a et 2.b des conditions sur b est σ assurant que
+le schéma de Misltein continu de (Yt )t∈[0,T ] issu de x ≥ 0 reste positif [Indication: l’idée est
+d’introduire un degré de liberté avec le paramètre κ].
+4.a. Donner des conditions suffisantes sur b et σ assurant la convergence des schémas de
+Milstein de (Yt ) vers la diffusion dans les espaces Lp (P), p ∈ [1, +∞).
+4.b. En déduire un critère sur b est σ assurant que la solution d’(EDS) reste positive sur
+[0, T ] lorsque X0 = x ≥ 0.
+Dans la suite on admettra qu’il suffit que les fonctions b et σ soient continues et
+à croissance linéaire en x uniformément en t ∈ [0, T ] et que (EDS) ait une unique
+solution forte issue de tout x ∈ R pour que le schéma de Milstein continu (issu
+L
+de x converge en loi vers la solution X x d’(EDS) au sens: ∀ t ∈ [0, T ], X̄tmil −→ Xtx
+lorsque n → ∞.
+5. On considère pour tout α ∈ [ 21 , 1] et tous a ∈ R∗+ , b ∈ R, ϑ ∈ R∗+ , l’équation différentielle
+stochastique
+(CIR)α ≡ dXt = (a − bXt )dt + ϑ|Xt |α dWt , X0 = x ∈ R+ .
+dont on admettra qu’elle a une unique solution forte issue de tout x ≥ 0. Lorsque α = 12 , il
+s’agit du modèle (CIR) classique.
+5.a. Dans quels cas les théorèmes généraux standard ne permetttent pas de justifier directement l’existence de cette unique solution forte issue de x ∈ R+ ?
+5.b. Discuter à l’aide de ce qui précède, et selon les valeurs de α, a, b et ϑ, la positivité de
+la solution (Xtx )t∈[0,T ] .
+6. On considère un processus d’Ornstein-Uhlenbeck de paramètre λ ∈ R et σ > 0 solution
+de l’équation
+dZt = −λZt dt + σdWt , Z0 = z ∈ R, t ∈ [0, T ].
+6.a. Montrer que le processus (Zt2 )t∈[0,T ] vérifie une équation de type (CIR) dont on précisera
+les paramètres α, a, b et ϑ en fonction de λ et σ.
+6.b. Expliciter le schéma d’Euler de pas Tn , noté (Z̄tn )t∈[0,T ] , associé à l’équation d’OrnsteinUhlenbeck.
+6.c. Montrer par une méthode votre choix que
+sup k|ZT | + |Z̄Tn |k2 < +∞.
+n
+
+6.d. En déduire un schéma de discrétisation du modèle (CIR) lorsque a = ϑ2 /4 pour
+laquelle on peut établir à partir des résultats du cours une erreur de discrétisation en temps
+e mil .
+de l’ordre de n1 “le long” des fonctions lipschitziennes f : R+ → R pour XT et X
+T
+6.e. Comment simuler de façon exacte un (CIR) dans le cas a = ϑ2 /4 ?
+On introduit maintenant le modèle de Heston suivant:
+(
+p
+
+√
+dSt = rSt dt + vt St ρdWt + 1 − ρ2 dBt ,
+√
+dvt = (a − bvt )dt + σ vt dWt , v0 > 0,
+
+2
+
+S0 > 0
+
+avec ρ ∈ [−1, 1], a > 0, b > 0, σ > 0 et r ∈ R. On suppose de plus σ 2 < 2a.
+7.a. Que représente le paramètre ρ ?
+7.b.
+borélienne à croissance polynomiale de payoff classique et PBS (x, r, s) =
+ Soit ϕ une fonction 
+s2
+
+E e−rT ϕ xe(r− 2 )T +sBT
+
+le prix dans un modèle de Black-Scholes de valeur initiale x > 0,
+
+de taux r et de volatilité constante s. On note FtW = σ(Ws , 0 ≤ s ≤ t, NP ) la tribu
+(complétée) de W en T . Montrer qu’il existe une variable aléatoire FT -mesurable Ξ telle que
+
+
+s
+Z T
+2
+
+1−ρ
+E e−rT ϕ(ST )|FT = PBS Ξ, r,
+vt dt .
+T
+0
+7.c. En déduire unestimateur de Monte Carlo (a priori plus efficace que l’estimateur naı̈f)
+pour le calcul de E e−rT ϕ(ST ) .
+Numériquement, quelle propriété doit vérifier ϕ pour que cette méthode soit réellement
+implémentable ?
+8. Sous quelles conditions peut-on mettre en œuvre un schéma de Milstein pour le couple
+(St , vt ) garantissant la positivité de (vt )t∈[0,T ] .
+Problème 2 (Autour du pont de diffusion). On considère un processus de diffusion
+solution de l’EDS
+(EDS) ≡ dXt = b(Xt )dt + σ(Xt )dWt , X0x = x0 ∈ R, t ∈ [0, T ], T > 0,
+où b, σ : R → R sont lipschitziennes et (Wt )t≥0 est un mouvement brownien standard défini
+sur un espace de probabilités (Ω, A, P).
+On rappelle que le pont brownien(YtB,T,y )t∈[0,T ] associé à un mouvement brownien standard B = (Bt )t∈[0,T ] issu de 0 en t = 0 et valant y ∈ R en t = T est défini par
+YtB,T,y = Bt −
+
+t
+(BT − y)
+T
+
+et que la loi de son supremum sur [0, T ] est donnée à travers sa fonction de répartition par
+2
+
+ 
+1 − e− T z(z−y) si z ≥ max(y, 0)
+B,T,y
+∀ z ∈ R, P sup Yt
+≤z =
+0
+si z ≤ max(y, 0).
+t∈[0,T ]
+1.a. Montrer par un argument de symétrie approprié que
+
+  − T2 z(z−y)
+e
+B,T,y
+∀ z ∈ R, P inf Yt
+≤z =
+1
+t∈[0,T ]
+
+si z ≤ min(y, 0)
+si z ≥ min(y, 0).
+
+1.b. En déduire pour tous x, y ∈ R fixés et tout λ ∈ R∗+ , la fonction de répartition de
+inf
+t∈[0,T ]
+
+
+
+x+
+
+
+t
+(y − x) + λYtB,T,0 .
+T
+
+1.c. En déduire une méthode simple de simulation de cette variable aléatoire.
+3
+
+2.a. On considère le schéma d’Euler continu (ou authentique) de la diffusion de pas Tn , noté
+(X̄t )t∈[0,T ]) . Rappeler avec soin le résultat du cours sur la loi conditionnelle de (X̄t )t∈[0,T ]
+sachant la tribu σ({X̄tnk , k = 0, . . . , n}) et sa version “régulière” i.e. sachant {X̄tnk = xk , k =
+0, . . . , n}.
+2.b. Proposer à partir de ce schéma d’Euler
+de calcul approché par simulation
+ une méthode
+2
+de Monte Carlo de E f (XT , inf t∈[0,T ] Xt ) où f : R → R est borélienne à croissance linéaire.
+2.c. On suppose en outre que la fonction f est lipschitzienne. À quelle vitesse de convergence
+est-on assuré que disparaı̂tra l’erreur due à la discrétisation en temps d’(EDS) ?
+3.a. On souhaite calculer par simulation de Monte
+Carlo du schéma d’Euler une quantité
+
+de type barrière basse E g(XT )1{inf t∈[0,T ] Xt ≥L} où L ∈ (−∞, x0 ). Montrer que
+
+
+E g(X̄T )1{inf t∈[0,T ] X̄t ≥L} = E g(X̄T )1{min0≤k≤n X̄tn ≥L}
+k
+
+n 
+Y
+
+−
+
+1−e
+
+2n(X̄tn −L)(X̄tn −L)
+i
+i−1
+T σ 2 (X̄tn )
+i−1
+
+
+
+
+.
+
+i=1
+
+En déduire un algorithme de simulation de Monte Carlo.
+−
+
+2n(X̄tn −L)(X̄tn −L)
+i−1
+i
+T σ 2 (X̄tn )
+i−1
+
+
+de la représentation précédente
+3.b. En quoi le terme produit i=1 1 − e
+peut-il être considéré comme un terme correctif ?
+3.c. Comparer les variances des estimateurs obtenus aux questions 3.b. et 2.b.
+Qn 
+
+4
+
+
