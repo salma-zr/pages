@@ -1,0 +1,628 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+\usepackage{amsmath,amsfonts,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+\geometry{margin=2.5cm}
+
+\title{Correction Détaillée des Examens de Probabilités Numériques\\
+\large Années 2022 et 2025}
+\author{}
+\date{}
+
+\newtheorem{theorem}{Théorème}[section]
+\newtheorem{lemma}{Lemme}[section]
+\newtheorem{proposition}{Proposition}[section]
+\newtheorem{corollary}{Corollaire}[section]
+\newtheorem{definition}{Définition}[section]
+\newtheorem{remark}{Remarque}[section]
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\newpage
+
+\section{Examen 2022 - Correction Détaillée}
+
+\subsection{Question 1 : Méthodes de Monte Carlo}
+
+\subsubsection{Énoncé}
+On souhaite estimer $I = \int_0^1 f(x) dx$ où $f$ est une fonction continue sur $[0,1]$.
+
+\subsubsection{Correction détaillée}
+
+\textbf{Partie A : Méthode de Monte Carlo classique}
+
+\textbf{Étape 1 : Principe de la méthode}
+
+La méthode de Monte Carlo classique consiste à :
+\begin{enumerate}
+    \item Générer $n$ variables aléatoires $U_1, U_2, \ldots, U_n$ indépendantes et uniformément distribuées sur $[0,1]$
+    \item Calculer l'estimateur :
+    \[
+    \hat{I}_n = \frac{1}{n} \sum_{i=1}^n f(U_i)
+    \]
+\end{enumerate}
+
+\textbf{Étape 2 : Propriétés de l'estimateur}
+
+Par la loi des grands nombres, on a :
+\[
+\hat{I}_n \xrightarrow[n \to \infty]{\text{p.s.}} \mathbb{E}[f(U_1)] = \int_0^1 f(x) dx = I
+\]
+
+\textbf{Étape 3 : Variance de l'estimateur}
+
+Calculons la variance :
+\begin{align*}
+    \text{Var}(\hat{I}_n) &= \text{Var}\left(\frac{1}{n} \sum_{i=1}^n f(U_i)\right) \\
+    &= \frac{1}{n^2} \sum_{i=1}^n \text{Var}(f(U_i)) \quad \text{(indépendance)} \\
+    &= \frac{1}{n^2} \cdot n \cdot \text{Var}(f(U_1)) \\
+    &= \frac{\sigma^2}{n}
+\end{align*}
+où $\sigma^2 = \text{Var}(f(U_1)) = \int_0^1 f^2(x) dx - I^2$.
+
+\textbf{Étape 4 : Intervalle de confiance}
+
+Par le théorème central limite, pour $n$ grand :
+\[
+\frac{\hat{I}_n - I}{\sigma/\sqrt{n}} \xrightarrow[n \to \infty]{\mathcal{L}} \mathcal{N}(0,1)
+\]
+
+Donc un intervalle de confiance asymptotique au niveau $1-\alpha$ est :
+\[
+\hat{I}_n \pm z_{1-\alpha/2} \frac{\hat{\sigma}_n}{\sqrt{n}}
+\]
+où $\hat{\sigma}_n^2 = \frac{1}{n-1} \sum_{i=1}^n (f(U_i) - \hat{I}_n)^2$ est l'estimateur de la variance.
+
+\textbf{Partie B : Méthode d'échantillonnage préférentiel}
+
+\textbf{Étape 1 : Principe}
+
+On choisit une densité de probabilité $g$ sur $[0,1]$ telle que $g(x) > 0$ pour tout $x \in [0,1]$ où $f(x) \neq 0$.
+
+On réécrit l'intégrale :
+\[
+I = \int_0^1 f(x) dx = \int_0^1 \frac{f(x)}{g(x)} g(x) dx = \mathbb{E}_g\left[\frac{f(X)}{g(X)}\right]
+\]
+où $X \sim g$.
+
+\textbf{Étape 2 : Nouvel estimateur}
+
+On génère $X_1, \ldots, X_n \sim g$ indépendantes et on calcule :
+\[
+\hat{I}_n^{IS} = \frac{1}{n} \sum_{i=1}^n \frac{f(X_i)}{g(X_i)}
+\]
+
+\textbf{Étape 3 : Variance optimale}
+
+La variance de cet estimateur est :
+\[
+\text{Var}_g(\hat{I}_n^{IS}) = \frac{1}{n} \left( \int_0^1 \frac{f^2(x)}{g(x)} dx - I^2 \right)
+\]
+
+Pour minimiser cette variance, on choisit :
+\[
+g^*(x) = \frac{|f(x)|}{\int_0^1 |f(t)| dt}
+\]
+
+\textbf{Étape 4 : Comparaison}
+
+La méthode d'échantillonnage préférentiel réduit la variance si :
+\[
+\int_0^1 \frac{f^2(x)}{g(x)} dx < \int_0^1 f^2(x) dx
+\]
+
+\subsection{Question 2 : Convergence et théorèmes limites}
+
+\subsubsection{Énoncé}
+Soit $(X_n)_{n \geq 1}$ une suite de variables aléatoires. Étudier la convergence de $S_n = \frac{1}{n} \sum_{i=1}^n X_i$.
+
+\subsubsection{Correction détaillée}
+
+\textbf{Partie A : Loi des grands nombres}
+
+\textbf{Étape 1 : Loi faible des grands nombres}
+
+Si $(X_n)$ sont i.i.d. avec $\mathbb{E}[X_1] = \mu$ et $\text{Var}(X_1) = \sigma^2 < \infty$, alors :
+\[
+S_n \xrightarrow[n \to \infty]{\mathbb{P}} \mu
+\]
+
+\textbf{Démonstration détaillée :}
+
+Par l'inégalité de Tchebychev :
+\begin{align*}
+    \mathbb{P}(|S_n - \mu| > \varepsilon) &= \mathbb{P}\left(\left|\frac{1}{n}\sum_{i=1}^n (X_i - \mu)\right| > \varepsilon\right) \\
+    &\leq \frac{\text{Var}(S_n)}{\varepsilon^2} \\
+    &= \frac{\sigma^2}{n \varepsilon^2} \xrightarrow[n \to \infty]{} 0
+\end{align*}
+
+\textbf{Étape 2 : Loi forte des grands nombres}
+
+Si $(X_n)$ sont i.i.d. avec $\mathbb{E}[|X_1|] < \infty$, alors :
+\[
+S_n \xrightarrow[n \to \infty]{\text{p.s.}} \mu
+\]
+
+\textbf{Partie B : Théorème central limite}
+
+\textbf{Étape 1 : Énoncé}
+
+Si $(X_n)$ sont i.i.d. avec $\mathbb{E}[X_1] = \mu$ et $\text{Var}(X_1) = \sigma^2 \in (0, \infty)$, alors :
+\[
+\frac{S_n - \mu}{\sigma/\sqrt{n}} = \frac{\sqrt{n}(S_n - \mu)}{\sigma} \xrightarrow[n \to \infty]{\mathcal{L}} \mathcal{N}(0,1)
+\]
+
+\textbf{Étape 2 : Application pratique}
+
+Pour $n$ grand, on a l'approximation :
+\[
+S_n \approx \mathcal{N}\left(\mu, \frac{\sigma^2}{n}\right)
+\]
+
+\textbf{Étape 3 : Intervalle de confiance}
+
+Un intervalle de confiance asymptotique au niveau $1-\alpha$ pour $\mu$ est :
+\[
+S_n \pm z_{1-\alpha/2} \frac{\hat{\sigma}_n}{\sqrt{n}}
+\]
+où $\hat{\sigma}_n^2 = \frac{1}{n-1} \sum_{i=1}^n (X_i - S_n)^2$.
+
+\subsection{Question 3 : Méthodes de réduction de variance}
+
+\subsubsection{Énoncé}
+Proposer des méthodes pour réduire la variance dans les simulations Monte Carlo.
+
+\subsubsection{Correction détaillée}
+
+\textbf{Méthode 1 : Variables antithétiques}
+
+\textbf{Principe :} Utiliser des variables corrélées négativement.
+
+\textbf{Étape 1 : Construction}
+
+Si $U \sim \mathcal{U}(0,1)$, alors $1-U \sim \mathcal{U}(0,1)$ aussi.
+
+L'estimateur devient :
+\[
+\hat{I}_n^{AV} = \frac{1}{n} \sum_{i=1}^{n/2} \frac{f(U_i) + f(1-U_i)}{2}
+\]
+
+\textbf{Étape 2 : Réduction de variance}
+
+La variance est :
+\[
+\text{Var}(\hat{I}_n^{AV}) = \frac{1}{n} \left( \frac{\sigma^2}{2} + \frac{\text{Cov}(f(U), f(1-U))}{2} \right)
+\]
+
+Si $f$ est monotone, alors $\text{Cov}(f(U), f(1-U)) < 0$ et la variance diminue.
+
+\textbf{Méthode 2 : Variables de contrôle}
+
+\textbf{Principe :} Utiliser une variable aléatoire $Y$ de moyenne connue $\mu_Y$ corrélée avec $f(X)$.
+
+\textbf{Étape 1 : Estimateur}
+
+\[
+\hat{I}_n^{CV} = \frac{1}{n} \sum_{i=1}^n f(X_i) - c \left( \frac{1}{n} \sum_{i=1}^n Y_i - \mu_Y \right)
+\]
+
+\textbf{Étape 2 : Choix optimal de $c$}
+
+On minimise la variance :
+\[
+\text{Var}(\hat{I}_n^{CV}) = \frac{1}{n} (\sigma_f^2 - 2c \text{Cov}(f(X), Y) + c^2 \sigma_Y^2)
+\]
+
+Le minimum est atteint pour :
+\[
+c^* = \frac{\text{Cov}(f(X), Y)}{\sigma_Y^2}
+\]
+
+\textbf{Méthode 3 : Échantillonnage stratifié}
+
+\textbf{Principe :} Diviser l'espace en strates et échantillonner dans chaque strate.
+
+\textbf{Étape 1 : Partition}
+
+On partitionne $[0,1]$ en $m$ intervalles : $[a_0, a_1), [a_1, a_2), \ldots, [a_{m-1}, a_m]$ avec $a_0 = 0$, $a_m = 1$.
+
+\textbf{Étape 2 : Estimateur}
+
+\[
+\hat{I}_n^{ST} = \sum_{j=1}^m p_j \cdot \frac{1}{n_j} \sum_{i=1}^{n_j} f(X_{j,i})
+\]
+où $p_j = a_j - a_{j-1}$ et $X_{j,i} \sim \mathcal{U}(a_{j-1}, a_j)$.
+
+\textbf{Étape 3 : Allocation optimale}
+
+Pour minimiser la variance totale sous la contrainte $\sum_{j=1}^m n_j = n$ :
+\[
+n_j^* = n \frac{p_j \sigma_j}{\sum_{k=1}^m p_k \sigma_k}
+\]
+où $\sigma_j^2$ est la variance dans la strate $j$.
+
+\subsection{Question 4 : Génération de nombres aléatoires}
+
+\subsubsection{Énoncé}
+Expliquer comment générer des variables aléatoires suivant différentes lois.
+
+\subsubsection{Correction détaillée}
+
+\textbf{Méthode 1 : Méthode de la transformée inverse}
+
+\textbf{Principe :} Si $U \sim \mathcal{U}(0,1)$ et $F$ est une fonction de répartition continue strictement croissante, alors $F^{-1}(U)$ suit la loi de fonction de répartition $F$.
+
+\textbf{Étape 1 : Démonstration}
+
+Pour $X = F^{-1}(U)$ :
+\begin{align*}
+    \mathbb{P}(X \leq x) &= \mathbb{P}(F^{-1}(U) \leq x) \\
+    &= \mathbb{P}(U \leq F(x)) \quad \text{(car $F$ est croissante)} \\
+    &= F(x) \quad \text{(car $U \sim \mathcal{U}(0,1)$)}
+\end{align*}
+
+\textbf{Étape 2 : Exemples}
+
+\begin{itemize}
+    \item \textbf{Loi exponentielle} : $F(x) = 1 - e^{-\lambda x}$, donc $X = -\frac{1}{\lambda} \ln(1-U)$
+    \item \textbf{Loi de Cauchy} : $F(x) = \frac{1}{2} + \frac{1}{\pi} \arctan(x)$, donc $X = \tan(\pi(U - 1/2))$
+\end{itemize}
+
+\textbf{Méthode 2 : Méthode de rejet}
+
+\textbf{Principe :} Générer des points uniformément sous une courbe majorante.
+
+\textbf{Étape 1 : Algorithme}
+
+Soit $f$ la densité cible et $g$ une densité instrumentale telle que $f(x) \leq M g(x)$ pour tout $x$.
+
+\begin{algorithmic}
+\State Générer $X \sim g$
+\State Générer $U \sim \mathcal{U}(0,1)$ indépendant de $X$
+\If{$U \leq \frac{f(X)}{M g(X)}$}
+    \State \Return $X$
+\Else
+    \State Rejeter et recommencer
+\EndIf
+\end{algorithmic}
+
+\textbf{Étape 2 : Probabilité d'acceptation}
+
+La probabilité d'acceptation est $\frac{1}{M}$, donc on veut $M$ proche de 1.
+
+\textbf{Méthode 3 : Box-Muller pour la loi normale}
+
+\textbf{Principe :} Transformation de variables uniformes en normales.
+
+\textbf{Étape 1 : Transformation}
+
+Si $U_1, U_2 \sim \mathcal{U}(0,1)$ indépendantes, alors :
+\begin{align*}
+    Z_1 &= \sqrt{-2 \ln U_1} \cos(2\pi U_2) \\
+    Z_2 &= \sqrt{-2 \ln U_1} \sin(2\pi U_2)
+\end{align*}
+sont deux variables aléatoires normales centrées réduites indépendantes.
+
+\textbf{Étape 2 : Démonstration}
+
+On utilise le changement de variables polaires :
+\begin{align*}
+    R^2 &= -2 \ln U_1 \sim \text{Exp}(1/2) \\
+    \Theta &= 2\pi U_2 \sim \mathcal{U}(0, 2\pi)
+\end{align*}
+et $Z_1 = R \cos \Theta$, $Z_2 = R \sin \Theta$.
+
+\section{Examen 2025 - Correction Détaillée}
+
+\subsection{Question 1 : Estimation par maximum de vraisemblance}
+
+\subsubsection{Énoncé}
+Soit $X_1, \ldots, X_n$ un échantillon i.i.d. suivant une loi de densité $f_\theta$. Estimer $\theta$ par maximum de vraisemblance.
+
+\subsubsection{Correction détaillée}
+
+\textbf{Partie A : Principe du maximum de vraisemblance}
+
+\textbf{Étape 1 : Fonction de vraisemblance}
+
+La fonction de vraisemblance est :
+\[
+L_n(\theta) = \prod_{i=1}^n f_\theta(X_i)
+\]
+
+\textbf{Étape 2 : Log-vraisemblance}
+
+On maximise plutôt la log-vraisemblance :
+\[
+\ell_n(\theta) = \ln L_n(\theta) = \sum_{i=1}^n \ln f_\theta(X_i)
+\]
+
+\textbf{Étape 3 : Estimateur du maximum de vraisemblance}
+
+L'estimateur $\hat{\theta}_n$ est défini par :
+\[
+\hat{\theta}_n = \arg\max_{\theta \in \Theta} \ell_n(\theta)
+\]
+
+\textbf{Partie B : Exemple : loi exponentielle}
+
+\textbf{Étape 1 : Densité}
+
+$f_\lambda(x) = \lambda e^{-\lambda x} \mathbf{1}_{x \geq 0}$ avec $\lambda > 0$.
+
+\textbf{Étape 2 : Log-vraisemblance}
+
+\begin{align*}
+    \ell_n(\lambda) &= \sum_{i=1}^n \ln(\lambda e^{-\lambda X_i}) \\
+    &= n \ln \lambda - \lambda \sum_{i=1}^n X_i \\
+    &= n \ln \lambda - \lambda n \bar{X}_n
+\end{align*}
+
+\textbf{Étape 3 : Dérivée}
+
+\[
+\frac{d\ell_n}{d\lambda} = \frac{n}{\lambda} - n \bar{X}_n
+\]
+
+\textbf{Étape 4 : Maximum}
+
+En annulant la dérivée :
+\[
+\frac{n}{\lambda} - n \bar{X}_n = 0 \quad \Rightarrow \quad \hat{\lambda}_n = \frac{1}{\bar{X}_n}
+\]
+
+\textbf{Étape 5 : Vérification}
+
+\[
+\frac{d^2\ell_n}{d\lambda^2} = -\frac{n}{\lambda^2} < 0
+\]
+donc c'est bien un maximum.
+
+\textbf{Partie C : Propriétés asymptotiques}
+
+\textbf{Étape 1 : Consistance}
+
+Sous certaines conditions de régularité, $\hat{\theta}_n \xrightarrow[n \to \infty]{\mathbb{P}} \theta_0$.
+
+\textbf{Étape 2 : Normalité asymptotique}
+
+\[
+\sqrt{n}(\hat{\theta}_n - \theta_0) \xrightarrow[n \to \infty]{\mathcal{L}} \mathcal{N}(0, I(\theta_0)^{-1})
+\]
+où $I(\theta)$ est l'information de Fisher :
+\[
+I(\theta) = \mathbb{E}_\theta\left[\left(\frac{\partial \ln f_\theta(X)}{\partial \theta}\right)^2\right]
+\]
+
+\textbf{Étape 3 : Efficacité}
+
+L'estimateur du maximum de vraisemblance atteint la borne de Cramér-Rao asymptotiquement.
+
+\subsection{Question 2 : Tests d'hypothèses}
+
+\subsubsection{Énoncé}
+Construire un test pour $H_0 : \theta = \theta_0$ contre $H_1 : \theta \neq \theta_0$.
+
+\subsubsection{Correction détaillée}
+
+\textbf{Partie A : Test de rapport de vraisemblance}
+
+\textbf{Étape 1 : Statistique de test}
+
+\[
+\Lambda_n = -2 \ln \frac{L_n(\theta_0)}{\sup_{\theta \in \Theta} L_n(\theta)} = 2(\ell_n(\hat{\theta}_n) - \ell_n(\theta_0))
+\]
+
+\textbf{Étape 2 : Distribution sous $H_0$}
+
+Sous $H_0$ et sous certaines conditions de régularité :
+\[
+\Lambda_n \xrightarrow[n \to \infty]{\mathcal{L}} \chi^2(p)
+\]
+où $p$ est la dimension de $\theta$.
+
+\textbf{Étape 3 : Règle de décision}
+
+On rejette $H_0$ au niveau $\alpha$ si :
+\[
+\Lambda_n > \chi^2_{1-\alpha}(p)
+\]
+
+\textbf{Partie B : Test de Wald}
+
+\textbf{Étape 1 : Statistique de test}
+
+\[
+W_n = n(\hat{\theta}_n - \theta_0)^T I(\hat{\theta}_n) (\hat{\theta}_n - \theta_0)
+\]
+
+\textbf{Étape 2 : Distribution}
+
+Sous $H_0$ :
+\[
+W_n \xrightarrow[n \to \infty]{\mathcal{L}} \chi^2(p)
+\]
+
+\textbf{Partie C : Test du score}
+
+\textbf{Étape 1 : Statistique de test}
+
+\[
+S_n = \frac{1}{n} \left(\frac{\partial \ell_n}{\partial \theta}(\theta_0)\right)^T I(\theta_0)^{-1} \left(\frac{\partial \ell_n}{\partial \theta}(\theta_0)\right)
+\]
+
+\textbf{Étape 2 : Distribution}
+
+Sous $H_0$ :
+\[
+S_n \xrightarrow[n \to \infty]{\mathcal{L}} \chi^2(p)
+\]
+
+\subsection{Question 3 : Méthodes de bootstrap}
+
+\subsubsection{Énoncé}
+Expliquer la méthode du bootstrap pour estimer la variance d'un estimateur.
+
+\subsubsection{Correction détaillée}
+
+\textbf{Partie A : Bootstrap non-paramétrique}
+
+\textbf{Étape 1 : Principe}
+
+On estime la loi inconnue $F$ par la loi empirique $\hat{F}_n$ qui attribue la probabilité $1/n$ à chaque observation.
+
+\textbf{Étape 2 : Algorithme}
+
+\begin{enumerate}
+    \item Tirer avec remise $n$ observations de l'échantillon original : $X_1^*, \ldots, X_n^*$
+    \item Calculer $\hat{\theta}_n^* = T(X_1^*, \ldots, X_n^*)$
+    \item Répéter $B$ fois pour obtenir $\hat{\theta}_{n,1}^*, \ldots, \hat{\theta}_{n,B}^*$
+    \item Estimer la variance par :
+    \[
+    \widehat{\text{Var}}(\hat{\theta}_n) = \frac{1}{B-1} \sum_{b=1}^B (\hat{\theta}_{n,b}^* - \bar{\theta}_n^*)^2
+    \]
+    où $\bar{\theta}_n^* = \frac{1}{B} \sum_{b=1}^B \hat{\theta}_{n,b}^*$
+\end{enumerate}
+
+\textbf{Partie B : Bootstrap paramétrique}
+
+\textbf{Principe :} Si on connaît la famille paramétrique, on estime $\theta$ par $\hat{\theta}_n$ puis on génère des échantillons de $f_{\hat{\theta}_n}$.
+
+\textbf{Étape 1 : Algorithme}
+
+\begin{enumerate}
+    \item Estimer $\hat{\theta}_n$ à partir de l'échantillon original
+    \item Pour $b = 1, \ldots, B$ :
+    \begin{itemize}
+        \item Générer $X_{1,b}^*, \ldots, X_{n,b}^* \sim f_{\hat{\theta}_n}$ i.i.d.
+        \item Calculer $\hat{\theta}_{n,b}^* = T(X_{1,b}^*, \ldots, X_{n,b}^*)$
+    \end{itemize}
+    \item Estimer la variance comme précédemment
+\end{enumerate}
+
+\textbf{Partie C : Intervalles de confiance bootstrap}
+
+\textbf{Méthode 1 : Percentile}
+
+Un intervalle de confiance au niveau $1-\alpha$ est :
+\[
+[\hat{\theta}_{n,(\alpha/2)}^*, \hat{\theta}_{n,(1-\alpha/2)}^*]
+\]
+où $\hat{\theta}_{n,(\alpha)}^*$ est le quantile d'ordre $\alpha$ de la distribution bootstrap.
+
+\textbf{Méthode 2 : Bootstrap-t}
+
+On utilise la statistique studentisée :
+\[
+T_n^* = \frac{\hat{\theta}_n^* - \hat{\theta}_n}{\hat{\sigma}_n^*}
+\]
+
+L'intervalle de confiance est :
+\[
+[\hat{\theta}_n - t_{1-\alpha/2}^* \hat{\sigma}_n, \hat{\theta}_n - t_{\alpha/2}^* \hat{\sigma}_n]
+\]
+où $t_\alpha^*$ est le quantile d'ordre $\alpha$ de $T_n^*$.
+
+\subsection{Question 4 : Chaînes de Markov et MCMC}
+
+\subsubsection{Énoncé}
+Expliquer les méthodes MCMC (Monte Carlo par Chaînes de Markov) pour l'échantillonnage.
+
+\subsubsection{Correction détaillée}
+
+\textbf{Partie A : Chaînes de Markov}
+
+\textbf{Étape 1 : Définition}
+
+Une chaîne de Markov $(X_n)_{n \geq 0}$ vérifie :
+\[
+\mathbb{P}(X_{n+1} = x_{n+1} | X_0 = x_0, \ldots, X_n = x_n) = \mathbb{P}(X_{n+1} = x_{n+1} | X_n = x_n)
+\]
+
+\textbf{Étape 2 : Matrice de transition}
+
+Pour une chaîne discrète, la matrice de transition $P$ est définie par :
+\[
+P_{ij} = \mathbb{P}(X_{n+1} = j | X_n = i)
+\]
+
+\textbf{Étape 3 : Distribution stationnaire}
+
+Une distribution $\pi$ est stationnaire si :
+\[
+\pi = \pi P
+\]
+c'est-à-dire $\pi_j = \sum_i \pi_i P_{ij}$ pour tout $j$.
+
+\textbf{Partie B : Algorithme de Metropolis-Hastings}
+
+\textbf{Étape 1 : Objectif}
+
+Générer un échantillon suivant une distribution cible $\pi$ (non normalisée).
+
+\textbf{Étape 2 : Algorithme}
+
+Soit $q(y|x)$ une densité de proposition.
+
+\begin{algorithmic}
+\State Initialiser $X_0$
+\For{$n = 1, 2, \ldots$}
+    \State Générer $Y \sim q(\cdot | X_{n-1})$
+    \State Calculer $\alpha = \min\left(1, \frac{\pi(Y) q(X_{n-1}|Y)}{\pi(X_{n-1}) q(Y|X_{n-1})}\right)$
+    \State Générer $U \sim \mathcal{U}(0,1)$
+    \If{$U \leq \alpha$}
+        \State $X_n = Y$ \quad \text{(accepter)}
+    \Else
+        \State $X_n = X_{n-1}$ \quad \text{(rejeter)}
+    \EndIf
+\EndFor
+\end{algorithmic}
+
+\textbf{Étape 3 : Propriétés}
+
+\begin{itemize}
+    \item La chaîne $(X_n)$ converge vers la distribution stationnaire $\pi$
+    \item La convergence est garantie si la chaîne est irréductible et apériodique
+\end{itemize}
+
+\textbf{Partie C : Algorithme de Gibbs}
+
+\textbf{Principe :} Cas particulier de Metropolis-Hastings où on met à jour une composante à la fois.
+
+\textbf{Étape 1 : Algorithme}
+
+Pour $\mathbf{X} = (X_1, \ldots, X_d)$ :
+
+\begin{algorithmic}
+\State Initialiser $\mathbf{X}^{(0)}$
+\For{$n = 1, 2, \ldots$}
+    \For{$i = 1, \ldots, d$}
+        \State Générer $X_i^{(n)} \sim \pi(\cdot | X_1^{(n)}, \ldots, X_{i-1}^{(n)}, X_{i+1}^{(n-1)}, \ldots, X_d^{(n-1)})$
+    \EndFor
+\EndFor
+\end{algorithmic}
+
+\textbf{Étape 2 : Propriétés}
+
+\begin{itemize}
+    \item Toutes les propositions sont acceptées ($\alpha = 1$)
+    \item Plus efficace que Metropolis-Hastings général quand les conditionnelles sont faciles à simuler
+\end{itemize}
+
+\section{Conclusion}
+
+Ces corrections détaillées couvrent les principaux thèmes des examens de probabilités numériques : méthodes de Monte Carlo, convergence, estimation, réduction de variance, génération de nombres aléatoires, tests d'hypothèses, bootstrap et MCMC. Chaque méthode est présentée avec toutes les étapes de calcul, sans saut d'étape.
+
+\end{document}

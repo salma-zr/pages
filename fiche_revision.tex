@@ -1,0 +1,521 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+\usepackage{amsmath,amsfonts,amssymb}
+\usepackage{geometry}
+\usepackage{multicol}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usepackage{fancyhdr}
+
+\geometry{margin=1.5cm}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[C]{Fiche de Révision - Probabilités Numériques}
+\fancyfoot[C]{\thepage}
+
+\setlength{\columnsep}{1cm}
+\setlength{\parindent}{0pt}
+
+\title{\vspace{-2cm}\textbf{FICHE DE RÉVISION}\\
+\large Probabilités Numériques - Inégalités, Notions et Astuces}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+\begin{multicols}{2}
+
+\section*{INÉGALITÉS FONDAMENTALES}
+
+\subsection*{Inégalité de Markov}
+Pour $X \geq 0$ et $a > 0$ :
+\[
+\mathbb{P}(X \geq a) \leq \frac{\mathbb{E}[X]}{a}
+\]
+
+\subsection*{Inégalité de Tchebychev}
+Pour toute v.a. $X$ avec $\mathbb{E}[X] = \mu$, $\text{Var}(X) = \sigma^2$ :
+\[
+\mathbb{P}(|X - \mu| \geq \varepsilon) \leq \frac{\sigma^2}{\varepsilon^2}
+\]
+
+\subsection*{Inégalité de Bienaymé-Tchebychev}
+Version généralisée :
+\[
+\mathbb{P}(|X - \mu| \geq k\sigma) \leq \frac{1}{k^2}
+\]
+
+\subsection*{Inégalité de Jensen}
+Si $\varphi$ est convexe et $X$ intégrable :
+\[
+\varphi(\mathbb{E}[X]) \leq \mathbb{E}[\varphi(X)]
+\]
+
+\subsection*{Inégalité de Hölder}
+Pour $p, q > 1$ avec $\frac{1}{p} + \frac{1}{q} = 1$ :
+\[
+\mathbb{E}[|XY|] \leq (\mathbb{E}[|X|^p])^{1/p} (\mathbb{E}[|Y|^q])^{1/q}
+\]
+
+\subsection*{Inégalité de Minkowski}
+Pour $p \geq 1$ :
+\[
+(\mathbb{E}[|X+Y|^p])^{1/p} \leq (\mathbb{E}[|X|^p])^{1/p} + (\mathbb{E}[|Y|^p])^{1/p}
+\]
+
+\subsection*{Inégalité de Cauchy-Schwarz}
+Cas particulier de Hölder avec $p = q = 2$ :
+\[
+|\mathbb{E}[XY]| \leq \sqrt{\mathbb{E}[X^2] \mathbb{E}[Y^2]}
+\]
+
+\subsection*{Inégalité de Chernoff}
+Pour $X_1, \ldots, X_n$ i.i.d. avec $\mathbb{E}[X_i] = 0$ :
+\[
+\mathbb{P}\left(\sum_{i=1}^n X_i \geq t\right) \leq \inf_{\lambda > 0} e^{-\lambda t} \prod_{i=1}^n \mathbb{E}[e^{\lambda X_i}]
+\]
+
+\subsection*{Inégalité de Bernstein}
+Pour $X_1, \ldots, X_n$ i.i.d. avec $|X_i| \leq M$ p.s. :
+\[
+\mathbb{P}\left(\left|\sum_{i=1}^n X_i\right| \geq t\right) \leq 2 \exp\left(-\frac{t^2/2}{\sum_{i=1}^n \text{Var}(X_i) + Mt/3}\right)
+\]
+
+\subsection*{Inégalité de Hoeffding}
+Pour $X_1, \ldots, X_n$ indépendantes avec $a_i \leq X_i \leq b_i$ :
+\[
+\mathbb{P}\left(\sum_{i=1}^n (X_i - \mathbb{E}[X_i]) \geq t\right) \leq \exp\left(-\frac{2t^2}{\sum_{i=1}^n (b_i - a_i)^2}\right)
+\]
+
+\section*{THÉORÈMES DE CONVERGENCE}
+
+\subsection*{Loi faible des grands nombres}
+Si $(X_n)$ i.i.d. avec $\mathbb{E}[X_1] = \mu$, $\text{Var}(X_1) < \infty$ :
+\[
+\frac{1}{n}\sum_{i=1}^n X_i \xrightarrow[n \to \infty]{\mathbb{P}} \mu
+\]
+
+\subsection*{Loi forte des grands nombres}
+Si $(X_n)$ i.i.d. avec $\mathbb{E}[|X_1|] < \infty$ :
+\[
+\frac{1}{n}\sum_{i=1}^n X_i \xrightarrow[n \to \infty]{\text{p.s.}} \mu
+\]
+
+\subsection*{Théorème central limite}
+Si $(X_n)$ i.i.d. avec $\mathbb{E}[X_1] = \mu$, $\text{Var}(X_1) = \sigma^2 \in (0, \infty)$ :
+\[
+\frac{\sqrt{n}(\bar{X}_n - \mu)}{\sigma} \xrightarrow[n \to \infty]{\mathcal{L}} \mathcal{N}(0,1)
+\]
+
+\subsection*{Théorème de Slutsky}
+Si $X_n \xrightarrow{\mathcal{L}} X$ et $Y_n \xrightarrow{\mathbb{P}} c$ :
+\[
+X_n + Y_n \xrightarrow{\mathcal{L}} X + c, \quad X_n Y_n \xrightarrow{\mathcal{L}} cX
+\]
+
+\subsection*{Méthode delta}
+Si $\sqrt{n}(T_n - \theta) \xrightarrow{\mathcal{L}} \mathcal{N}(0, \sigma^2)$ et $g$ dérivable :
+\[
+\sqrt{n}(g(T_n) - g(\theta)) \xrightarrow{\mathcal{L}} \mathcal{N}(0, (g'(\theta))^2 \sigma^2)
+\]
+
+\section*{MÉTHODES MONTE CARLO}
+
+\subsection*{Estimateur classique}
+\[
+\hat{I}_n = \frac{1}{n} \sum_{i=1}^n f(U_i), \quad U_i \sim \mathcal{U}(0,1)
+\]
+
+\subsection*{Variance}
+\[
+\text{Var}(\hat{I}_n) = \frac{1}{n} \left(\int_0^1 f^2(x) dx - I^2\right) = \frac{\sigma^2}{n}
+\]
+
+\subsection*{Intervalle de confiance}
+\[
+\hat{I}_n \pm z_{1-\alpha/2} \frac{\hat{\sigma}_n}{\sqrt{n}}
+\]
+
+\subsection*{Échantillonnage préférentiel}
+\[
+\hat{I}_n^{IS} = \frac{1}{n} \sum_{i=1}^n \frac{f(X_i)}{g(X_i)}, \quad X_i \sim g
+\]
+
+\subsection*{Densité optimale}
+\[
+g^*(x) = \frac{|f(x)|}{\int |f(t)| dt}
+\]
+
+\section*{RÉDUCTION DE VARIANCE}
+
+\subsection*{Variables antithétiques}
+\[
+\hat{I}_n^{AV} = \frac{1}{n} \sum_{i=1}^{n/2} \frac{f(U_i) + f(1-U_i)}{2}
+\]
+Efficace si $f$ monotone.
+
+\subsection*{Variables de contrôle}
+\[
+\hat{I}_n^{CV} = \frac{1}{n} \sum_{i=1}^n f(X_i) - c \left(\frac{1}{n} \sum_{i=1}^n Y_i - \mu_Y\right)
+\]
+Coefficient optimal : $c^* = \frac{\text{Cov}(f(X), Y)}{\sigma_Y^2}$
+
+\subsection*{Échantillonnage stratifié}
+\[
+\hat{I}_n^{ST} = \sum_{j=1}^m p_j \cdot \frac{1}{n_j} \sum_{i=1}^{n_j} f(X_{j,i})
+\]
+
+\subsection*{Allocation optimale}
+\[
+n_j^* = n \frac{p_j \sigma_j}{\sum_{k=1}^m p_k \sigma_k}
+\]
+
+\section*{GÉNÉRATION DE NOMBRES ALÉATOIRES}
+
+\subsection*{Méthode de la transformée inverse}
+Si $U \sim \mathcal{U}(0,1)$ et $F$ continue strictement croissante :
+\[
+X = F^{-1}(U) \sim F
+\]
+
+\subsection*{Exemples}
+\begin{itemize}
+    \item Exponentielle : $X = -\frac{1}{\lambda} \ln(1-U)$
+    \item Cauchy : $X = \tan(\pi(U - 1/2))$
+    \item Pareto : $X = x_m (1-U)^{-1/\alpha}$
+\end{itemize}
+
+\subsection*{Méthode de rejet}
+Générer $X \sim g$, $U \sim \mathcal{U}(0,1)$.
+Accepter si $U \leq \frac{f(X)}{M g(X)}$ où $f \leq M g$.
+
+Probabilité d'acceptation : $\frac{1}{M}$.
+
+\subsection*{Box-Muller}
+Pour $U_1, U_2 \sim \mathcal{U}(0,1)$ indépendantes :
+\begin{align*}
+    Z_1 &= \sqrt{-2 \ln U_1} \cos(2\pi U_2) \\
+    Z_2 &= \sqrt{-2 \ln U_1} \sin(2\pi U_2)
+\end{align*}
+Alors $Z_1, Z_2 \sim \mathcal{N}(0,1)$ indépendantes.
+
+\section*{ESTIMATION}
+
+\subsection*{Maximum de vraisemblance}
+\[
+\hat{\theta}_n = \arg\max_{\theta} \sum_{i=1}^n \ln f_\theta(X_i)
+\]
+
+\subsection*{Information de Fisher}
+\[
+I(\theta) = \mathbb{E}_\theta\left[\left(\frac{\partial \ln f_\theta(X)}{\partial \theta}\right)^2\right]
+\]
+
+\subsection*{Borne de Cramér-Rao}
+\[
+\text{Var}(\hat{\theta}_n) \geq \frac{1}{n I(\theta)}
+\]
+
+\subsection*{Normalité asymptotique MLE}
+\[
+\sqrt{n}(\hat{\theta}_n - \theta_0) \xrightarrow{\mathcal{L}} \mathcal{N}(0, I(\theta_0)^{-1})
+\]
+
+\section*{TESTS D'HYPOTHÈSES}
+
+\subsection*{Test du rapport de vraisemblance}
+\[
+\Lambda_n = 2(\ell_n(\hat{\theta}_n) - \ell_n(\theta_0)) \xrightarrow{\mathcal{L}} \chi^2(p)
+\]
+
+\subsection*{Test de Wald}
+\[
+W_n = n(\hat{\theta}_n - \theta_0)^T I(\hat{\theta}_n) (\hat{\theta}_n - \theta_0) \xrightarrow{\mathcal{L}} \chi^2(p)
+\]
+
+\subsection*{Test du score}
+\[
+S_n = \frac{1}{n} \left(\frac{\partial \ell_n}{\partial \theta}(\theta_0)\right)^T I(\theta_0)^{-1} \left(\frac{\partial \ell_n}{\partial \theta}(\theta_0)\right) \xrightarrow{\mathcal{L}} \chi^2(p)
+\]
+
+\section*{BOOTSTRAP}
+
+\subsection*{Variance bootstrap}
+\[
+\widehat{\text{Var}}(\hat{\theta}_n) = \frac{1}{B-1} \sum_{b=1}^B (\hat{\theta}_{n,b}^* - \bar{\theta}_n^*)^2
+\]
+
+\subsection*{Intervalle percentile}
+\[
+[\hat{\theta}_{n,(\alpha/2)}^*, \hat{\theta}_{n,(1-\alpha/2)}^*]
+\]
+
+\subsection*{Bootstrap-t}
+\[
+T_n^* = \frac{\hat{\theta}_n^* - \hat{\theta}_n}{\hat{\sigma}_n^*}
+\]
+
+\section*{MCMC}
+
+\subsection*{Metropolis-Hastings}
+Acceptation avec probabilité :
+\[
+\alpha = \min\left(1, \frac{\pi(Y) q(X|Y)}{\pi(X) q(Y|X)}\right)
+\]
+
+\subsection*{Gibbs}
+Mise à jour coordonnée par coordonnée :
+\[
+X_i^{(n)} \sim \pi(\cdot | X_1^{(n)}, \ldots, X_{i-1}^{(n)}, X_{i+1}^{(n-1)}, \ldots, X_d^{(n-1)})
+\]
+
+\section*{ASTUCES ET TRICKS}
+
+\subsection*{Calcul de variance}
+\[
+\text{Var}(X) = \mathbb{E}[X^2] - (\mathbb{E}[X])^2
+\]
+
+\subsection*{Variance d'une somme}
+\[
+\text{Var}\left(\sum_{i=1}^n X_i\right) = \sum_{i=1}^n \text{Var}(X_i) + 2 \sum_{i<j} \text{Cov}(X_i, X_j)
+\]
+
+Si indépendantes : $\text{Var}\left(\sum_{i=1}^n X_i\right) = \sum_{i=1}^n \text{Var}(X_i)$
+
+\subsection*{Covariance}
+\[
+\text{Cov}(X, Y) = \mathbb{E}[XY] - \mathbb{E}[X]\mathbb{E}[Y]
+\]
+
+\subsection*{Loi conditionnelle}
+\[
+f_{X|Y}(x|y) = \frac{f_{X,Y}(x,y)}{f_Y(y)}
+\]
+
+\subsection*{Espérance conditionnelle}
+\[
+\mathbb{E}[X] = \mathbb{E}[\mathbb{E}[X|Y]]
+\]
+
+\subsection*{Variance totale}
+\[
+\text{Var}(X) = \mathbb{E}[\text{Var}(X|Y)] + \text{Var}(\mathbb{E}[X|Y])
+\]
+
+\subsection*{Moment générateur}
+\[
+M_X(t) = \mathbb{E}[e^{tX}]
+\]
+Si $M_X(t) = M_Y(t)$ pour tout $t$, alors $X \stackrel{d}{=} Y$.
+
+\subsection*{Fonction caractéristique}
+\[
+\phi_X(t) = \mathbb{E}[e^{itX}]
+\]
+Détermine uniquement la loi.
+
+\subsection*{Méthode des moments}
+Résoudre $\mathbb{E}_\theta[X^k] = \frac{1}{n}\sum_{i=1}^n X_i^k$ pour $k = 1, 2, \ldots$
+
+\subsection*{Estimateur sans biais}
+\[
+\mathbb{E}[\hat{\theta}_n] = \theta
+\]
+
+\subsection*{Biais}
+\[
+\text{Biais}(\hat{\theta}_n) = \mathbb{E}[\hat{\theta}_n] - \theta
+\]
+
+\subsection*{Erreur quadratique moyenne}
+\[
+\text{EQM}(\hat{\theta}_n) = \text{Var}(\hat{\theta}_n) + (\text{Biais}(\hat{\theta}_n))^2
+\]
+
+\subsection*{Efficacité relative}
+\[
+\text{ER}(\hat{\theta}_1, \hat{\theta}_2) = \frac{\text{Var}(\hat{\theta}_2)}{\text{Var}(\hat{\theta}_1)}
+\]
+
+\subsection*{Convergence en probabilité}
+\[
+X_n \xrightarrow{\mathbb{P}} X \Leftrightarrow \forall \varepsilon > 0, \lim_{n \to \infty} \mathbb{P}(|X_n - X| > \varepsilon) = 0
+\]
+
+\subsection*{Convergence presque sûre}
+\[
+X_n \xrightarrow{\text{p.s.}} X \Leftrightarrow \mathbb{P}(\lim_{n \to \infty} X_n = X) = 1
+\]
+
+\subsection*{Convergence en loi}
+\[
+X_n \xrightarrow{\mathcal{L}} X \Leftrightarrow \forall x \text{ point de continuité de } F_X, \lim_{n \to \infty} F_{X_n}(x) = F_X(x)
+\]
+
+\subsection*{Théorème de continuité de Lévy}
+\[
+X_n \xrightarrow{\mathcal{L}} X \Leftrightarrow \phi_{X_n}(t) \to \phi_X(t) \text{ pour tout } t
+\]
+
+\subsection*{Loi des grands nombres pour fonctions}
+Si $X_n \xrightarrow{\text{p.s.}} X$ et $g$ continue :
+\[
+g(X_n) \xrightarrow{\text{p.s.}} g(X)
+\]
+
+\subsection*{Méthode de la fonction indicatrice}
+\[
+\mathbb{E}[\mathbf{1}_A] = \mathbb{P}(A)
+\]
+
+\subsection*{Changement de variable}
+Si $Y = g(X)$ avec $g$ bijective :
+\[
+f_Y(y) = f_X(g^{-1}(y)) \left|\frac{d}{dy} g^{-1}(y)\right|
+\]
+
+\subsection*{Formule de convolution}
+Pour $Z = X + Y$ indépendantes :
+\[
+f_Z(z) = \int_{-\infty}^{\infty} f_X(x) f_Y(z-x) dx
+\]
+
+\subsection*{Méthode de la fonction génératrice}
+Pour variables discrètes :
+\[
+G_X(s) = \mathbb{E}[s^X] = \sum_{k=0}^{\infty} s^k \mathbb{P}(X = k)
+\]
+
+\subsection*{Trick : Symétrie}
+Pour $U \sim \mathcal{U}(0,1)$, on a $1-U \sim \mathcal{U}(0,1)$ aussi.
+
+\subsection*{Trick : Normalisation}
+Pour estimer $\int f(x) dx$, on peut écrire :
+\[
+\int f(x) dx = \int \frac{f(x)}{g(x)} g(x) dx = \mathbb{E}_g\left[\frac{f(X)}{g(X)}\right]
+\]
+
+\subsection*{Trick : Importance sampling}
+Choisir $g$ proche de $f$ pour réduire la variance.
+
+\subsection*{Trick : Stratification}
+Diviser l'espace en régions de variance similaire.
+
+\subsection*{Trick : Variables antithétiques}
+Utiliser $U$ et $1-U$ pour créer corrélation négative.
+
+\subsection*{Trick : Variables de contrôle}
+Soustraire une variable de moyenne connue corrélée.
+
+\subsection*{Trick : Rao-Blackwell}
+Si $T$ est suffisant et $\hat{\theta}$ estimateur :
+\[
+\mathbb{E}[\hat{\theta}|T] \text{ est meilleur que } \hat{\theta}
+\]
+
+\subsection*{Trick : Méthode delta multivariée}
+Si $\sqrt{n}(\mathbf{T}_n - \boldsymbol{\theta}) \xrightarrow{\mathcal{L}} \mathcal{N}(\mathbf{0}, \boldsymbol{\Sigma})$ :
+\[
+\sqrt{n}(g(\mathbf{T}_n) - g(\boldsymbol{\theta})) \xrightarrow{\mathcal{L}} \mathcal{N}(0, \nabla g(\boldsymbol{\theta})^T \boldsymbol{\Sigma} \nabla g(\boldsymbol{\theta}))
+\]
+
+\subsection*{Trick : Loi conditionnelle normale}
+Si $(X, Y) \sim \mathcal{N}(\boldsymbol{\mu}, \boldsymbol{\Sigma})$ :
+\[
+X|Y = y \sim \mathcal{N}(\mu_X + \Sigma_{XY} \Sigma_{YY}^{-1}(y - \mu_Y), \Sigma_{XX} - \Sigma_{XY} \Sigma_{YY}^{-1} \Sigma_{YX})
+\]
+
+\subsection*{Trick : Propriété de Markov}
+Pour chaîne de Markov :
+\[
+\mathbb{P}(X_{n+1} = x_{n+1} | X_0, \ldots, X_n) = \mathbb{P}(X_{n+1} = x_{n+1} | X_n)
+\]
+
+\subsection*{Trick : Équation de Chapman-Kolmogorov}
+\[
+P^{(n+m)}_{ij} = \sum_k P^{(n)}_{ik} P^{(m)}_{kj}
+\]
+
+\subsection*{Trick : Condition de réversibilité}
+Pour distribution stationnaire $\pi$ :
+\[
+\pi_i P_{ij} = \pi_j P_{ji} \quad \text{(balance détaillée)}
+\]
+
+\subsection*{Trick : Burn-in en MCMC}
+Éliminer les premières itérations pour laisser la chaîne converger.
+
+\subsection*{Trick : Thinning en MCMC}
+Ne garder qu'une itération sur $k$ pour réduire l'autocorrélation.
+
+\subsection*{Trick : Diagnostic de convergence}
+Utiliser plusieurs chaînes avec points de départ différents.
+
+\subsection*{Trick : Facteur de réduction potentiel}
+\[
+\hat{R} = \sqrt{\frac{\text{Var entre chaînes} + \text{Var dans chaînes}}{\text{Var dans chaînes}}}
+\]
+On veut $\hat{R} < 1.1$.
+
+\section*{LOIS USUELLES}
+
+\subsection*{Normale}
+$X \sim \mathcal{N}(\mu, \sigma^2)$ :
+\[
+f(x) = \frac{1}{\sigma\sqrt{2\pi}} e^{-\frac{(x-\mu)^2}{2\sigma^2}}
+\]
+$\mathbb{E}[X] = \mu$, $\text{Var}(X) = \sigma^2$
+
+\subsection*{Exponentielle}
+$X \sim \text{Exp}(\lambda)$ :
+\[
+f(x) = \lambda e^{-\lambda x} \mathbf{1}_{x \geq 0}
+\]
+$\mathbb{E}[X] = \frac{1}{\lambda}$, $\text{Var}(X) = \frac{1}{\lambda^2}$
+
+\subsection*{Uniforme}
+$X \sim \mathcal{U}(a, b)$ :
+\[
+f(x) = \frac{1}{b-a} \mathbf{1}_{[a,b]}(x)
+\]
+$\mathbb{E}[X] = \frac{a+b}{2}$, $\text{Var}(X) = \frac{(b-a)^2}{12}$
+
+\subsection*{Gamma}
+$X \sim \Gamma(\alpha, \beta)$ :
+\[
+f(x) = \frac{\beta^\alpha}{\Gamma(\alpha)} x^{\alpha-1} e^{-\beta x} \mathbf{1}_{x > 0}
+\]
+$\mathbb{E}[X] = \frac{\alpha}{\beta}$, $\text{Var}(X) = \frac{\alpha}{\beta^2}$
+
+\subsection*{Beta}
+$X \sim \text{Beta}(\alpha, \beta)$ :
+\[
+f(x) = \frac{\Gamma(\alpha+\beta)}{\Gamma(\alpha)\Gamma(\beta)} x^{\alpha-1} (1-x)^{\beta-1} \mathbf{1}_{[0,1]}(x)
+\]
+$\mathbb{E}[X] = \frac{\alpha}{\alpha+\beta}$, $\text{Var}(X) = \frac{\alpha\beta}{(\alpha+\beta)^2(\alpha+\beta+1)}$
+
+\subsection*{Chi-deux}
+$X \sim \chi^2(k)$ :
+\[
+X = \sum_{i=1}^k Z_i^2, \quad Z_i \sim \mathcal{N}(0,1) \text{ i.i.d.}
+\]
+$\mathbb{E}[X] = k$, $\text{Var}(X) = 2k$
+
+\subsection*{Student}
+$T \sim t(k)$ :
+\[
+T = \frac{Z}{\sqrt{Y/k}}, \quad Z \sim \mathcal{N}(0,1), Y \sim \chi^2(k)
+\]
+
+\subsection*{Fisher}
+$F \sim F(d_1, d_2)$ :
+\[
+F = \frac{X_1/d_1}{X_2/d_2}, \quad X_1 \sim \chi^2(d_1), X_2 \sim \chi^2(d_2)
+\]
+
+\end{multicols}
+
+\end{document}
