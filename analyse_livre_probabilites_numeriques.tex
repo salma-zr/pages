@@ -1,0 +1,1782 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{hyperref}
+
+\geometry{margin=2.5cm}
+\allowdisplaybreaks
+\setlength{\emergencystretch}{3em}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue!50!black,
+  urlcolor=blue!50!black,
+  citecolor=blue!50!black,
+  pdftitle={Analyse du livre Numerical Probability},
+  pdfauthor={Synthese en francais fondee sur le livre fourni}
+}
+
+\setlist[itemize]{leftmargin=*, itemsep=3pt, topsep=3pt}
+\setlist[enumerate]{leftmargin=*, itemsep=3pt, topsep=3pt}
+
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Prob}{\mathbb{P}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\mc}{Monte Carlo}
+\newcommand{\qmc}{Quasi-Monte Carlo}
+\newcommand{\ud}{\,\mathrm{d}}
+\newcommand{\Lip}{\mathrm{Lip}}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+
+\title{\textbf{Analyse structurée du livre}\\[0.3em]
+\emph{Numerical Probability -- An Introduction with Applications to Finance}}
+\author{Synthèse de révision en français\\ fondée exclusivement sur le livre fourni}
+\date{}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\clearpage
+
+\section{Introduction générale}
+
+Le livre \emph{Numerical Probability} de Gilles Pagès est un ouvrage de probabilités numériques centré sur la simulation, l'approximation et l'exploitation calculatoire des objets probabilistes, avec un fil conducteur très net : partir de la génération de variables aléatoires, comprendre le \mc\ comme méthode de base, puis apprendre à le rendre plus fiable, plus rapide, plus précis et plus adapté aux problèmes réellement rencontrés en finance quantitative.
+
+Le thème général du livre est double. D'une part, il étudie les méthodes de simulation \emph{exacte} ou du moins non biaisée : génération de lois, estimation d'espérances par \mc, réduction de variance, \qmc, approximation stochastique et quantification lorsqu'elles servent à accélérer des calculs d'espérance. D'autre part, il traite la simulation \emph{approchée}, donc biaisée, en particulier lorsqu'il faut discrétiser des diffusions browiennes, contrôler le biais faible et le biais fort, et construire des procédures plus performantes comme les extrapolations de Richardson--Romberg ou les méthodes multilevel.
+
+Les problèmes étudiés sont de plusieurs types :
+\begin{itemize}
+  \item simulation de lois unidimensionnelles ou vectorielles ;
+  \item calcul d'espérances et d'intervalles de confiance ;
+  \item calcul de sensibilités (\emph{Greeks}) ;
+  \item réduction de variance et accélération du \mc ;
+  \item approximation de solutions d'équations différentielles stochastiques ;
+  \item calcul de prix d'options dépendant du chemin ;
+  \item recherche de zéros ou d'optima par approximation stochastique ;
+  \item arrêt optimal et approximation d'options américaines ou bermudiennes.
+\end{itemize}
+
+Les outils mathématiques centraux du livre sont la théorie de la mesure et de l'intégration, la convergence faible, les théorèmes limites, la théorie des martingales, le calcul stochastique browien, les propriétés de régularité des fonctions et des diffusions, ainsi que des arguments de complexité numérique. Le livre ne se limite pas à énoncer des recettes : il insiste constamment sur les hypothèses, sur la nature exacte des erreurs, sur les cadres où un théorème est applicable, et sur ce qui se dégrade lorsque les payoffs deviennent irréguliers ou que les coefficients ne sont plus globalement lipschitziens.
+
+La logique d'ensemble de l'ouvrage est très structurée :
+\begin{enumerate}
+  \item établir les briques élémentaires de simulation (chapitre 1) ;
+  \item formaliser le \mc\ et le contrôle statistique de l'erreur (chapitre 2) ;
+  \item apprendre à réduire la variance ou à remplacer le \mc\ classique par des méthodes plus fines (chapitres 3 à 6) ;
+  \item traiter la simulation biaisée des diffusions et le contrôle du biais (chapitres 7 à 9) ;
+  \item revenir au calcul de sensibilités dans ce cadre approché (chapitre 10) ;
+  \item terminer par un problème non linéaire majeur, l'arrêt optimal (chapitre 11) ;
+  \item rassembler enfin, dans le chapitre 12, un ensemble de compléments techniques utilisés dans le reste du livre.
+\end{enumerate}
+
+La synthèse ci-dessous suit cette architecture et reste volontairement fidèle au contenu du livre fourni. Elle ne rajoute pas de méthodes extérieures, ne remplace pas les hypothèses par des slogans, et insiste, chaque fois que le texte du livre le permet, sur l'idée des preuves, les conditions d'application, les limitations et les pièges.
+
+\section{Chapitre 1 -- Simulation de variables aléatoires}
+
+\subsection{Idée générale du chapitre}
+
+Ce premier chapitre construit le socle de tout l'ouvrage. Son objectif est de montrer comment passer de nombres uniformes sur $[0,1]$ à des lois plus générales, d'abord en théorie, puis par des procédures effectivement calculables. Le chapitre a un statut fondateur : la préface du livre souligne explicitement que la lecture du chapitre 1, ainsi que du début du chapitre 2, est pratiquement indispensable pour profiter du reste.
+
+Le rôle du chapitre est donc triple :
+\begin{itemize}
+  \item fixer ce qu'on entend par simulation de variables aléatoires ;
+  \item distinguer les principes théoriques généraux des méthodes effectivement implémentables ;
+  \item fournir les procédés de base utilisés ensuite partout : inversion, acceptation--rejet, simulation de Poisson, simulation gaussienne, simulation de trajectoires browiennes aux temps de grille.
+\end{itemize}
+
+\subsection{Notions et définitions essentielles}
+
+\begin{itemize}
+  \item \textbf{Suite de nombres pseudo-aléatoires.} Le livre rappelle d'abord qu'une définition purement mathématique d'une suite aléatoire exigerait l'existence d'une suite i.i.d. $(U_n)$ de loi uniforme et d'un scénario $\omega$ tel que $x_n=U_n(\omega)$. Cette définition est théoriquement correcte mais inutilisable en pratique.
+  \item \textbf{Générateurs congruentiels.} Les suites pseudo-aléatoires de la forme
+  \[
+    y_{n+1}\equiv ay_n+b \pmod N,\qquad x_n=\frac{y_n}{N}
+  \]
+  sont étudiées comme objets arithmétiques. Le livre insiste sur la période, sur le rôle du groupe multiplicatif modulo $N$ et sur le fait qu'une grande période n'est pas, à elle seule, un gage de qualité.
+  \item \textbf{Théorème fondamental de simulation.} Sur un espace polonais, toute loi peut être vue comme l'image de la mesure uniforme sur $[0,1]$ par une application borélienne. C'est un résultat de structure : il garantit l'existence d'une représentation, mais pas une méthode numériquement exploitable.
+  \item \textbf{Méthode par fonction de répartition inverse.} Si $F$ est la fonction de répartition de la loi cible, l'inverse gauche canonique
+  \[
+    F_l^{-1}(u)=\inf\{x\in\R:\ F(x)\ge u\}
+  \]
+  transforme une uniforme en une variable de loi voulue.
+  \item \textbf{Rendement d'une procédure.} Le livre appelle \emph{yield} le rendement d'une méthode, c'est-à-dire l'inverse du nombre moyen de nombres pseudo-aléatoires nécessaires pour produire une réalisation de la loi cible.
+  \item \textbf{Acceptation--rejet.} Si une densité cible $f$ est majorée par $cg$ où $g$ est une densité simulable et $c$ une constante, on simule sous la densité $g$ puis on accepte avec probabilité proportionnelle à $f/(cg)$.
+  \item \textbf{Processus de Poisson.} Le chapitre relie la loi de Poisson aux temps exponentiels cumulés et à une construction explicite à partir d'un produit d'uniformes.
+  \item \textbf{Simulation gaussienne.} Le texte présente la méthode de Box--Muller, la simulation de vecteurs gaussiens corrélés via racine de covariance ou décomposition de Cholesky, puis l'application à la simulation de mouvement brownien sur une grille de temps.
+\end{itemize}
+
+\subsection{Résultats / théorèmes / propositions à connaître}
+
+\begin{enumerate}[label=\textbf{\arabic*.}]
+  \item \textbf{Structure arithmétique des générateurs congruentiels.} Le chapitre rappelle les résultats classiques sur le groupe multiplicatif modulo $N$ et sur la période maximale des générateurs homogènes. L'idée essentielle n'est pas de faire de la théorie des nombres pour elle-même, mais de comprendre qu'un générateur congruentiel est d'abord un objet périodique, donc forcément fini, et que sa structure algébrique contraint sa période.
+
+  \item \textbf{Théorème fondamental de simulation.} Toute loi à valeurs dans un espace polonais est image de la loi uniforme sur $[0,1]$ par une application borélienne.
+  \begin{itemize}
+    \item \emph{Hypothèses :} l'espace d'arrivée doit être polonais.
+    \item \emph{Signification :} toute simulation part, au fond, de l'uniforme.
+    \item \emph{Utilité :} ce résultat justifie conceptuellement l'universalité des procédures basées sur $U\sim\mathcal U([0,1])$.
+    \item \emph{À retenir :} c'est un théorème d'existence, pas une recette.
+  \end{itemize}
+
+  \item \textbf{Proposition d'inversion.} Si $U\sim\mathcal U((0,1))$, alors $F_l^{-1}(U)$ a la loi de fonction de répartition $F$.
+  \begin{itemize}
+    \item \emph{Idée de preuve :} montrer que l'événement $\{F_l^{-1}(U)\le x\}$ équivaut à $\{U\le F(x)\}$.
+    \item \emph{Utilité :} c'est la méthode la plus directe lorsqu'on sait inverser $F$.
+    \item \emph{Point d'attention :} son rendement est excellent, mais le coût de l'inversion peut être prohibitif.
+  \end{itemize}
+
+  \item \textbf{Proposition d'acceptation--rejet.} Si $f\le cg$ avec $g>0$ presque partout, le temps d'acceptation est géométrique et l'échantillon accepté suit la loi cible normalisée.
+  \begin{itemize}
+    \item \emph{Hypothèses :} majoration valable presque partout et simulation possible sous $g$.
+    \item \emph{Signification :} on peut simuler une densité connue à constante multiplicative près.
+    \item \emph{Utilité :} méthode très générale, notamment quand l'inversion n'est pas praticable.
+    \item \emph{À retenir :} la qualité dépend fortement de la constante $c$ ; plus $c$ est proche de la meilleure majoration, meilleur est le rendement.
+  \end{itemize}
+
+  \item \textbf{Construction du processus de Poisson.} En cumulant des variables exponentielles indépendantes, on obtient un processus à accroissements indépendants et stationnaires, et de marginales de loi de Poisson.
+  \begin{itemize}
+    \item \emph{Ce que montre le résultat :} la loi de Poisson et le processus de Poisson se simulent naturellement par temps d'attente exponentiels.
+    \item \emph{Message pédagogique :} le lien entre lois discrètes et dynamiques de saut est déjà présent au niveau simulation.
+  \end{itemize}
+
+  \item \textbf{Proposition de Box--Muller.} Si $R^2$ est exponentielle de paramètre $1/2$ et $\Theta$ uniforme sur $[0,2\pi]$, alors $(R\cos\Theta,R\sin\Theta)$ est gaussien standard bidimensionnel.
+  \begin{itemize}
+    \item \emph{Idée de preuve :} passage en coordonnées polaires.
+    \item \emph{Utilité :} simulation efficace de paires de gaussiennes centrées réduites.
+    \item \emph{À retenir :} elle fournit directement deux gaussiennes à la fois.
+  \end{itemize}
+
+  \item \textbf{Lemme de covariance linéaire.} Si $Y\in L^2(\R^d)$ et $A$ est une matrice, alors $C_{AY}=AC_YA^\ast$.
+  \begin{itemize}
+    \item \emph{Utilité :} si $Z\sim\mathcal N(0,I_d)$ et $\Sigma=AA^\ast$, alors $AZ\sim\mathcal N(0,\Sigma)$.
+    \item \emph{Conséquence pratique :} Cholesky ou racine carrée positive de $\Sigma$ permettent de simuler des vecteurs gaussiens corrélés.
+  \end{itemize}
+\end{enumerate}
+
+\subsection{Méthodes et techniques}
+
+\begin{itemize}
+  \item \textbf{Méthode d'inversion.} Son objectif est de transformer une uniforme en loi cible par la fonction de répartition inverse. Elle est particulièrement adaptée aux lois unidimensionnelles usuelles lorsque l'inverse est explicite ou peu coûteux.
+  \item \textbf{Méthode d'acceptation--rejet.} Elle sert lorsque la densité cible est plus facile à majorer qu'à inverser. La procédure est : simuler $Y\sim g$, simuler $U\sim\mathcal U(0,1)$, accepter si $cUg(Y)\le f(Y)$, sinon recommencer.
+  \item \textbf{Simulation de lois discrètes.} Le chapitre explique que l'inversion fonctionne aussi, mais que le coût peut devenir linéaire dans la taille du support si on n'utilise pas de structure adaptée.
+  \item \textbf{Simulation gamma.} Le livre distingue soigneusement les cas $\alpha<1$ et $\alpha\ge1$ et montre qu'on ne traite pas uniformément toute la famille gamma.
+  \item \textbf{Simulation du Poisson.} Deux points de vue sont proposés : via les temps exponentiels, ou via le produit d'uniformes.
+  \item \textbf{Simulation gaussienne.} Deux niveaux apparaissent :
+  \begin{itemize}
+    \item gaussiennes standards indépendantes (Box--Muller) ;
+    \item gaussiennes corrélées, puis processus gaussiens, via la structure de covariance.
+  \end{itemize}
+  \item \textbf{Simulation du brownien sur une grille.} Le message fondamental est qu'il est souvent plus naturel de simuler les accroissements browniens indépendants que d'attaquer directement la matrice de covariance $(t_i\wedge t_j)$.
+\end{itemize}
+
+\subsection{Exemples et interprétations}
+
+\begin{itemize}
+  \item Les exemples de lois exponentielle, de Cauchy, de Pareto, de Bernoulli, de binomiale et de géométrique montrent que l'inversion peut être soit très simple, soit rapidement coûteuse.
+  \item La simulation uniforme sur un domaine $D$ par rejet dans un rectangle englobant illustre l'idée géométrique de l'acceptation--rejet.
+  \item Les exemples gamma rappellent qu'une même famille paramétrée peut exiger des procédures différentes selon les valeurs du paramètre.
+  \item Les applications gaussiennes montrent déjà les objets qui reviendront partout ensuite : covariance, Cholesky, brownien, processus gaussiens corrélés.
+\end{itemize}
+
+\subsection{Ce qu'il faut absolument savoir retenir}
+
+\begin{itemize}
+  \item \textbf{Résultats à connaître par cœur :}
+  \begin{itemize}
+    \item $F_l^{-1}(U)$ simule la loi de fonction de répartition $F$ ;
+    \item l'acceptation--rejet produit un temps d'attente géométrique ;
+    \item $AZ$ simule une gaussienne corrélée dès que $AA^\ast=\Sigma$.
+  \end{itemize}
+  \item \textbf{Méthodes indispensables :}
+  \begin{itemize}
+    \item inversion ;
+    \item acceptation--rejet ;
+    \item Box--Muller ;
+    \item Cholesky pour les vecteurs gaussiens corrélés.
+  \end{itemize}
+  \item \textbf{Points subtils :}
+  \begin{itemize}
+    \item le théorème fondamental de simulation est un résultat d'existence, non un algorithme ;
+    \item une grande période pour un générateur pseudo-aléatoire ne suffit pas ;
+    \item le rendement d'une méthode est une notion centrale de coût.
+  \end{itemize}
+  \item \textbf{Erreurs fréquentes à éviter :}
+  \begin{itemize}
+    \item confondre qualité arithmétique et qualité statistique d'un générateur ;
+    \item utiliser l'acceptation--rejet avec une enveloppe trop mauvaise ;
+    \item oublier que la simulation d'un processus gaussien passe d'abord par sa covariance.
+  \end{itemize}
+\end{itemize}
+
+\section{Chapitre 2 -- La méthode de Monte Carlo et les premières applications au pricing}
+
+\subsection{Idée générale du chapitre}
+
+Le chapitre 2 explique ce qu'est réellement la méthode de \mc : non pas une simple moyenne empirique, mais une procédure numérique dont la fiabilité dépend à la fois d'un théorème de convergence, d'un contrôle de variance et d'une quantification explicite de l'erreur statistique. C'est le chapitre où le livre transforme la loi forte des grands nombres en méthode de calcul.
+
+Le chapitre est aussi le lieu où apparaissent les premières applications financières : valorisation d'options européennes, puis calcul de sensibilités. Il sert donc à la fois de socle théorique et de première mise en pratique du langage du livre.
+
+\subsection{Notions et définitions essentielles}
+
+\begin{itemize}
+  \item \textbf{Estimateur de \mc.} Pour $X\in L^1$, l'espérance $\E[X]$ est approchée par
+  \[
+    \bar X_M=\frac1M\sum_{k=1}^M X_k,
+  \]
+  où les $X_k$ sont i.i.d. de même loi que $X$.
+  \item \textbf{Taux de convergence.} Le chapitre distingue clairement :
+  \begin{itemize}
+    \item la convergence presque sûre (loi forte des grands nombres) ;
+    \item la convergence quadratique moyenne ;
+    \item le théorème central limite ;
+    \item la loi du logarithme itéré.
+  \end{itemize}
+  \item \textbf{Variance empirique.} L'estimateur
+  \[
+    V_M=\frac{1}{M-1}\sum_{k=1}^M (X_k-\bar X_M)^2
+  \]
+  permet de remplacer la variance inconnue dans les intervalles de confiance.
+  \item \textbf{Intervalle de confiance.} Le chapitre insiste sur l'idée qu'un résultat de \mc\ n'est pas seulement une valeur numérique, mais une valeur accompagnée d'un niveau de confiance.
+  \item \textbf{Modèle de Black--Scholes multidimensionnel.} Les actifs suivent des exponentielles de browniens corrélés sous la probabilité risque-neutre.
+  \item \textbf{Prime d'une option européenne.} Le prix est l'espérance actualisée d'un payoff terminal.
+  \item \textbf{Greeks.} Les sensibilités sont les dérivées du prix par rapport aux paramètres du problème.
+  \item \textbf{Méthodes de calcul des sensibilités.} Le chapitre introduit la dérivation sous l'intégrale, la différentiation sur l'espace des scénarios, la méthode log-vraisemblance et la méthode du processus tangent.
+\end{itemize}
+
+\subsection{Résultats / théorèmes / propositions à connaître}
+
+\begin{enumerate}[label=\textbf{\arabic*.}]
+  \item \textbf{Loi forte des grands nombres et théorème central limite.}
+  \begin{itemize}
+    \item \emph{Signification :} $\bar X_M\to \E[X]$ presque sûrement et
+    \[
+      \sqrt{M}\,\bigl(\bar X_M-\E[X]\bigr)\xrightarrow{\mathcal L}\mathcal N(0,\mathrm{Var}(X)).
+    \]
+    \item \emph{Utilité :} le \mc\ a une vitesse typique d'ordre $M^{-1/2}$.
+    \item \emph{À retenir :} diviser l'erreur statistique par $2$ demande environ quatre fois plus de simulations.
+  \end{itemize}
+
+  \item \textbf{Théorème de Berry--Esseen.}
+  \begin{itemize}
+    \item \emph{Hypothèses :} existence d'un moment d'ordre $3$.
+    \item \emph{Message :} la normalisation gaussienne du TCL n'est pas seulement asymptotique ; elle est quantitativement contrôlée par une borne en $O(M^{-1/2})$.
+    \item \emph{Utilité :} justifier l'usage pratique d'intervalles de confiance gaussiens.
+  \end{itemize}
+
+  \item \textbf{Intervalle de confiance empirique.} Le chapitre construit, à partir de $V_M$, un intervalle de la forme
+  \[
+    I_M^\alpha=\left[\bar X_M-q_\alpha\sqrt{\frac{V_M}{M}},\ \bar X_M+q_\alpha\sqrt{\frac{V_M}{M}}\right],
+  \]
+  de niveau asymptotique $\alpha$.
+  \begin{itemize}
+    \item \emph{Point essentiel :} ce n'est pas la moyenne seule qu'il faut annoncer, mais la moyenne et l'intervalle.
+    \item \emph{Cas particulier :} si $X$ est gaussienne, le lien avec la loi de Student donne une justification exacte.
+  \end{itemize}
+
+  \item \textbf{Théorème d'interversion dérivée/intégrale.}
+  \begin{itemize}
+    \item \emph{Hypothèses :} existence d'une dérivée presque sûre et domination ou intégrabilité uniforme convenable.
+    \item \emph{Signification :} on peut dériver l'espérance en dérivant l'intégrande.
+    \item \emph{Utilité :} fondement rigoureux des estimateurs pathwise pour les Greeks.
+  \end{itemize}
+
+  \item \textbf{Formules de sensitivité dans Black--Scholes.} Le chapitre obtient notamment
+  \[
+    \Phi'(x)=\E\!\left[\phi'(X_T^x)\frac{X_T^x}{x}\right]
+  \]
+  pour les payoffs réguliers, et
+  \[
+    \Phi'(x)=\E\!\left[\phi(X_T^x)\frac{W_T}{x\sigma T}\right]
+  \]
+  dans une forme pondérée adaptée à des payoffs plus irréguliers.
+  \begin{itemize}
+    \item \emph{Idée :} la première formule vient de la dérivation sous l'espérance, la seconde d'une intégration par parties gaussienne.
+    \item \emph{À retenir :} une même sensibilité peut avoir plusieurs représentations, avec des variances très différentes.
+  \end{itemize}
+\end{enumerate}
+
+\subsection{Méthodes et techniques}
+
+\begin{itemize}
+  \item \textbf{\mc\ standard.} Tirer des copies indépendantes, calculer la moyenne empirique, calculer la variance empirique, construire un intervalle de confiance.
+  \item \textbf{Pricing d'options vanilles.} Le chapitre montre comment réécrire les payoffs en fonction de normales ou de vecteurs gaussiens corrélés, puis appliquer directement la mécanique du \mc.
+  \item \textbf{Méthode pathwise.} Elle consiste à différencier le payoff simulé par rapport au paramètre lorsque cela a un sens presque sûrement.
+  \item \textbf{Méthode log-vraisemblance.} Elle consiste à dériver la densité de transition plutôt que le payoff. Elle est particulièrement utile pour les payoffs non lisses.
+  \item \textbf{Méthode du processus tangent.} Elle prépare les développements plus poussés du chapitre 10.
+\end{itemize}
+
+\subsection{Exemples et interprétations}
+
+\begin{itemize}
+  \item Les options vanilles en modèle de Black--Scholes servent de cas test où l'on connaît le prix exact, donc où l'on peut mesurer la qualité réelle du \mc.
+  \item Le \emph{best-of call} et les produits d'échange montrent l'intérêt du \mc\ lorsque les formules fermées deviennent rares ou compliquées.
+  \item Les premières formules de delta illustrent une idée qui traversera tout le livre : une dérivée peut être calculée de plusieurs manières, mais toutes n'ont pas la même robustesse numérique.
+\end{itemize}
+
+\subsection{Ce qu'il faut absolument savoir retenir}
+
+\begin{itemize}
+  \item \textbf{Résultats à connaître par cœur :}
+  \begin{itemize}
+    \item vitesse $M^{-1/2}$ du \mc ;
+    \item formule de l'intervalle de confiance empirique ;
+    \item principe de la dérivation sous l'espérance.
+  \end{itemize}
+  \item \textbf{Méthodes indispensables :}
+  \begin{itemize}
+    \item moyenne empirique + variance empirique + intervalle de confiance ;
+    \item simulation des actifs de Black--Scholes ;
+    \item première comparaison des méthodes de calcul des Greeks.
+  \end{itemize}
+  \item \textbf{Points subtils :}
+  \begin{itemize}
+    \item le TCL donne une loi limite, pas une borne déterministe ;
+    \item une estimation sans intervalle de confiance n'est pas exploitable sérieusement ;
+    \item la possibilité de dériver sous l'espérance dépend d'hypothèses qu'il ne faut pas gommer.
+  \end{itemize}
+  \item \textbf{Erreurs fréquentes à éviter :}
+  \begin{itemize}
+    \item croire que le \mc\ donne un prix exact dès que $M$ est grand ;
+    \item confondre erreur statistique et erreur de modélisation ;
+    \item utiliser une formule pathwise sur un payoff non différentiable sans justification.
+  \end{itemize}
+\end{itemize}
+
+\section{Chapitre 3 -- Réduction de variance}
+
+\subsection{Idée générale du chapitre}
+
+Ce chapitre répond à une question fondamentale : si le \mc\ converge seulement en $M^{-1/2}$, comment réduire le coût nécessaire pour atteindre une précision fixée ? Le point de vue adopté par le livre est très clair : on ne cherche pas seulement à diminuer une variance abstraite, mais à diminuer l'effort numérique total requis pour une précision donnée.
+
+Le chapitre rassemble les grands paradigmes classiques de réduction de variance : variables de contrôle, antithétiques, régression, pré-conditionnement, stratification et importance sampling. Il joue un rôle décisif pour toute la suite, car plusieurs méthodes plus avancées du livre s'interprètent comme des raffinements de ces idées.
+
+\subsection{Notions et définitions essentielles}
+
+\begin{itemize}
+  \item \textbf{Effort.} Le livre relie explicitement taille d'échantillon et variance : à demi-largeur de confiance fixée, le coût est essentiellement proportionnel à $\mathrm{Var}(X)$.
+  \item \textbf{Variable de contrôle.} Une variable $\Xi$ est un bon contrôle si son espérance est connue à faible coût, si $X-\Xi$ est simulable, et si elle réduit effectivement la variance.
+  \item \textbf{Pseudo-variable de contrôle.} Le livre met en garde contre les substitutions naïves du type $0\le \Xi\le X$ : une minoration n'est pas automatiquement une bonne variable de contrôle.
+  \item \textbf{Antithétiques.} Le principe est de simuler des variables fortement négativement corrélées afin de réduire la variance de leur moyenne.
+  \item \textbf{Contrôle optimal par régression.} On considère $X_\lambda=X-\lambda\Xi$ et on choisit $\lambda$ de façon optimale au sens de la variance.
+  \item \textbf{Pré-conditionnement.} Remplacer $X$ par $\E[X\mid\mathcal B]$ diminue toujours la variance si cette quantité est calculable.
+  \item \textbf{Stratification.} On découpe l'espace d'échantillonnage en strates, puis on alloue un nombre de simulations à chaque strate.
+  \item \textbf{Importance sampling.} On change de loi de simulation et on rétablit l'espérance par pondération.
+\end{itemize}
+
+\subsection{Résultats / théorèmes / propositions à connaître}
+
+\begin{enumerate}[label=\textbf{\arabic*.}]
+  \item \textbf{Inégalité de Jensen et réduction de variance.}
+  \begin{itemize}
+    \item \emph{Message :} les conditionnements et les minorations convexes peuvent produire des contrôles utiles.
+    \item \emph{Utilité :} le chapitre s'en sert pour construire des contrôles issus de moyennes géométriques ou de parités.
+  \end{itemize}
+
+  \item \textbf{Variables antithétiques et co-monotonie.}
+  \begin{itemize}
+    \item \emph{Résultat :} le signe de la covariance est gouverné par les propriétés de monotonie.
+    \item \emph{Utilité :} si l'on peut coupler deux simulations de façon monotone décroissante, la moyenne antithétique devient intéressante.
+    \item \emph{Point d'attention :} il faut tenir compte du coût supplémentaire ; une covariance négative n'est utile que si le gain compense ce coût.
+  \end{itemize}
+
+  \item \textbf{Coefficient optimal de contrôle.} Le choix
+  \[
+    \lambda^\ast=\frac{\mathrm{Cov}(X,\Xi)}{\mathrm{Var}(\Xi)}
+  \]
+  minimise la variance de $X-\lambda\Xi$.
+  \begin{itemize}
+    \item \emph{Signification :} la qualité d'un contrôle dépend de la corrélation avec la variable cible.
+    \item \emph{À retenir :} plus la corrélation est forte, plus le contrôle est efficace.
+  \end{itemize}
+
+  \item \textbf{Contrôles estimés : versions batch et adaptative.}
+  \begin{itemize}
+    \item \emph{Version batch :} on estime d'abord $\lambda^\ast$, puis on fait tourner le \mc.
+    \item \emph{Version adaptative :} on met à jour le coefficient au fil des simulations.
+    \item \emph{Message du livre :} l'adaptatif préserve le non-biais tout en atteignant la variance asymptotique optimale sous de bonnes hypothèses.
+  \end{itemize}
+
+  \item \textbf{Variance stratifiée et allocation optimale.} Si $p_i$ est le poids de la strate $i$ et $\sigma_{F,i}$ son écart-type conditionnel, l'allocation optimale est proportionnelle à $p_i\sigma_{F,i}$.
+  \begin{itemize}
+    \item \emph{Idée de preuve :} inégalité de Cauchy--Schwarz.
+    \item \emph{À retenir :} une allocation uniforme n'est optimale que dans des cas particuliers.
+  \end{itemize}
+
+  \item \textbf{Identité d'importance sampling.}
+  \[
+    \E[h(X)] = \E\!\left[h(Y)\frac{f(Y)}{g(Y)}\right]
+  \]
+  lorsque $Y$ est simulé sous une densité $g$ et $X$ sous une densité $f$.
+  \begin{itemize}
+    \item \emph{Signification :} on peut déplacer l'effort de simulation vers les zones importantes.
+    \item \emph{Piège central :} un mauvais choix de $g$ peut augmenter la variance au lieu de la diminuer.
+  \end{itemize}
+\end{enumerate}
+
+\subsection{Méthodes et techniques}
+
+\begin{itemize}
+  \item \textbf{Contrôles statiques.} Ils utilisent des quantités de prix connus ou presque connus pour corriger la simulation d'un payoff voisin.
+  \item \textbf{Contrôles issus de Jensen.} Le chapitre montre notamment comment exploiter la moyenne géométrique dans les options de panier ou les Asian de type Kemna--Vorst.
+  \item \textbf{Antithétiques.} Très efficaces lorsque le payoff est monotone par rapport aux variables de base.
+  \item \textbf{Contrôles par régression.} Ils permettent d'optimiser numériquement la combinaison de plusieurs contrôles.
+  \item \textbf{Pré-conditionnement par conditionnement.} C'est une méthode conceptuellement très simple, mais très puissante dès qu'une espérance conditionnelle explicite est disponible.
+  \item \textbf{Stratification.} La procédure complète comprend le choix des strates, la simulation conditionnelle dans chaque strate, et l'allocation des tailles d'échantillon.
+  \item \textbf{Importance sampling paramétrique.} Le livre insiste déjà sur l'idée que le choix des paramètres doit être optimisé, ce qui prépare naturellement le chapitre 6.
+\end{itemize}
+
+\subsection{Exemples et interprétations}
+
+\begin{itemize}
+  \item Les relations de parité call--put et leurs variantes servent de source immédiate de variables de contrôle.
+  \item Les options de panier et les Asian montrent comment une approximation géométrique peut produire à la fois une intuition et une réduction de variance concrète.
+  \item Les calculs de VaR illustrent le fait qu'une méthode statistiquement correcte peut devenir numériquement inefficace si elle n'est pas adaptée aux événements rares.
+\end{itemize}
+
+\subsection{Ce qu'il faut absolument savoir retenir}
+
+\begin{itemize}
+  \item \textbf{Résultats à connaître par cœur :}
+  \begin{itemize}
+    \item coefficient optimal $\lambda^\ast$ d'une variable de contrôle ;
+    \item variance réduite par conditionnement ;
+    \item allocation optimale d'une stratification.
+  \end{itemize}
+  \item \textbf{Méthodes indispensables :}
+  \begin{itemize}
+    \item variables de contrôle ;
+    \item antithétiques ;
+    \item stratification ;
+    \item importance sampling.
+  \end{itemize}
+  \item \textbf{Points subtils :}
+  \begin{itemize}
+    \item une minoration n'est pas automatiquement une bonne variable de contrôle ;
+    \item le coût de calcul compte autant que la variance ;
+    \item l'importance sampling n'est efficace que si le changement de loi cible bien les zones rares ou dominantes.
+  \end{itemize}
+  \item \textbf{Erreurs fréquentes à éviter :}
+  \begin{itemize}
+    \item utiliser des antithétiques sans vérifier la structure de monotonie ;
+    \item oublier d'optimiser ou d'estimer convenablement les coefficients de contrôle ;
+    \item croire qu'un changement de loi améliore toujours la simulation.
+  \end{itemize}
+\end{itemize}
+
+\section{Chapitre 4 -- La méthode quasi-Monte Carlo}
+
+\subsection{Idée générale du chapitre}
+
+Le chapitre 4 remplace les suites pseudo-aléatoires par des suites déterministes à faible discrépance. L'idée est de réduire l'erreur d'intégration non plus par fluctuation aléatoire moyenne, mais par une meilleure répartition géométrique des points dans l'hypercube.
+
+Le chapitre est important car il met en évidence une alternative profonde au \mc\ classique. En même temps, le livre évite tout enthousiasme naïf : la \qmc\ peut être très performante, mais seulement sous des hypothèses de régularité adéquates, et la dépendance à la dimension peut réapparaître de façon sévère.
+
+\subsection{Notions et définitions essentielles}
+
+\begin{itemize}
+  \item \textbf{Uniforme distribution d'une suite.} Une suite $(\xi_n)$ de $[0,1]^d$ est uniformément distribuée si ses moyennes empiriques convergent vers l'intégrale de toute fonction borélienne bornée continue presque partout.
+  \item \textbf{Discrépance étoilée et discrépance extrême.} Elles mesurent l'écart entre la répartition empirique d'un nuage de points et la mesure de Lebesgue sur des familles de pavés.
+  \item \textbf{Variation finie au sens pertinent pour Koksma--Hlawka.} Le chapitre adopte une définition liée aux mesures signées et la relie à la variation de Hardy--Krause.
+  \item \textbf{Suites à faible discrépance.} Halton, Faure, Sobol', Niederreiter, Hammersley, Kakutani, bons points de réseau.
+  \item \textbf{Randomized QMC.} Le chapitre présente notamment le décalage aléatoire et les procédures de type scrambling.
+  \item \textbf{Dimension structurelle.} Le livre souligne qu'il faut adapter la dimension de la suite à la représentation effective du problème sous la forme $\varphi(U)$.
+\end{itemize}
+
+\subsection{Résultats / théorèmes / propositions à connaître}
+
+\begin{enumerate}[label=\textbf{\arabic*.}]
+  \item \textbf{Caractérisations de l'uniforme distribution.} Le chapitre énonce plusieurs équivalences : convergence sur les pavés, discrépance qui tend vers zéro, critère de Weyl.
+  \begin{itemize}
+    \item \emph{Utilité :} elles donnent plusieurs points d'entrée pour analyser une suite.
+    \item \emph{À retenir :} la discrépance n'est pas un gadget ; c'est le bon objet pour mesurer la qualité d'une suite déterministe.
+  \end{itemize}
+
+  \item \textbf{Inégalité de Koksma--Hlawka.}
+  \[
+    \left|\frac1n\sum_{k=1}^n f(\xi_k)-\int_{[0,1]^d} f(u)\,\ud u\right|
+    \le V(f)\,D_n^\ast.
+  \]
+  \begin{itemize}
+    \item \emph{Hypothèses :} $f$ doit avoir une variation finie au sens approprié.
+    \item \emph{Signification :} l'erreur est le produit d'une régularité et d'une qualité géométrique des points.
+    \item \emph{Utilité :} c'est la formule centrale du chapitre.
+  \end{itemize}
+
+  \item \textbf{Bornes de Roth sur la discrépance.}
+  \begin{itemize}
+    \item \emph{Message :} il existe des limites théoriques à l'amélioration de la discrépance ; on ne peut pas faire arbitrairement mieux que certaines puissances logarithmiques.
+    \item \emph{À retenir :} le taux idéal $n^{-1}$ sans pénalité de dimension n'est pas accessible en général.
+  \end{itemize}
+
+  \item \textbf{Théorème de Halton.} Les suites de Halton ont une discrépance en $O((\log n)^d/n)$.
+  \begin{itemize}
+    \item \emph{Utilité :} elles fournissent un exemple canonique de suites à faible discrépance.
+    \item \emph{Remarque :} le livre renvoie la preuve détaillée à son chapitre 12.
+  \end{itemize}
+
+  \item \textbf{Résultat de Proïnov.}
+  \begin{itemize}
+    \item \emph{Message :} pour les fonctions seulement lipschitziennes, le contrôle par la discrépance se dégrade via une puissance $1/d$.
+    \item \emph{Conséquence :} la malédiction de la dimension n'est pas simplement effacée par la \qmc.
+  \end{itemize}
+
+  \item \textbf{Décalage aléatoire.} Si $U$ est uniforme, alors $\{U+a\}$ reste uniforme.
+  \begin{itemize}
+    \item \emph{Utilité :} cela permet de randomiser une suite \qmc\ et donc de reconstruire des intervalles de confiance.
+    \item \emph{Limite :} on change alors de nature de méthode ; on réintroduit une variance statistique.
+  \end{itemize}
+\end{enumerate}
+
+\subsection{Méthodes et techniques}
+
+\begin{itemize}
+  \item \textbf{\qmc\ pure.} On remplace les points i.i.d. uniformes par une suite déterministe à faible discrépance.
+  \item \textbf{Suites à faible discrépance.} Le chapitre compare plusieurs familles et insiste sur leur mode de construction.
+  \item \textbf{Hammersley.} Procédure utile lorsque le nombre de points est fixé à l'avance.
+  \item \textbf{Randomized QMC.} Elle permet d'associer à la méthode des estimations de variance, mais au prix d'un retour partiel à une logique de \mc.
+  \item \textbf{\qmc\ et acceptation--rejet.} Le chapitre montre comment pousser l'approche dans des problèmes où la dimension d'innovation n'est pas bornée a priori.
+\end{itemize}
+
+\subsection{Exemples et interprétations}
+
+\begin{itemize}
+  \item Les comparaisons visuelles entre points \mc\ et suites de Halton donnent une intuition forte de la notion de faible discrépance.
+  \item L'exemple Box--Muller + Halton montre que la \qmc\ peut être très performante en pratique sur certaines intégrales liées à la finance.
+  \item L'exemple de la suite de Van der Corput réutilisée de manière naïve pour produire une structure bidimensionnelle met en évidence un piège conceptuel fondamental : une bonne suite unidimensionnelle ne crée pas automatiquement une bonne pseudo-indépendance en dimension supérieure.
+\end{itemize}
+
+\subsection{Ce qu'il faut absolument savoir retenir}
+
+\begin{itemize}
+  \item \textbf{Résultats à connaître par cœur :}
+  \begin{itemize}
+    \item Koksma--Hlawka ;
+    \item taux $O((\log n)^d/n)$ des bonnes suites explicites ;
+    \item limites de type Roth.
+  \end{itemize}
+  \item \textbf{Méthodes indispensables :}
+  \begin{itemize}
+    \item suites de Halton, Sobol', Faure ;
+    \item randomized QMC par décalage.
+  \end{itemize}
+  \item \textbf{Points subtils :}
+  \begin{itemize}
+    \item la dimension structurelle du problème est décisive ;
+    \item la régularité requise par Koksma--Hlawka est exigeante ;
+    \item le randomized QMC ne se lit pas exactement comme le QMC pur.
+  \end{itemize}
+  \item \textbf{Erreurs fréquentes à éviter :}
+  \begin{itemize}
+    \item croire que la \qmc\ est automatiquement meilleure que le \mc ;
+    \item ignorer la dépendance en dimension ;
+    \item utiliser une suite de faible discrépance dans une représentation mal choisie du problème.
+  \end{itemize}
+\end{itemize}
+
+\section{Chapitre 5 -- Méthodes de quantification optimale I : cubatures}
+
+\subsection{Idée générale du chapitre}
+
+Le chapitre 5 introduit la quantification vectorielle optimale comme méthode de calcul d'espérances en dimension modérée. L'idée est d'approximer une variable aléatoire $X$ par une variable discrète $\hat X$ à nombre fini de valeurs, choisie de manière optimale, puis de remplacer $\E[F(X)]$ par $\E[F(\hat X)]$.
+
+Ce chapitre est important pour deux raisons. Premièrement, il fournit une alternative au \mc\ pour des calculs répétitifs en dimension moyenne. Deuxièmement, il relie explicitement la quantification à la stratification, au contrôle de variance et à l'optimisation stochastique du chapitre 6.
+
+\subsection{Notions et définitions essentielles}
+
+\begin{itemize}
+  \item \textbf{Quantificateur à $N$ points.} Il s'agit d'une grille $\Gamma=\{x_1,\dots,x_N\}$ associée à une partition de Voronoï.
+  \item \textbf{Projection au plus proche voisin.} La variable quantifiée est
+  \[
+    \hat X^\Gamma=\mathrm{Proj}_\Gamma(X).
+  \]
+  \item \textbf{Distorsion quadratique.} La qualité de la quantification est mesurée par $\|X-\hat X^\Gamma\|_2$ ou, de manière équivalente, par la fonction de distorsion.
+  \item \textbf{Stationnarité.} Un quantificateur optimal satisfait une propriété de barycentre conditionnel : $\E(X\mid \hat X)=\hat X$.
+  \item \textbf{Cubature quantifiée.} On approxime une espérance en remplaçant $X$ par $\hat X$.
+  \item \textbf{Lien avec Wasserstein.} Pour les fonctions lipschitziennes, l'erreur de cubature se lit comme une distance de transport d'ordre $1$.
+\end{itemize}
+
+\subsection{Résultats / théorèmes / propositions à connaître}
+
+\begin{enumerate}[label=\textbf{\arabic*.}]
+  \item \textbf{Existence d'un quantificateur optimal.}
+  \begin{itemize}
+    \item \emph{Hypothèses :} $X\in L^2(\R^d)$.
+    \item \emph{Signification :} le problème d'optimisation a une solution.
+    \item \emph{Utilité :} la théorie n'est pas seulement asymptotique ; elle repose sur un vrai optimum.
+  \end{itemize}
+
+  \item \textbf{Stationnarité et meilleure approximation discrète.}
+  \begin{itemize}
+    \item \emph{Résultat :} un quantificateur quadratique optimal est stationnaire et constitue la meilleure approximation de $X$ parmi les variables aléatoires à au plus $N$ valeurs.
+    \item \emph{Idée de preuve :} projection orthogonale en norme $L^2$.
+  \end{itemize}
+
+  \item \textbf{Théorème de Zador.}
+  \begin{itemize}
+    \item \emph{Message :} l'erreur optimale de quantification décroît comme $N^{-1/d}$.
+    \item \emph{Conséquence :} la quantification subit, elle aussi, la malédiction de la dimension.
+    \item \emph{À retenir :} l'intérêt de la méthode est donc concentré sur les dimensions petites ou moyennes.
+  \end{itemize}
+
+  \item \textbf{Erreurs de cubature selon la régularité de $F$.}
+  \begin{itemize}
+    \item \emph{Cas lipschitzien :}
+    \[
+      |\E[F(X)]-\E[F(\hat X)]|\le [F]_{\Lip}\,\|X-\hat X\|_1.
+    \]
+    \item \emph{Cas convexe :} sous stationnarité, on obtient une inégalité à sens unique.
+    \item \emph{Cas $C^{1,\Lip}$ :} l'erreur devient quadratique, de l'ordre de $\|X-\hat X\|_2^2$.
+    \item \emph{Message :} la stationnarité sert à gagner un ordre lorsque la fonction test est régulière.
+  \end{itemize}
+
+  \item \textbf{Unicité en dimension 1 log-concave.}
+  \begin{itemize}
+    \item \emph{Résultat :} pour les densités unimodales log-concaves, le quantificateur stationnaire est unique à permutation près.
+    \item \emph{Utilité :} cela justifie des algorithmes déterministes très stables en dimension $1$.
+  \end{itemize}
+
+  \item \textbf{Stratification universelle et quantification.}
+  \begin{itemize}
+    \item \emph{Message :} les cellules de Voronoï d'un quantificateur optimal fournissent des strates remarquablement adaptées à des classes larges de fonctions lipschitziennes.
+    \item \emph{Importance :} le chapitre établit un lien conceptuel fort entre quantification et réduction de variance.
+  \end{itemize}
+\end{enumerate}
+
+\subsection{Méthodes et techniques}
+
+\begin{itemize}
+  \item \textbf{Formule de cubature.} Une fois la grille et les poids calculés, l'évaluation de $\E[F(\hat X)]$ devient très rapide.
+  \item \textbf{Newton--Raphson en dimension 1.} Le chapitre donne les équations stationnaires explicites et montre comment les résoudre efficacement.
+  \item \textbf{Lloyd I.} C'est une procédure de point fixe basée sur la stationnarité.
+  \item \textbf{Richardson--Romberg quantifié.} Le chapitre montre comment combiner plusieurs niveaux de quantification pour réduire le biais.
+  \item \textbf{Quantification comme variable de contrôle.} On décompose
+  \[
+    \E[F(X)] = \E[F(\hat X)] + \E[F(X)-F(\hat X)],
+  \]
+  puis on réserve le \mc\ au terme résiduel.
+  \item \textbf{Stratification universelle par quantification.} C'est une extension naturelle des idées du chapitre 3.
+\end{itemize}
+
+\subsection{Exemples et interprétations}
+
+\begin{itemize}
+  \item Les quantifications de lois gaussiennes illustrent visuellement les cellules de Voronoï et la manière dont l'inertie se répartit.
+  \item Les exemples liés au brownien et à certains fonctionnels montrent que la méthode ne se limite pas aux lois simples.
+  \item Les expériences numériques sur des options de panier géométrique montrent dans quels régimes la quantification peut devenir compétitive vis-à-vis du \mc.
+\end{itemize}
+
+\subsection{Ce qu'il faut absolument savoir retenir}
+
+\begin{itemize}
+  \item \textbf{Résultats à connaître par cœur :}
+  \begin{itemize}
+    \item stationnarité $\E(X\mid \hat X)=\hat X$ ;
+    \item taux $N^{-1/d}$ de Zador ;
+    \item ordre $1$ pour les fonctions lipschitziennes et ordre $2$ pour les fonctions $C^{1,\Lip}$.
+  \end{itemize}
+  \item \textbf{Méthodes indispensables :}
+  \begin{itemize}
+    \item Newton et Lloyd en dimension $1$ ;
+    \item cubature quantifiée ;
+    \item usage de la quantification comme contrôle ou comme stratification.
+  \end{itemize}
+  \item \textbf{Points subtils :}
+  \begin{itemize}
+    \item la stationnarité est décisive pour l'ordre d'erreur ;
+    \item l'intérêt pratique dépend fortement de la dimension ;
+    \item la préparation hors ligne de la grille fait partie intégrante de la méthode.
+  \end{itemize}
+  \item \textbf{Erreurs fréquentes à éviter :}
+  \begin{itemize}
+    \item croire que la quantification est adaptée aux grandes dimensions sans réserve ;
+    \item oublier le coût de recherche du plus proche voisin ;
+    \item négliger le rôle de la régularité de $F$ dans l'erreur de cubature.
+  \end{itemize}
+\end{itemize}
+
+\section{Chapitre 6 -- Approximation stochastique et applications à la finance}
+
+\subsection{Idée générale du chapitre}
+
+Le chapitre 6 change de nature : on ne cherche plus simplement à estimer une espérance, mais à résoudre des équations de point fixe, des problèmes d'optimisation ou des calibrations dans lesquels l'information n'est accessible que par simulation. Le paradigme central est celui de Robbins--Monro.
+
+Ce chapitre est important parce qu'il fait entrer le livre dans une logique itérative : le hasard n'est plus seulement utilisé pour moyenner, mais pour piloter une dynamique d'approximation. Il sert ensuite à l'importance sampling adaptatif, à la calibration, à la VaR/CVaR et à l'optimisation des grilles de quantification.
+
+\subsection{Notions et définitions essentielles}
+
+\begin{itemize}
+  \item \textbf{Algorithme de Robbins--Monro.}
+  \[
+    Y_{n+1}=Y_n-\gamma_{n+1}H(Y_n,Z_{n+1}),
+  \]
+  avec $h(y)=\E[H(y,Z_1)]$.
+  \item \textbf{Suite de pas.} Les hypothèses classiques sont
+  \[
+    \sum_{n\ge1}\gamma_n=+\infty,\qquad \sum_{n\ge1}\gamma_n^2<+\infty.
+  \]
+  \item \textbf{Fonction de Lyapunov.} Elle permet de contrôler la stabilité globale de l'algorithme.
+  \item \textbf{Champ pseudo-gradient.} Le livre étend la théorie au-delà du cas strictement convexe.
+  \item \textbf{VaR et CVaR.} Elles sont traitées comme des objets calculables récursivement.
+  \item \textbf{Traps.} Le texte attire l'attention sur l'existence de points fixes parasites ou de zones où l'algorithme peut se stabiliser de façon non pertinente.
+  \item \textbf{Quasi-stochastic approximation.} Le chapitre relie enfin approximation stochastique et suites à faible discrépance.
+\end{itemize}
+
+\subsection{Résultats / théorèmes / propositions à connaître}
+
+\begin{enumerate}[label=\textbf{\arabic*.}]
+  \item \textbf{Théorème de Robbins--Siegmund.}
+  \begin{itemize}
+    \item \emph{Hypothèses :} existence d'une fonction de Lyapunov, contrôle quadratique du bruit, conditions sur les pas.
+    \item \emph{Signification :} la suite est stable, certaines séries sont convergentes et le niveau de Lyapunov se stabilise.
+    \item \emph{Rôle :} c'est le résultat de base sur lequel repose l'analyse de convergence presque sûre.
+  \end{itemize}
+
+  \item \textbf{Corollaire de type Robbins--Monro.}
+  \begin{itemize}
+    \item \emph{Hypothèse clé :} condition de réversion moyenne vers l'unique zéro $y^\ast$.
+    \item \emph{Conclusion :} $Y_n\to y^\ast$ presque sûrement.
+    \item \emph{À retenir :} l'algorithme est un solveur stochastique de $h(y)=0$.
+  \end{itemize}
+
+  \item \textbf{Version gradient stochastique.}
+  \begin{itemize}
+    \item \emph{Cas visé :} minimisation d'une fonction $L$ lorsque seul un gradient bruité est observable.
+    \item \emph{Conclusion :} sous coercivité et convexité appropriées, la convergence vers le minimum global est assurée.
+  \end{itemize}
+
+  \item \textbf{Méthode de Kiefer--Wolfowitz.}
+  \begin{itemize}
+    \item \emph{Idée :} approcher le gradient par différences finies lorsqu'il n'est pas directement simulable.
+    \item \emph{Utilité :} calibration et optimisation lorsque l'accès aux dérivées est impossible.
+    \item \emph{Point d'attention :} le choix des pas devient beaucoup plus délicat.
+  \end{itemize}
+
+  \item \textbf{TCL et principe de moyennage de Ruppert--Polyak.}
+  \begin{itemize}
+    \item \emph{Message :} le moyennage des itérés améliore la variance asymptotique et permet d'atteindre une forme optimale sans connaître précisément la jacobienne au point limite.
+    \item \emph{Importance :} c'est l'un des résultats les plus importants du chapitre pour l'efficacité pratique.
+  \end{itemize}
+
+  \item \textbf{Calcul récursif de la VaR et de la CVaR.}
+  \begin{itemize}
+    \item \emph{Message :} la VaR peut être vue comme un zéro, et la CVaR comme une quantité jointe calculable en ligne.
+    \item \emph{Limite :} pour des niveaux extrêmes, l'algorithme brut devient instable ou très lent, ce qui motive l'ajout d'importance sampling.
+  \end{itemize}
+\end{enumerate}
+
+\subsection{Méthodes et techniques}
+
+\begin{itemize}
+  \item \textbf{Robbins--Monro pur.} Méthode de base pour résoudre $h(y)=0$.
+  \item \textbf{Gradient stochastique.} Utilisé pour minimiser une fonction d'énergie ou une variance.
+  \item \textbf{Importance sampling adaptatif.} On combine réduction de variance et approximation stochastique pour ajuster dynamiquement le changement de loi.
+  \item \textbf{Recherche de corrélation implicite.} Le chapitre montre comment transformer un problème de calibration en recherche de zéro.
+  \item \textbf{Calibration par simulation.} Le texte propose un cadre général, avec ou sans gradient direct.
+  \item \textbf{Calcul récursif VaR/CVaR.} Méthode légère et séquentielle, utile quand les données arrivent en flux ou quand un recalcul fréquent est requis.
+  \item \textbf{Optimisation de quantification.} Le chapitre relie explicitement la distorsion de quantification à un problème de gradient stochastique.
+  \item \textbf{Version quasi-stochastique.} Elle remplace le bruit i.i.d. par une suite \qmc\ sous des hypothèses plus fortes.
+\end{itemize}
+
+\subsection{Exemples et interprétations}
+
+\begin{itemize}
+  \item La loi des grands nombres est présentée elle-même comme un cas élémentaire d'approximation stochastique.
+  \item Les calculs de volatilité implicite et de corrélation implicite montrent que ces méthodes ne sont pas purement théoriques : elles répondent à des besoins de calibration concrets.
+  \item Les exemples de réduction de variance par importance sampling adaptatif illustrent bien le bénéfice d'une boucle d'apprentissage sur les paramètres de changement de loi.
+\end{itemize}
+
+\subsection{Ce qu'il faut absolument savoir retenir}
+
+\begin{itemize}
+  \item \textbf{Résultats à connaître par cœur :}
+  \begin{itemize}
+    \item schéma $Y_{n+1}=Y_n-\gamma_{n+1}H(Y_n,Z_{n+1})$ ;
+    \item conditions sur les pas ;
+    \item rôle du moyennage de Ruppert--Polyak.
+  \end{itemize}
+  \item \textbf{Méthodes indispensables :}
+  \begin{itemize}
+    \item Robbins--Monro ;
+    \item gradient stochastique ;
+    \item Kiefer--Wolfowitz ;
+    \item VaR/CVaR récursifs ;
+    \item optimisation stochastique des changements de loi.
+  \end{itemize}
+  \item \textbf{Points subtils :}
+  \begin{itemize}
+    \item la stabilité globale est un vrai sujet, pas un détail technique ;
+    \item les pièges locaux ou points répulsifs peuvent ruiner l'interprétation ;
+    \item les choix de pas gouvernent la vitesse autant que la convergence.
+  \end{itemize}
+  \item \textbf{Erreurs fréquentes à éviter :}
+  \begin{itemize}
+    \item prendre des pas trop grands ou trop petits sans diagnostic ;
+    \item oublier qu'un estimateur de gradient peut avoir une croissance explosive ;
+    \item appliquer naïvement la méthode à des quantiles extrêmes sans réduction de variance.
+  \end{itemize}
+\end{itemize}
+
+\section{Chapitre 7 -- Schémas de discrétisation d'une diffusion brownienne}
+
+\subsection{Idée générale du chapitre}
+
+Le chapitre 7 ouvre la partie du livre consacrée aux simulations biaisées. Lorsqu'une diffusion n'est pas simulable exactement, il faut la discrétiser. Le chapitre présente les schémas d'Euler--Maruyama et de Milstein, puis analyse leurs erreurs fortes et faibles, leurs moments, leurs déviations non asymptotiques et les premières techniques de réduction de biais.
+
+Il est central dans l'économie du livre. Les chapitres 8, 9 et 10 s'appuient directement sur les résultats construits ici : pont de diffusion, multilevel, calcul de sensibilités sur schémas d'Euler.
+
+\subsection{Notions et définitions essentielles}
+
+\begin{itemize}
+  \item \textbf{EDS brownienne.}
+  \[
+    \ud X_t=b(t,X_t)\ud t+\sigma(t,X_t)\ud W_t.
+  \]
+  \item \textbf{Hypothèse de Lipschitz uniforme.} Elle garantit existence et unicité fortes, ainsi que des majorations de moments.
+  \item \textbf{Schéma d'Euler en temps discret.}
+  \[
+    \bar X_{t_{k+1}}=\bar X_{t_k}+b(t_k,\bar X_{t_k})\Delta t+\sigma(t_k,\bar X_{t_k})\Delta W_k.
+  \]
+  \item \textbf{Euler constant par morceaux et Euler continu.} Le livre distingue soigneusement ces deux objets.
+  \item \textbf{Erreur forte.} Elle mesure la proximité trajectorielle ou en norme $L^p$ entre diffusion et approximation.
+  \item \textbf{Erreur faible.} Elle mesure l'erreur sur les espérances de fonctionnelles.
+  \item \textbf{Schéma de Milstein.} Il ajoute un terme correctif de second ordre faisant intervenir les dérivées de $\sigma$ et, en dimension supérieure, des aires de Lévy.
+  \item \textbf{Extrapolation de Richardson--Romberg.} Elle tue le premier terme du développement du biais faible.
+\end{itemize}
+
+\subsection{Résultats / théorèmes / propositions à connaître}
+
+\begin{enumerate}[label=\textbf{\arabic*.}]
+  \item \textbf{Existence et unicité forte pour l'EDS.}
+  \begin{itemize}
+    \item \emph{Hypothèses :} coefficients globalement lipschitziens.
+    \item \emph{Utilité :} tout le chapitre travaille dans ce cadre standard avant d'évoquer le cas non globalement lipschitzien.
+  \end{itemize}
+
+  \item \textbf{Taux d'erreur forte pour Euler.}
+  \begin{itemize}
+    \item \emph{Message principal :} l'Euler continu converge en général à l'ordre $1/2$ en pas de temps, modulo la régularité temporelle des coefficients.
+    \item \emph{Point subtil :} le schéma constant par morceaux subit un facteur $\sqrt{\log n}$ dû à l'oscillation browienne.
+    \item \emph{À retenir :} il faut distinguer schéma continu et schéma càdlàg.
+  \end{itemize}
+
+  \item \textbf{Conséquence faible pour les payoffs höldériens.}
+  \begin{itemize}
+    \item \emph{Résultat :} une erreur forte fournit immédiatement une erreur faible pour des payoffs assez réguliers.
+    \item \emph{Limite :} ce raisonnement ne donne pas le bon ordre faible pour les payoffs lisses.
+  \end{itemize}
+
+  \item \textbf{Inégalités de déviation non asymptotiques.}
+  \begin{itemize}
+    \item \emph{Message :} on peut obtenir des bornes de concentration de type sous-gaussien pour des fonctions lipschitziennes du schéma d'Euler.
+    \item \emph{Utilité :} elles complètent les intervalles de confiance asymptotiques.
+  \end{itemize}
+
+  \item \textbf{Taux de Milstein.}
+  \begin{itemize}
+    \item \emph{Résultat :} en dimension $1$, Milstein atteint un ordre fort $1$ lorsque les dérivées sont assez régulières.
+    \item \emph{Limite pratique :} en dimension supérieure, les aires de Lévy compliquent l'implémentation.
+  \end{itemize}
+
+  \item \textbf{Théorèmes de Talay--Tubaro et Bally--Talay.}
+  \begin{itemize}
+    \item \emph{Message :} pour des payoffs suffisamment réguliers, l'erreur faible admet un développement en puissances du pas ; le premier terme est d'ordre $1/n$.
+    \item \emph{Importance :} c'est la base théorique des techniques de réduction de biais du chapitre 9.
+    \item \emph{Point essentiel :} en cadre elliptique, on peut étendre les résultats à des fonctions moins régulières.
+  \end{itemize}
+
+  \item \textbf{Richardson--Romberg.}
+  \begin{itemize}
+    \item \emph{Idée :} combiner deux niveaux de discrétisation couplés pour annuler le premier terme du biais faible.
+    \item \emph{Point d'attention :} le couplage des incréments browniens est crucial.
+  \end{itemize}
+\end{enumerate}
+
+\subsection{Méthodes et techniques}
+
+\begin{itemize}
+  \item \textbf{Euler discret, Euler continu, Euler constant par morceaux.} Le chapitre montre qu'il faut choisir la bonne représentation selon qu'on veut un terminal, un chemin ou une analyse fine du biais.
+  \item \textbf{Milstein.} Plus précis en erreur forte, mais plus coûteux et plus complexe en dimension élevée.
+  \item \textbf{Méthode PDE/Feynman--Kac.} Elle sert à établir l'expansion faible.
+  \item \textbf{Richardson--Romberg avec incréments cohérents.} C'est déjà une première version du contrôle du biais par couplage.
+\end{itemize}
+
+\subsection{Exemples et interprétations}
+
+\begin{itemize}
+  \item Le modèle de Black--Scholes sert de cas d'école pour illustrer les schémas.
+  \item Les options lookback ou Asian sont évoquées pour montrer que l'erreur de chemin n'est pas la même question que l'erreur terminale.
+  \item Les résultats sur les moments et les déviations montrent que le comportement numérique d'un schéma ne se résume pas à un simple ordre asymptotique.
+\end{itemize}
+
+\subsection{Ce qu'il faut absolument savoir retenir}
+
+\begin{itemize}
+  \item \textbf{Résultats à connaître par cœur :}
+  \begin{itemize}
+    \item ordre fort $1/2$ d'Euler ;
+    \item ordre faible $1$ d'Euler pour les payoffs lisses ;
+    \item intérêt et limites du schéma de Milstein.
+  \end{itemize}
+  \item \textbf{Méthodes indispensables :}
+  \begin{itemize}
+    \item Euler ;
+    \item Milstein ;
+    \item Richardson--Romberg couplé.
+  \end{itemize}
+  \item \textbf{Points subtils :}
+  \begin{itemize}
+    \item ne pas confondre erreur forte et erreur faible ;
+    \item distinguer schéma continu et schéma constant par morceaux ;
+    \item le biais faible dépend fortement de la régularité du payoff.
+  \end{itemize}
+  \item \textbf{Erreurs fréquentes à éviter :}
+  \begin{itemize}
+    \item réutiliser des schémas non couplés dans Richardson--Romberg ;
+    \item croire que Milstein améliore tout automatiquement ;
+    \item négliger les hypothèses sur les coefficients.
+  \end{itemize}
+\end{itemize}
+
+\section{Chapitre 8 -- Méthode du pont de diffusion et options dépendant du chemin}
+
+\subsection{Idée générale du chapitre}
+
+Le chapitre 8 prolonge le précédent en s'intéressant aux fonctionnelles de trajectoire. Lorsqu'un payoff dépend du maximum, du minimum ou d'une intégrale le long de la trajectoire, une simple grille de temps ne suffit généralement pas à produire une bonne approximation faible. L'idée est alors d'exploiter le pont brownien, puis le pont du schéma d'Euler continu.
+
+Ce chapitre est important car il montre concrètement comment améliorer les simulations de produits exotiques sans raffiner brutalement la maille partout. Il relie la théorie de l'erreur faible aux structures conditionnelles gaussiennes.
+
+\subsection{Notions et définitions essentielles}
+
+\begin{itemize}
+  \item \textbf{Pont brownien.} C'est un brownien conditionné par ses valeurs aux extrémités d'un intervalle.
+  \item \textbf{Pont du schéma d'Euler continu.} Entre deux dates de grille, le schéma est une diffusion gaussienne conditionnelle explicite.
+  \item \textbf{Maximum et minimum conditionnels.} Le chapitre donne la loi conditionnelle du supremum d'un pont brownien, puis l'exploite sur chaque intervalle.
+  \item \textbf{Pré-conditionnement.} Il réapparaît ici pour réduire la variance dans le pricing d'options barrière.
+\end{itemize}
+
+\subsection{Résultats / théorèmes / propositions à connaître}
+
+\begin{enumerate}[label=\textbf{\arabic*.}]
+  \item \textbf{Résultats théoriques de discrétisation pour les fonctionnelles de chemin.}
+  \begin{itemize}
+    \item \emph{Message :} pour des payoffs barrières, l'erreur faible d'une approximation par simple grille est souvent seulement en $O(n^{-1/2})$, alors que le schéma continu traité avec un pont peut atteindre un meilleur ordre dans des cadres réguliers.
+    \item \emph{Conclusion pédagogique :} le choix entre schéma constant et schéma continu est ici décisif.
+  \end{itemize}
+
+  \item \textbf{Loi du pont brownien conditionnel.}
+  \begin{itemize}
+    \item \emph{Utilité :} elle permet de simuler exactement le maximum ou le minimum entre deux dates, conditionnellement aux extrémités.
+    \item \emph{Idée :} combiner conditionnement gaussien et principe de réflexion.
+  \end{itemize}
+
+  \item \textbf{Formule de correction pour les options barrière.}
+  \begin{itemize}
+    \item \emph{Message :} le prix peut être réécrit comme une espérance discrète corrigée par un produit de probabilités conditionnelles de ne pas franchir la barrière.
+    \item \emph{Utilité :} on obtient à la fois une meilleure approximation et une réduction de variance.
+  \end{itemize}
+
+  \item \textbf{Résultats sur les Asians.}
+  \begin{itemize}
+    \item \emph{Message :} pour certaines structures, notamment en Black--Scholes géométrique, l'usage d'intégrales conditionnelles gaussiennes améliore nettement la simulation.
+  \end{itemize}
+\end{enumerate}
+
+\subsection{Méthodes et techniques}
+
+\begin{itemize}
+  \item \textbf{Simulation du maximum par inversion conditionnelle.} Sur chaque maille, on simule une uniforme puis on inverse la loi conditionnelle du maximum du pont.
+  \item \textbf{Options lookback.} On reconstruit le maximum global de la trajectoire intervalle par intervalle.
+  \item \textbf{Options barrière.} On remplace la simple vérification de la grille par une correction conditionnelle exacte sur chaque intervalle du schéma continu.
+  \item \textbf{Asians.} Le chapitre exploite la structure gaussienne des intégrales conditionnelles du pont brownien.
+\end{itemize}
+
+\subsection{Exemples et interprétations}
+
+\begin{itemize}
+  \item Les lookback montrent pourquoi la seule grille discrète est insuffisante pour les extrema.
+  \item Les barrières illustrent un point méthodologique majeur : une mauvaise discrétisation du chemin crée un biais faible structurel, pas seulement une variance plus grande.
+  \item Les Asians montrent que les méthodes de pont servent aussi pour des intégrales, pas seulement pour des événements de franchissement.
+\end{itemize}
+
+\subsection{Ce qu'il faut absolument savoir retenir}
+
+\begin{itemize}
+  \item \textbf{Résultats à connaître par cœur :}
+  \begin{itemize}
+    \item loi conditionnelle du pont brownien ;
+    \item intérêt du schéma d'Euler continu pour les payoffs dépendant du chemin ;
+    \item correction conditionnelle des options barrière.
+  \end{itemize}
+  \item \textbf{Méthodes indispensables :}
+  \begin{itemize}
+    \item simulation du maximum/minimum par pont ;
+    \item pré-conditionnement pour barrières ;
+    \item intégrales conditionnelles pour Asians.
+  \end{itemize}
+  \item \textbf{Points subtils :}
+  \begin{itemize}
+    \item un payoff de chemin ne se traite pas comme un payoff terminal ;
+    \item le schéma continu et le schéma discret ne sont pas interchangeables ;
+    \item la correction porte sur chaque intervalle, pas seulement sur l'événement final.
+  \end{itemize}
+  \item \textbf{Erreurs fréquentes à éviter :}
+  \begin{itemize}
+    \item tester une barrière seulement sur la grille ;
+    \item oublier les dépendances conditionnelles entre valeurs de grille et extrema intermédiaires ;
+    \item croire que raffiner un peu la grille remplace toujours une méthode de pont.
+  \end{itemize}
+\end{itemize}
+
+\section{Chapitre 9 -- Simulation biaisée et paradigme multilevel}
+
+\subsection{Idée générale du chapitre}
+
+Le chapitre 9 pose une question de complexité : lorsqu'on ne peut simuler qu'une approximation biaisée $Y^h$ d'une quantité idéale $Y_0$, comment obtenir une erreur quadratique moyenne donnée au coût minimal ? Le chapitre formule un cadre abstrait de simulation biaisée, puis y installe les stratégies de réduction de biais et de réduction de coût les plus importantes du livre : extrapolation de Richardson--Romberg, version multistep, multilevel classique, version pondérée ML2R, versions antithétiques et versions randomisées non biaisées.
+
+Ce chapitre est l'un des plus structurants du livre car il synthétise les notions de biais faible, de variance forte et de couplage introduites auparavant.
+
+\subsection{Notions et définitions essentielles}
+
+\begin{itemize}
+  \item \textbf{Approximation biaisée.} On remplace la quantité idéale $Y_0$ par une famille $(Y^h)_{h>0}$ telle que $Y^h\to Y_0$ lorsque $h\to0$.
+  \item \textbf{Décomposition du RMSE.}
+  \[
+    \mathrm{RMSE}^2 = \bigl(\E[Y^h]-\E[Y_0]\bigr)^2 + \frac{\mathrm{Var}(\widehat Y)}{M}.
+  \]
+  \item \textbf{Expansion faible.} Le biais est supposé admettre un développement asymptotique en puissances de $h^\alpha$.
+  \item \textbf{Erreur forte ou variance d'incrément.} Elle mesure la décroissance de la variance de $Y^{h/2}-Y^h$.
+  \item \textbf{Estimateur multilevel.} Il repose sur une décomposition télescopique des espérances.
+  \item \textbf{Estimateur ML2R.} Il combine pondération de type Richardson et structure multilevel.
+\end{itemize}
+
+\subsection{Résultats / théorèmes / propositions à connaître}
+
+\begin{enumerate}[label=\textbf{\arabic*.}]
+  \item \textbf{Complexité du \mc\ biaisé naïf.}
+  \begin{itemize}
+    \item \emph{Message :} si le biais décroît comme $h^\alpha$ et que le coût unitaire est en $h^{-1}$, la complexité totale devient beaucoup plus mauvaise que celle du \mc\ non biaisé.
+    \item \emph{À retenir :} il faut traiter séparément biais et variance.
+  \end{itemize}
+
+  \item \textbf{Richardson--Romberg simple et multistep.}
+  \begin{itemize}
+    \item \emph{Idée :} annuler le premier, puis plusieurs termes du développement du biais faible.
+    \item \emph{Utilité :} réduire l'erreur systématique sans réduire exagérément le pas.
+    \item \emph{Limite :} si l'on se contente d'extrapoler sans structure multilevel, le coût peut devenir trop élevé.
+  \end{itemize}
+
+  \item \textbf{Décomposition multilevel.}
+  \[
+    \E[Y_{h_L}] = \E[Y_{h_0}] + \sum_{\ell=1}^{L}\E\!\left[Y_{h_\ell}-Y_{h_{\ell-1}}\right].
+  \]
+  \begin{itemize}
+    \item \emph{Message :} il faut beaucoup d'échantillons sur les niveaux grossiers et peu sur les niveaux fins, parce que les corrections fines ont faible variance mais coût élevé.
+    \item \emph{Point clé :} le couplage entre niveaux est essentiel.
+  \end{itemize}
+
+  \item \textbf{Allocation optimale multilevel.}
+  \begin{itemize}
+    \item \emph{Idée :} minimiser le coût sous contrainte de variance totale fixée.
+    \item \emph{Résultat :} l'allocation optimale vient d'une inégalité de Cauchy--Schwarz et dépend à la fois des variances de niveaux et des coûts unitaires.
+  \end{itemize}
+
+  \item \textbf{Théorème de complexité du ML2R.}
+  \begin{itemize}
+    \item \emph{Message :} selon la vitesse de décroissance de la variance forte, on distingue les régimes $\beta>1$, $\beta=1$ et $\beta<1$.
+    \item \emph{Conclusion :} ML2R peut retrouver un coût quasi $\varepsilon^{-2}$ dans des situations où le \mc\ biaisé brut serait bien plus coûteux.
+  \end{itemize}
+
+  \item \textbf{Expansions faibles pour nested Monte Carlo.}
+  \begin{itemize}
+    \item \emph{Intérêt :} le paradigme multilevel n'est pas réservé aux diffusions ; il s'applique aussi aux problèmes imbriqués.
+    \item \emph{Point d'attention :} la régularité du payoff conditionnel joue un rôle décisif.
+  \end{itemize}
+\end{enumerate}
+
+\subsection{Méthodes et techniques}
+
+\begin{itemize}
+  \item \textbf{\mc\ biaisé naïf.} Point de départ utile pour comprendre ce qu'il faut améliorer.
+  \item \textbf{Richardson--Romberg.} Méthode de débiaisage par combinaison linéaire.
+  \item \textbf{Multistep Richardson.} Extension à plusieurs niveaux de biais.
+  \item \textbf{MLMC régulier.} Décomposition télescopique sans pondération sophistiquée.
+  \item \textbf{ML2R.} Combinaison de poids optimisés et de structure multilevel.
+  \item \textbf{Schémas antithétiques.} Le chapitre les réinterprète comme outil pour améliorer l'exposant fort effectif.
+  \item \textbf{Randomized multilevel.} Le livre montre enfin comment retrouver une simulation non biaisée en randomisant la profondeur.
+\end{itemize}
+
+\subsection{Exemples et interprétations}
+
+\begin{itemize}
+  \item Le système de Clark--Cameron sert de banc d'essai analytique et numérique.
+  \item Les options vanilles ou plus complexes permettent de comparer clairement l'effet du multilevel sur coût et précision.
+  \item Les nested Monte Carlo montrent que le paradigme ne dépend pas du cadre diffusions seul ; il s'applique à tout problème avec hiérarchie naturelle d'approximations.
+\end{itemize}
+
+\subsection{Ce qu'il faut absolument savoir retenir}
+
+\begin{itemize}
+  \item \textbf{Résultats à connaître par cœur :}
+  \begin{itemize}
+    \item décomposition biais$^2$ + variance ;
+    \item identité télescopique multilevel ;
+    \item régimes de complexité selon $\beta$.
+  \end{itemize}
+  \item \textbf{Méthodes indispensables :}
+  \begin{itemize}
+    \item Richardson--Romberg ;
+    \item MLMC ;
+    \item ML2R ;
+    \item variantes antithétiques et randomisées.
+  \end{itemize}
+  \item \textbf{Points subtils :}
+  \begin{itemize}
+    \item le couplage entre niveaux est indispensable ;
+    \item on alloue les simulations selon variance et coût, pas uniformément ;
+    \item tuer le biais sans gérer la variance n'est pas suffisant.
+  \end{itemize}
+  \item \textbf{Erreurs fréquentes à éviter :}
+  \begin{itemize}
+    \item utiliser des niveaux indépendants ;
+    \item ignorer l'exposant fort de variance d'incrément ;
+    \item croire que le multilevel est une simple moyenne de schémas fins et grossiers.
+  \end{itemize}
+\end{itemize}
+
+\section{Chapitre 10 -- Retour au calcul des sensibilités}
+
+\subsection{Idée générale du chapitre}
+
+Après avoir traité la simulation biaisée des diffusions, le livre revient au calcul des sensibilités dans ce cadre plus difficile. Le problème n'est plus seulement de dériver une espérance explicite, mais de comprendre comment calculer numériquement une dérivée lorsque le payoff est irrégulier, que l'objet simulé est un schéma approché, ou que les formules pathwise deviennent inutilisables.
+
+Le chapitre organise les méthodes en plusieurs familles : différences finies, différentiation trajectorielle, log-vraisemblance, formules de Bismut et premiers outils de calcul de Malliavin, avec un accent constant sur les questions de variance.
+
+\subsection{Notions et définitions essentielles}
+
+\begin{itemize}
+  \item \textbf{Cadre abstrait.} On considère $f(x)=\E[F(x,Z)]$ et l'on cherche $f'(x)$.
+  \item \textbf{Régime régulier et régime singulier.} Le chapitre distingue les cas où $F(\cdot,Z)$ est localement lipschitzienne en $L^2$ et ceux où elle n'est que höldérienne.
+  \item \textbf{Différence finie symétrique.}
+  \[
+    \widehat f'_{\varepsilon,M}(x)=\frac{1}{M}\sum_{m=1}^M
+    \frac{F(x+\varepsilon,Z_m)-F(x-\varepsilon,Z_m)}{2\varepsilon}.
+  \]
+  \item \textbf{Différentiabilité en $L^p$.} Elle sert à justifier proprement la méthode pathwise.
+  \item \textbf{Processus tangent.} C'est la dérivée du flot de diffusion par rapport à la condition initiale ou à un paramètre.
+  \item \textbf{Méthode log-vraisemblance.} Elle dérive la densité du schéma plutôt que le payoff.
+  \item \textbf{Localisation.} Elle consiste à décomposer le payoff en une partie lisse et une partie singulière, traitées par des méthodes différentes.
+\end{itemize}
+
+\subsection{Résultats / théorèmes / propositions à connaître}
+
+\begin{enumerate}[label=\textbf{\arabic*.}]
+  \item \textbf{Bornes d'erreur des différences finies en régime régulier.}
+  \begin{itemize}
+    \item \emph{Message :} le biais est en ordre $\varepsilon^2$ pour la différence symétrique, tandis que la variance reste contrôlée si l'on réutilise les mêmes scénarios.
+    \item \emph{Point crucial :} le livre avertit explicitement qu'il faut absolument utiliser le \emph{même bruit} pour $x+\varepsilon$ et $x-\varepsilon$.
+  \end{itemize}
+
+  \item \textbf{Cas singulier.}
+  \begin{itemize}
+    \item \emph{Message :} si $F$ n'est que höldérienne en $L^2$, la variance des différences finies explose lorsque $\varepsilon\to0$.
+    \item \emph{Conséquence :} les payoffs digitaux ou proches d'une discontinuité nécessitent d'autres techniques.
+  \end{itemize}
+
+  \item \textbf{Version récursive à pas décroissant.}
+  \begin{itemize}
+    \item \emph{Idée :} faire décroître $\varepsilon_k$ avec $k$ pour effacer asymptotiquement le biais.
+    \item \emph{Résultat :} sous de bonnes hypothèses, l'estimateur devient consistant.
+  \end{itemize}
+
+  \item \textbf{Différentiabilité en $L^p$ et dérivation sous l'espérance.}
+  \begin{itemize}
+    \item \emph{Message :} cette notion permet de justifier rigoureusement les formules pathwise en dehors des cadres élémentaires.
+    \item \emph{Utilité :} elle conduit à des estimateurs de variance souvent plus faible que les différences finies.
+  \end{itemize}
+
+  \item \textbf{Théorème de Kunita sur le flot différentiable.}
+  \begin{itemize}
+    \item \emph{Signification :} sous des hypothèses suffisantes de régularité sur les coefficients, le flot de l'EDS est différentiable par rapport à l'état initial.
+    \item \emph{Conséquence :} le processus tangent vérifie une EDS linéaire explicite.
+  \end{itemize}
+
+  \item \textbf{Proposition log-vraisemblance abstraite.}
+  \begin{itemize}
+    \item \emph{Message :} si la densité dépend de façon régulière d'un paramètre, on peut écrire la dérivée d'une espérance comme une espérance pondérée par $\partial_\theta \log p$.
+    \item \emph{Utilité :} méthode adaptée aux payoffs non lisses.
+  \end{itemize}
+
+  \item \textbf{Formule de Bismut.}
+  \begin{itemize}
+    \item \emph{Message :} la dérivée d'une espérance peut être ramenée à une espérance pondérée par une intégrale stochastique, sans dériver explicitement le payoff.
+    \item \emph{Importance :} c'est une porte d'entrée vers le calcul de Malliavin.
+    \item \emph{Limite :} la variance du poids peut être très grande, notamment à courte maturité.
+  \end{itemize}
+\end{enumerate}
+
+\subsection{Méthodes et techniques}
+
+\begin{itemize}
+  \item \textbf{Différences finies à pas constant.} Méthode la plus simple, mais très sensible au choix de $\varepsilon$.
+  \item \textbf{Richardson--Romberg pour les Greeks.} Utilisé pour réduire le biais des différences finies.
+  \item \textbf{Différences finies à pas décroissant.} Variante récursive proche de Kiefer--Wolfowitz.
+  \item \textbf{Méthode pathwise.} Elle repose sur la simulation conjointe du schéma et du processus tangent.
+  \item \textbf{Méthode log-vraisemblance sur le schéma d'Euler.} Naturellement adaptée au cadre biaisé.
+  \item \textbf{Poids de Bismut et localisation.} On lisse localement le payoff pour réduire la variance sur la partie singulière.
+\end{itemize}
+
+\subsection{Exemples et interprétations}
+
+\begin{itemize}
+  \item Les options digitales montrent qu'un prix lisse peut provenir d'un payoff intrinsèquement non régulier au niveau trajectoriel.
+  \item Les comparaisons entre différences finies, estimateurs pondérés et méthodes localisées illustrent bien le compromis central du chapitre : biais contre variance.
+  \item Les exemples Black--Scholes servent de référence, mais le chapitre vise clairement des cadres plus généraux où la densité explicite n'est plus disponible.
+\end{itemize}
+
+\subsection{Ce qu'il faut absolument savoir retenir}
+
+\begin{itemize}
+  \item \textbf{Résultats à connaître par cœur :}
+  \begin{itemize}
+    \item structure biais/variance des différences finies ;
+    \item rôle de la différentiabilité en $L^p$ ;
+    \item principe de la formule de Bismut.
+  \end{itemize}
+  \item \textbf{Méthodes indispensables :}
+  \begin{itemize}
+    \item différences finies avec bruit commun ;
+    \item méthode pathwise/tangent ;
+    \item log-vraisemblance ;
+    \item localisation.
+  \end{itemize}
+  \item \textbf{Points subtils :}
+  \begin{itemize}
+    \item un payoff non lisse n'interdit pas que le prix soit lisse ;
+    \item dériver l'approximation n'est pas toujours équivalent à approximer la dérivée ;
+    \item les poids de Malliavin/Bismut sont puissants mais potentiellement très volatils.
+  \end{itemize}
+  \item \textbf{Erreurs fréquentes à éviter :}
+  \begin{itemize}
+    \item simuler séparément $F(x+\varepsilon,Z)$ et $F(x-\varepsilon,Z)$ ;
+    \item utiliser pathwise sans vérifier la régularité ;
+    \item sous-estimer le problème de variance dans les formules pondérées.
+  \end{itemize}
+\end{itemize}
+
+\section{Chapitre 11 -- Arrêt optimal et options américaines/bermudiennes multi-actifs}
+
+\subsection{Idée générale du chapitre}
+
+Le chapitre 11 traite un problème d'une autre nature : l'arrêt optimal. On ne cherche plus une simple espérance, mais une valeur obtenue par maximisation sur des temps d'arrêt. En finance, cela correspond au pricing d'options américaines ou bermudiennes.
+
+Ce chapitre est important parce qu'il fait intervenir une non-linéarité fondamentale : l'enveloppe de Snell et le principe de programmation dynamique rétrograde. Il clôt la partie principale du livre par un problème où la discrétisation temporelle ne suffit pas ; une discrétisation spatiale ou une régression est nécessaire pour obtenir des algorithmes effectifs.
+
+\subsection{Notions et définitions essentielles}
+
+\begin{itemize}
+  \item \textbf{Enveloppe de Snell.} C'est la plus petite surmartingale dominant le payoff actualisé.
+  \item \textbf{Fonction valeur markovienne.} Dans le cadre markovien, l'enveloppe de Snell s'écrit en fonction de l'état courant.
+  \item \textbf{Principe de programmation dynamique rétrograde.} En temps discret,
+  \[
+    U_k=\max\bigl(Z_k,\E(U_{k+1}\mid X_k)\bigr).
+  \]
+  \item \textbf{Approximation bermudienne.} On remplace le problème continu par un ensemble discret de dates d'exercice.
+  \item \textbf{Régression.} Les méthodes de type Longstaff--Schwartz ou Tsitsiklis--Van Roy remplacent les espérances conditionnelles par des projections sur des bases de fonctions.
+  \item \textbf{Arbre de quantification.} On discrétise l'espace d'états à chaque date et on force une dynamique markovienne approchée sur les grilles.
+  \item \textbf{Dualité de Rogers.} Elle produit des bornes supérieures à partir de martingales.
+\end{itemize}
+
+\subsection{Résultats / théorèmes / propositions à connaître}
+
+\begin{enumerate}[label=\textbf{\arabic*.}]
+  \item \textbf{Caractérisation markovienne de la valeur.}
+  \begin{itemize}
+    \item \emph{Message :} dans le cadre diffusion markovienne, l'enveloppe de Snell se réécrit sous forme de fonction valeur $F(t,x)$.
+    \item \emph{Utilité :} c'est ce qui rend possible un traitement numérique structuré.
+  \end{itemize}
+
+  \item \textbf{Principe de programmation dynamique rétrograde.}
+  \begin{itemize}
+    \item \emph{Résultat :} $U_n=Z_n$ puis $U_k=\max(Z_k,\E(U_{k+1}\mid X_k))$.
+    \item \emph{Signification :} à chaque date, il faut comparer exercice immédiat et valeur de continuation.
+    \item \emph{À retenir :} c'est l'identité fondamentale du chapitre.
+  \end{itemize}
+
+  \item \textbf{Erreur de discrétisation temporelle.}
+  \begin{itemize}
+    \item \emph{Résultat :} sous hypothèse lipschitzienne sur le payoff, l'erreur entre problème américain continu et approximation bermudienne est d'ordre $n^{-1/2}$, avec amélioration en $n^{-1}$ sous hypothèse de semi-convexité.
+    \item \emph{Importance :} ce taux structure toute la phase de débiaisage temporel.
+  \end{itemize}
+
+  \item \textbf{Erreur liée au schéma d'Euler.}
+  \begin{itemize}
+    \item \emph{Message :} remplacer la diffusion exacte aux dates de grille par son Euler ajoute une erreur supplémentaire du même type d'ordre.
+    \item \emph{Conséquence :} il faut distinguer clairement discrétisation du temps d'exercice et discrétisation de la dynamique.
+  \end{itemize}
+
+  \item \textbf{Résultat asymptotique pour les méthodes de régression.}
+  \begin{itemize}
+    \item \emph{Message :} la phase de \mc\ et de régression a son propre comportement limite, de type gaussien.
+    \item \emph{Limite :} le chapitre souligne que des bornes d'erreur uniformes et complètes restent délicates.
+  \end{itemize}
+
+  \item \textbf{Théorème d'erreur pour l'arbre de quantification.}
+  \begin{itemize}
+    \item \emph{Message :} l'erreur se contrôle en fonction des erreurs de quantification à chaque date et des constantes lipschitziennes.
+    \item \emph{Importance :} c'est la justification mathématique du quantization tree.
+  \end{itemize}
+
+  \item \textbf{Dualité de Rogers.}
+  \begin{itemize}
+    \item \emph{Résultat :} la valeur d'arrêt optimal peut s'écrire comme un infimum sur des martingales d'une espérance de supremum.
+    \item \emph{Utilité :} cette représentation fournit des majorants numériques, complémentaires des minorants donnés par les stratégies de régression.
+  \end{itemize}
+\end{enumerate}
+
+\subsection{Méthodes et techniques}
+
+\begin{itemize}
+  \item \textbf{Approximation bermudienne.} Première étape incontournable.
+  \item \textbf{Longstaff--Schwartz.} Régression de la valeur de continuation à partir de trajectoires simulées.
+  \item \textbf{Tsitsiklis--Van Roy.} Variante plus directement liée à la programmation dynamique.
+  \item \textbf{Quantization tree.} Discrétisation spatiale via des grilles successives et estimation des transitions.
+  \item \textbf{Dualité par martingales.} Construction de bornes supérieures pour encadrer les estimateurs de type régression.
+\end{itemize}
+
+\subsection{Exemples et interprétations}
+
+\begin{itemize}
+  \item Les modèles multi-actifs montrent que la difficulté n'est pas seulement temporelle ; elle est aussi spatiale et dimensionnelle.
+  \item Le modèle de Black--Scholes multidimensionnel sert de cadre où la dynamique est simulable exactement aux dates, ce qui isole mieux les difficultés propres à l'arrêt optimal.
+  \item Les exemples de bases de régression rappellent que le choix des fonctions de projection influence directement la qualité numérique des méthodes.
+\end{itemize}
+
+\subsection{Ce qu'il faut absolument savoir retenir}
+
+\begin{itemize}
+  \item \textbf{Résultats à connaître par cœur :}
+  \begin{itemize}
+    \item identité $U_k=\max(Z_k,\E(U_{k+1}\mid X_k))$ ;
+    \item ordre $n^{-1/2}$ de discrétisation temporelle en cadre lipschitzien ;
+    \item rôle de la dualité de Rogers.
+  \end{itemize}
+  \item \textbf{Méthodes indispensables :}
+  \begin{itemize}
+    \item approximation bermudienne ;
+    \item Longstaff--Schwartz ;
+    \item quantization tree ;
+    \item bornes duales.
+  \end{itemize}
+  \item \textbf{Points subtils :}
+  \begin{itemize}
+    \item le problème est non linéaire ;
+    \item discrétiser le temps ne suffit pas pour obtenir un algorithme complet ;
+    \item les méthodes de régression produisent naturellement des minorants.
+  \end{itemize}
+  \item \textbf{Erreurs fréquentes à éviter :}
+  \begin{itemize}
+    \item confondre valeur d'exercice et valeur de continuation ;
+    \item négliger la qualité des bases de régression ;
+    \item oublier l'effet dimensionnel dans les méthodes spatiales.
+  \end{itemize}
+\end{itemize}
+
+\section{Chapitre 12 -- Miscellany : compléments techniques et résultats de référence}
+
+\subsection{Idée générale du chapitre}
+
+Le chapitre 12 n'introduit pas un nouveau bloc méthodologique comparable aux chapitres 1 à 11. Il joue plutôt le rôle d'une boîte à outils technique. On y trouve des rappels, des preuves reportées et des résultats de référence utilisés un peu partout dans le livre : loi normale, formules de Black--Scholes, théorie de la mesure, intégrabilité uniforme, convergence faible, martingales discrètes, formule d'Itô, supremum essentiel, preuve de la majoration de discrépance de Halton, et une identité de Pitman--Yor utilisée comme benchmark dans le chapitre 9.
+
+Le statut du chapitre est donc très clair : il consolide les outils nécessaires à la lecture rigoureuse du reste du livre.
+
+\subsection{Notions et définitions essentielles}
+
+\begin{itemize}
+  \item \textbf{Fonction caractéristique gaussienne.} Elle sert de rappel pour les calculs en loi normale.
+  \item \textbf{Approximation et table de $\Phi_0$.} Le chapitre donne une approximation numérique concrète de la fonction de répartition gaussienne standard.
+  \item \textbf{Formules Black--Scholes.} Elles sont regroupées ici comme prix de référence.
+  \item \textbf{Classe monotone fonctionnelle et tribu borélienne.} Outils de mesurabilité.
+  \item \textbf{Intégrabilité uniforme.} Notion clé pour les passages à la limite sans domination stricte.
+  \item \textbf{Convergence faible sur espace polonais.} Le chapitre réunit les formes utiles du théorème de Portmanteau.
+  \item \textbf{Crochet d'une martingale discrète.} Outil central pour les TCL martingales.
+  \item \textbf{Processus d'Itô et formule d'Itô.} Rappels de base pour les diffusions.
+  \item \textbf{Supremum essentiel et infimum essentiel.} Notions indispensables pour l'arrêt optimal.
+\end{itemize}
+
+\subsection{Résultats / théorèmes / propositions à connaître}
+
+\begin{enumerate}[label=\textbf{\arabic*.}]
+  \item \textbf{Fonction caractéristique de la loi normale.}
+  \begin{itemize}
+    \item \emph{Résultat :} si $Z\sim \mathcal N(0,1)$, alors $\chi_Z(u)=e^{-u^2/2}$ ; de même en dimension $d$ pour $\mathcal N(0,I_d)$.
+    \item \emph{Utilité :} base des arguments de convergence gaussienne.
+  \end{itemize}
+
+  \item \textbf{Formules de Black--Scholes.}
+  \begin{itemize}
+    \item \emph{Message :} le chapitre fournit les formules call/put standard ainsi que les variantes avec dividende, taux étranger ou futures.
+    \item \emph{Utilité :} servir de référence numérique pour les expériences de simulation.
+  \end{itemize}
+
+  \item \textbf{Théorème de la classe monotone fonctionnelle.}
+  \begin{itemize}
+    \item \emph{Signification :} à partir d'une classe stable par produit, on peut engendrer toute une classe de fonctions mesurables bornées.
+    \item \emph{Rôle :} résultat d'appui pour plusieurs arguments de mesurabilité du livre.
+  \end{itemize}
+
+  \item \textbf{Critères d'intégrabilité uniforme.}
+  \begin{itemize}
+    \item \emph{Message :} le chapitre rassemble les caractérisations équivalentes et le critère de La Vallée Poussin.
+    \item \emph{Utilité :} justifier continuité et convergence d'espérances dans les chapitres précédents.
+  \end{itemize}
+
+  \item \textbf{Théorème de Portmanteau et théorème de Lévy.}
+  \begin{itemize}
+    \item \emph{Signification :} ils donnent les critères usuels de convergence faible, notamment par test sur fonctions lipschitziennes bornées ou via les fonctions caractéristiques.
+    \item \emph{Rôle :} appui théorique pour la convergence en loi des schémas et des estimateurs.
+  \end{itemize}
+
+  \item \textbf{TCL de Lindeberg pour martingales discrètes.}
+  \begin{itemize}
+    \item \emph{Utilité :} il justifie plusieurs résultats asymptotiques rencontrés plus tôt, notamment dans la réduction de variance adaptative et l'approximation stochastique.
+  \end{itemize}
+
+  \item \textbf{Formule d'Itô.}
+  \begin{itemize}
+    \item \emph{Rôle :} rappel de base pour les calculs sur diffusions ; le chapitre 12 ne la redéveloppe pas comme thème autonome, mais la fixe comme référence.
+  \end{itemize}
+
+  \item \textbf{Supremum essentiel.}
+  \begin{itemize}
+    \item \emph{Message :} le supremum essentiel existe, est unique et peut, sous stabilité appropriée, être réalisé comme supremum d'une suite croissante.
+    \item \emph{Utilité :} notion cruciale pour l'enveloppe de Snell du chapitre 11.
+  \end{itemize}
+\end{enumerate}
+
+\subsection{Méthodes et techniques}
+
+\begin{itemize}
+  \item \textbf{Approximation de $\Phi_0$.} Outil numérique direct.
+  \item \textbf{Arguments de classe monotone.} Outils de preuve.
+  \item \textbf{Usage systématique de l'intégrabilité uniforme.} Outil de passage à la limite.
+  \item \textbf{Fonctions caractéristiques et convergence faible.} Outils de diagnostic en loi.
+  \item \textbf{Crochet prévisible et TCL martingale.} Outils asymptotiques.
+  \item \textbf{Théorie modulaire et théorème chinois.} Outils utilisés dans la preuve reportée sur la discrépance de Halton.
+  \item \textbf{Girsanov et conditionnement gaussien.} Outils utilisés pour l'identité de Pitman--Yor en fin de chapitre.
+\end{itemize}
+
+\subsection{Exemples et interprétations}
+
+\begin{itemize}
+  \item Les formules de Black--Scholes sont à comprendre comme des prix étalons permettant de juger les méthodes numériques.
+  \item La section sur Halton montre qu'une borne de discrépance utilisée plus tôt dans le livre repose en réalité sur une preuve arithmétique non triviale.
+  \item La dernière section fournit un benchmark analytique pour le système de Clark--Cameron, ce qui souligne encore une fois l'importance, dans tout le livre, d'avoir des cas tests exacts.
+\end{itemize}
+
+\subsection{Ce qu'il faut absolument savoir retenir}
+
+\begin{itemize}
+  \item \textbf{Résultats à connaître par cœur :}
+  \begin{itemize}
+    \item fonction caractéristique gaussienne ;
+    \item formules de Black--Scholes ;
+    \item critères d'intégrabilité uniforme ;
+    \item Portmanteau ;
+    \item formule d'Itô ;
+    \item définition du supremum essentiel.
+  \end{itemize}
+  \item \textbf{Méthodes indispensables :}
+  \begin{itemize}
+    \item reconnaître quand un argument de domination doit être remplacé par de l'intégrabilité uniforme ;
+    \item utiliser la convergence faible dans le bon cadre ;
+    \item mobiliser les outils martingales et Itô comme langage commun du livre.
+  \end{itemize}
+  \item \textbf{Points subtils :}
+  \begin{itemize}
+    \item ce chapitre sert de référence technique et non de nouvelle théorie autonome ;
+    \item plusieurs résultats déjà utilisés plus haut sont ici rappelés ou prouvés ;
+    \item les outils de mesurabilité et de convergence sont aussi importants que les algorithmes.
+  \end{itemize}
+  \item \textbf{Erreurs fréquentes à éviter :}
+  \begin{itemize}
+    \item négliger les hypothèses de domination ou d'intégrabilité uniforme ;
+    \item manipuler un supremum sur une famille de variables sans passer au supremum essentiel ;
+    \item oublier que les prix Black--Scholes sont là pour valider numériquement les méthodes.
+  \end{itemize}
+\end{itemize}
+
+\section{Synthèse transversale du livre}
+
+\subsection{Carte globale des méthodes}
+
+Le livre couvre un ensemble de méthodes qui s'organisent naturellement en grandes familles.
+
+\subsubsection*{1. Simulation exacte ou non biaisée des lois}
+
+\begin{itemize}
+  \item \textbf{Inversion de la fonction de répartition :} utile lorsque la loi est unidimensionnelle et que l'inverse de la cdf est disponible.
+  \item \textbf{Acceptation--rejet :} utile lorsque la densité cible est connue à constante près et qu'une densité enveloppe simple est disponible.
+  \item \textbf{Simulation de Poisson et de gaussiennes :} briques de base pour les chapitres suivants.
+\end{itemize}
+
+\subsubsection*{2. Estimation d'espérances et contrôle statistique}
+
+\begin{itemize}
+  \item \textbf{\mc\ standard :} méthode universelle, lente mais robuste.
+  \item \textbf{Intervalles de confiance :} outil indispensable pour rendre une estimation exploitable.
+  \item \textbf{Calcul pathwise des sensibilités :} première extension du \mc\ vers les dérivées.
+\end{itemize}
+
+\subsubsection*{3. Réduction de variance}
+
+\begin{itemize}
+  \item \textbf{Variables de contrôle :} efficaces lorsqu'on dispose d'une quantité proche au prix connu.
+  \item \textbf{Antithétiques :} utiles dans les problèmes monotones.
+  \item \textbf{Pré-conditionnement :} particulièrement puissant lorsque des espérances conditionnelles explicites sont accessibles.
+  \item \textbf{Stratification :} utile lorsqu'on sait découper intelligemment l'espace et simuler conditionnellement.
+  \item \textbf{Importance sampling :} incontournable pour les événements rares, les quantiles extrêmes et certains payoffs très déséquilibrés.
+\end{itemize}
+
+\subsubsection*{4. Intégration déterministe ou semi-déterministe}
+
+\begin{itemize}
+  \item \textbf{\qmc :} utile lorsque le problème peut être écrit comme intégrale sur $[0,1]^d$ avec une régularité convenable.
+  \item \textbf{Randomized QMC :} utile lorsqu'on veut retrouver des diagnostics statistiques.
+  \item \textbf{Quantification :} adaptée aux dimensions faibles ou moyennes, surtout si de nombreuses évaluations doivent être faites après une phase de pré-calcul.
+\end{itemize}
+
+\subsubsection*{5. Approximation stochastique}
+
+\begin{itemize}
+  \item \textbf{Robbins--Monro :} recherche de zéro.
+  \item \textbf{Gradient stochastique :} optimisation.
+  \item \textbf{Kiefer--Wolfowitz :} gradient inaccessible.
+  \item \textbf{Ruppert--Polyak :} stabilisation et amélioration asymptotique.
+\end{itemize}
+
+\subsubsection*{6. Simulation biaisée des diffusions}
+
+\begin{itemize}
+  \item \textbf{Euler--Maruyama :} méthode de base.
+  \item \textbf{Milstein :} meilleur ordre fort mais coût et complexité supérieurs.
+  \item \textbf{Pont brownien / pont de diffusion :} indispensable pour certains payoffs de chemin.
+  \item \textbf{Richardson--Romberg :} débiaisage par extrapolation.
+  \item \textbf{Multilevel et ML2R :} optimisation globale du coût sous contrainte de RMSE.
+\end{itemize}
+
+\subsubsection*{7. Sensibilités et problèmes non linéaires}
+
+\begin{itemize}
+  \item \textbf{Différences finies :} universelles mais sensibles à la variance.
+  \item \textbf{Processus tangent :} naturel pour les payoffs réguliers.
+  \item \textbf{Log-vraisemblance et Bismut/Malliavin :} utiles pour les payoffs non lisses.
+  \item \textbf{Longstaff--Schwartz, quantization tree, dualité de Rogers :} méthodes dédiées à l'arrêt optimal.
+\end{itemize}
+
+\subsection{Tableau conceptuel}
+
+\begingroup
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{longtable}{@{}p{0.16\textwidth}p{0.14\textwidth}p{0.15\textwidth}p{0.14\textwidth}p{0.14\textwidth}p{0.19\textwidth}@{}}
+\toprule
+\textbf{Notion / méthode} & \textbf{Objectif} & \textbf{Hypothèses} & \textbf{Point fort} & \textbf{Limite} & \textbf{À retenir} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Notion / méthode} & \textbf{Objectif} & \textbf{Hypothèses} & \textbf{Point fort} & \textbf{Limite} & \textbf{À retenir} \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+Inversion de la cdf & Simuler une loi 1D & cdf connue et inversable & Rendement 1 & Inversion parfois coûteuse & Méthode de base si l'inverse est disponible \\
+Acceptation--rejet & Simuler une densité compliquée & Majorant $f\le cg$ & Très général & Dépend fortement de $c$ & La qualité de l'enveloppe décide du rendement \\
+\mc\ standard & Calculer une espérance & Simulations i.i.d., variance finie & Universel et simple & Vitesse $M^{-1/2}$ & Toujours fournir un intervalle de confiance \\
+Variables de contrôle & Réduire la variance & Espérance du contrôle connue & Gains parfois massifs & Choix du contrôle non trivial & L'efficacité dépend de la corrélation \\
+Antithétiques & Réduire la variance & Structure de monotonie & Facile à implémenter & Gain non garanti & Le coût supplémentaire doit être pris en compte \\
+Stratification & Réduire la variance & Découpage + simulation conditionnelle & Très efficace si bien conçue & Allocation optimale inconnue a priori & Le nombre de tirages par strate ne doit pas être uniforme par défaut \\
+Importance sampling & Traiter des zones rares/importantes & Changement de loi simulable & Crucial pour événements rares & Peut dégrader la variance & Changer de loi n'aide que si les poids restent bien contrôlés \\
+\qmc & Intégrer plus vite sur $[0,1]^d$ & Régularité du problème & Excellente en pratique dans de bons cadres & Dépendance forte à la dimension/régularité & La discrépance remplace la variance comme objet central \\
+Quantification & Approcher une loi par une grille finie & Dimension modérée, pré-calcul possible & Évaluations rapides une fois la grille construite & Taux $N^{-1/d}$ & Très utile en faible ou moyenne dimension \\
+Robbins--Monro & Résoudre $h(y)=0$ & Pas adaptés + réversion moyenne & Méthode générale et légère & Sensible au réglage des pas & La stabilité est aussi importante que la convergence \\
+Euler--Maruyama & Simuler une diffusion & Coefficients suffisamment réguliers & Méthode universelle & Biais de discrétisation & Distinguer erreur forte et erreur faible \\
+Milstein & Améliorer l'erreur forte & Dérivées de $\sigma$ + structure adaptée & Ordre fort meilleur & Complexe en dimension élevée & Intéressant surtout si l'ordre fort compte réellement \\
+Pont brownien / diffusion & Traiter les payoffs de chemin & Structure gaussienne conditionnelle & Corrige les extrema entre les mailles & Implémentation plus technique & Essentiel pour lookback et barrières \\
+MLMC / ML2R & Réduire le coût sous contrainte RMSE & Couplage entre niveaux, expansions faibles & Peut approcher le coût optimal & Calibration non triviale & Le couplage est le coeur de la méthode \\
+Différences finies & Calculer des Greeks & Choix de pas et bruit commun & Universel & Variance élevée pour payoffs irréguliers & Toujours partager le même bruit \\
+Processus tangent & Calculer des Greeks réguliers & Différentiabilité du flot & Faible variance potentielle & Inapplicable à certains payoffs non lisses & Méthode de référence en régime régulier \\
+Log-vraisemblance / Bismut & Calculer des Greeks non lisses & Densité ou structure stochastique suffisante & Évite de dériver le payoff & Poids parfois très volatils & Puissant mais à manier avec contrôle de variance \\
+Longstaff--Schwartz & Approximer l'arrêt optimal & Régression sur bases choisies & Flexible et pratique & Dépend du choix des bases & Produit naturellement des minorants \\
+Quantization tree & Approximer l'arrêt optimal & Grilles successives + transitions & Méthode déterministe structurée & Souffre de la dimension & Justifiée par des bornes lipschitziennes \\
+\end{longtable}
+\endgroup
+
+\subsection{Liste des résultats fondamentaux}
+
+\begin{itemize}
+  \item \textbf{Simulation de base :}
+  \begin{itemize}
+    \item théorème fondamental de simulation ;
+    \item $F_l^{-1}(U)$ ;
+    \item acceptation--rejet ;
+    \item simulation gaussienne par Box--Muller et Cholesky.
+  \end{itemize}
+
+  \item \textbf{\mc\ et contrôle statistique :}
+  \begin{itemize}
+    \item loi forte, TCL, Berry--Esseen ;
+    \item intervalle de confiance empirique ;
+    \item dérivation sous l'espérance.
+  \end{itemize}
+
+  \item \textbf{Réduction de variance :}
+  \begin{itemize}
+    \item coefficient optimal de variable de contrôle ;
+    \item antithétiques par covariance négative ;
+    \item allocation optimale de la stratification ;
+    \item identité d'importance sampling.
+  \end{itemize}
+
+  \item \textbf{\qmc\ et quantification :}
+  \begin{itemize}
+    \item Koksma--Hlawka ;
+    \item bornes de Roth ;
+    \item taux des suites de Halton ;
+    \item stationnarité des quantificateurs ;
+    \item théorème de Zador ;
+    \item erreurs de cubature d'ordres $1$ et $2$ selon la régularité.
+  \end{itemize}
+
+  \item \textbf{Approximation stochastique :}
+  \begin{itemize}
+    \item Robbins--Siegmund ;
+    \item convergence de Robbins--Monro ;
+    \item TCL de Pelletier ;
+    \item moyennage de Ruppert--Polyak ;
+    \item algorithmes VaR/CVaR.
+  \end{itemize}
+
+  \item \textbf{Discrétisation des diffusions :}
+  \begin{itemize}
+    \item ordre fort d'Euler ;
+    \item ordre faible d'Euler ;
+    \item ordre fort de Milstein ;
+    \item expansions faibles de Talay--Tubaro / Bally--Talay ;
+    \item inégalités de concentration pour le schéma d'Euler.
+  \end{itemize}
+
+  \item \textbf{Contrôle du biais :}
+  \begin{itemize}
+    \item Richardson--Romberg ;
+    \item identité télescopique multilevel ;
+    \item théorèmes de complexité MLMC/ML2R.
+  \end{itemize}
+
+  \item \textbf{Sensibilités :}
+  \begin{itemize}
+    \item biais/variance des différences finies ;
+    \item flot différentiable et processus tangent ;
+    \item formule log-vraisemblance ;
+    \item formule de Bismut.
+  \end{itemize}
+
+  \item \textbf{Arrêt optimal :}
+  \begin{itemize}
+    \item enveloppe de Snell ;
+    \item programmation dynamique rétrograde ;
+    \item erreurs de discrétisation temporelle et d'Euler ;
+    \item dualité de Rogers.
+  \end{itemize}
+\end{itemize}
+
+\subsection{Pièges et confusions classiques}
+
+\begin{enumerate}
+  \item Confondre \textbf{erreur statistique} et \textbf{biais de discrétisation}.
+  \item Donner une estimation de \mc\ sans \textbf{intervalle de confiance}.
+  \item Croire qu'une \textbf{grande période} suffit à valider un générateur pseudo-aléatoire.
+  \item Utiliser l'\textbf{acceptation--rejet} avec une enveloppe grossière et conclure trop vite que la méthode est mauvaise en soi.
+  \item Oublier que l'efficacité d'une \textbf{variable de contrôle} dépend de sa corrélation et du coût de simulation.
+  \item Croire que la \textbf{\qmc} élimine automatiquement la dépendance à la dimension.
+  \item Oublier qu'une \textbf{quantification} souffre d'un taux $N^{-1/d}$.
+  \item Employer \textbf{Euler} sans distinguer schéma continu et schéma constant par morceaux.
+  \item Confondre \textbf{erreur forte} et \textbf{erreur faible}.
+  \item Tester une \textbf{barrière} seulement aux dates de grille.
+  \item Utiliser Richardson--Romberg ou le \textbf{multilevel} sans couplage cohérent des niveaux.
+  \item Calculer des \textbf{Greeks par différences finies} avec deux bruits indépendants.
+  \item Utiliser pathwise sur un \textbf{payoff non lisse} sans justification.
+  \item Oublier le \textbf{problème de variance} des poids de Bismut ou de log-vraisemblance.
+  \item En arrêt optimal, confondre \textbf{valeur d'exercice} et \textbf{valeur de continuation}.
+  \item En régression, croire qu'une base quelconque suffit dès qu'elle est de grande taille.
+  \item Manipuler des suprema de variables aléatoires sans passer au \textbf{supremum essentiel} lorsque le cadre l'exige.
+\end{enumerate}
+
+\subsection{Plan de révision du livre}
+
+\subsubsection*{Priorités absolues}
+
+\begin{enumerate}
+  \item \textbf{Chapitre 1} : inversion, acceptation--rejet, gaussiennes corrélées.
+  \item \textbf{Début du chapitre 2} : \mc, TCL, intervalle de confiance.
+  \item \textbf{Chapitre 3} : variables de contrôle, stratification, importance sampling.
+  \item \textbf{Chapitre 7} : Euler, erreur forte, erreur faible.
+  \item \textbf{Chapitre 9} : multilevel et logique coût/biais/variance.
+\end{enumerate}
+
+\subsubsection*{Chapitres les plus structurants}
+
+\begin{itemize}
+  \item \textbf{Chapitre 2} pour la philosophie générale du calcul probabiliste.
+  \item \textbf{Chapitre 3} pour la réduction de variance, indispensable pratiquement.
+  \item \textbf{Chapitre 7} pour toute la partie diffusions.
+  \item \textbf{Chapitre 9} pour la complexité et le débiaisage.
+  \item \textbf{Chapitre 11} si l'objectif inclut les produits américains/bermudiens.
+\end{itemize}
+
+\subsubsection*{Méthodes les plus importantes}
+
+\begin{itemize}
+  \item inversion et acceptation--rejet ;
+  \item \mc\ avec intervalle de confiance ;
+  \item variables de contrôle et importance sampling ;
+  \item schéma d'Euler ;
+  \item Richardson--Romberg ;
+  \item MLMC / ML2R ;
+  \item processus tangent et log-vraisemblance ;
+  \item Longstaff--Schwartz.
+\end{itemize}
+
+\subsubsection*{Notions à retravailler en premier}
+
+\begin{itemize}
+  \item la différence entre \textbf{fort} et \textbf{faible} ;
+  \item la différence entre \textbf{variance} et \textbf{biais} ;
+  \item les hypothèses de \textbf{régularité} qui autorisent les formules pathwise ;
+  \item la logique de \textbf{couplage} dans Richardson--Romberg et le multilevel ;
+  \item la notion de \textbf{valeur de continuation} dans l'arrêt optimal.
+\end{itemize}
+
+\subsubsection*{Ordre conseillé de reprise}
+
+\begin{enumerate}
+  \item maîtriser les chapitres 1 à 3 ;
+  \item revoir ensuite les chapitres 7 à 9 comme bloc cohérent ;
+  \item traiter les chapitres 10 et 11 si les Greeks et l'arrêt optimal font partie des objectifs ;
+  \item lire les chapitres 4, 5 et 6 comme des méthodes d'accélération et d'optimisation plus spécialisées ;
+  \item utiliser le chapitre 12 comme chapitre de consolidation technique.
+\end{enumerate}
+
+\end{document}
