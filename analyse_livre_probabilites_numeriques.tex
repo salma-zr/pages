@@ -39,6 +39,7 @@
 \newcommand{\ud}{\,\mathrm{d}}
 \newcommand{\Lip}{\mathrm{Lip}}
 \newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\newcolumntype{P}[1]{>{\raggedright\arraybackslash}p{#1}}
 
 \title{\textbf{Analyse structurée du livre}\\[0.3em]
 \emph{Numerical Probability -- An Introduction with Applications to Finance}}
@@ -1276,7 +1277,7 @@ Le chapitre organise les méthodes en plusieurs familles : différences finies, 
   \end{itemize}
 \end{itemize}
 
-\section{Chapitre 11 -- Arrêt optimal et options américaines/bermudiennes multi-actifs}
+\section[Chapitre 11 -- Arrêt optimal et options américaines/bermudiennes multi-actifs]{Chapitre 11 -- Arrêt optimal et options américaines/\\bermudiennes multi-actifs}
 
 \subsection{Idée générale du chapitre}
 
@@ -1589,9 +1590,11 @@ Le livre couvre un ensemble de méthodes qui s'organisent naturellement en grand
 \subsection{Tableau conceptuel}
 
 \begingroup
-\footnotesize
+\scriptsize
 \setlength{\tabcolsep}{4pt}
-\begin{longtable}{@{}p{0.16\textwidth}p{0.14\textwidth}p{0.15\textwidth}p{0.14\textwidth}p{0.14\textwidth}p{0.19\textwidth}@{}}
+\setlength{\LTleft}{0pt}
+\setlength{\LTright}{0pt}
+\begin{longtable}{@{}P{0.15\textwidth}P{0.13\textwidth}P{0.14\textwidth}P{0.13\textwidth}P{0.13\textwidth}P{0.18\textwidth}@{}}
 \toprule
 \textbf{Notion / méthode} & \textbf{Objectif} & \textbf{Hypothèses} & \textbf{Point fort} & \textbf{Limite} & \textbf{À retenir} \\
 \midrule
