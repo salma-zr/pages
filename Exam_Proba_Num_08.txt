@@ -1,0 +1,240 @@
+Méthodes de Monte Carlo en finance (G. Pagès, V. Lemaire)
+M2 Probabilités & Finance, UPMC-École Polytechnique
+2 avril 2012
+
+
+        3 h, polycopié, notes de cours et téléphones mobiles non autorisés
+
+
+Exercice 1.a. Rappeler la définition d’une suite (ξn )n≥1 équirépartie sur un hypercube
+[0, 1]d et les diverses caractérisations.
+1.b. Quand dit-on d’une telle suite qu’elle est “à discrépance faible” ?
+
+2. Soit
+    P p un entier, p ≥ 2. Pour tout entier n ≥ 1 on considère sa décompostion p−adique
+            k
+n = k≥0 ak p où ak ∈ {0, . . . , p − 1}. On pose
+                                                 X ak
+                                          ξn =         k+1
+                                                           .
+                                                 k≥0
+                                                     p
+
+On admettra que cette suite (ξn )n≥1 est équirépartie sur [0, 1].
+                                                                                     ξn + r
+2.a. Montrer que pour tout entier n ≥ 1 et pour r ∈ {0, . . . , p − 1}, ξnp+r =             . En
+                                                                                        p
+déduire la valeur de                             n
+                                               1X
+                                         lim         ξkp+r .
+                                           n   n k=1
+
+2.b. Calculer pour tout r, r0 ∈ {0, . . . , p − 1}, les limites lorsque n → ∞ des quantités
+        n                                n
+                                                         !         n
+                                                                            !    n
+                                                                                          !
+     1X                            1X                           1X            1X
+           ξkp+r ξkp+r0 puis                 ξkp+r ξkp+r0 −           ξkp+r         ξkp+r0 .
+     n k=1                        n k=1                         n k=1         n k=1
+
+3. Que vous inspire le résultat établi à la question précédente ?
+                                                                                
+3.a. Proposer une méthode de quasi-Monte Carlo pour calculer Ef (Z), Z ∼ N 0; I2 (loi
+normale bi-variée) ?
+3.bÉtendre la méthode au cas d’une matrice de covariance Σ ∈ S(2, R).
+
+Exercice 2 (Co-monotonie) Soit Z : (Ω, A, P) → R une variable aléatoire réelle et deux
+fonctions f , g : R → R de la variable réelle à valeurs réelles, monotones de même monotonie.
+2.a. Montrer que si f (Z) et g(Z) ∈ L2 (P), alors
+
+                                  E f (Z)g(Z) ≥ E f (Z)E g(Z).
+
+2.b. Montrer qu’il y a égalité dans l’inégalité ci-dessus si et seulement si f (Z) ou g(Z) est
+P-p.s. constante.
+2.c. On suppose que f et g sont positives. Montrer que l’inégalité établie en 2.a a un sens
+et reste valide.
+
+                                                  1
+                                                                         σ2
+3. On considère un actif risqué de type Black-Scholes Xt = x0 e(r− 2 )t+σWt , x0 , σ > 0, r ∈ R,
+et une fonction payoff ϕ : R+ → R+ convexe et dérivable que l’on supposera en outre à
+croissance polynomiale (ϕ(x) ≤ C(1 + xr ), pour tout x ∈ R+ ).
+3.a. Montrer que pour tout x ∈ R+ ,
+                          ϕ(x) − ϕ(x − 1) ≤ ϕ0 (x) ≤ ϕ(x + 1) − ϕ(x)
+(où ϕ est prolongé sur R− de façon C 1 et affine) et en déduire que ϕ0 est aussi à croissance
+polynomiale.
+3.b. Montrer que la sensibilité de la prime Φ(x0 , σ, r, T ) de l’option européenne de maturité
+T > 0 est donnée par
+                        ∂Φ                    −rT
+                                                   
+                                                        0
+                                                                          
+                           (x0 , σ, r, T ) = e E ϕ (XT )XT (WT − σT )
+                        ∂σ
+3.c. Montrer à l’aide d’un changement de variable approprié de votre choix que
+                      ∂Φ                      √                 √    σ2  
+                          (x0 , σ, r, T ) = x0 T E ϕ0 x0 eσ T Z+(r+ 2 )T Z
+                       ∂σ
+où Z suit une loi normale centrée réduite.
+3.d. En déduire sans autres calculs que ∂Φ   ∂σ
+                                                 (x0 , σ, r, T ) ≥ 0.
+
+Exercice 3 (Convergence p.s. du schéma d’Euler) On considère une diffusion d-
+dimensionnelle
+                  dXt = b(t, Xt )dt + σ(t, Xt )dWt , X0 = x ∈ Rd ,
+où b : [0, T ] × Rd → Rd et σ : [0, T ] × Rd → Md,q (R) sont des fonctions a priori boréliennes
+et W = (Wt )t∈[0,T ] un mouvement brownien q-dimensionnel.
+1.a. Définir formellement le schéma d’Euler à temps discret de pas Tn (n ≥ 1) associé à cette
+équation de diffusion brownienne (on notera tnk , k = 0, . . . , n les instants de discrétisation et
+(X̄tnk )0≤k≤n le dit schéma d’Euler à ces instants).
+1.b. Définir les schémas d’Euler dits “constant par morceaux” et “continu”, notés respec-
+tivement (X  e n )t∈[0,T ] et (X̄ n )t∈[0,T ] .
+               t                 t
+
+2. Donner des conditions classiques sur b et σ qui assurent à la fois l’existence d’une unique
+solution forte à l’équation et la convergence dans tous les espaces Lp , p ∈ [1, +∞[, des deux
+schémas d’Euler mentionnés dans la question 1.b., ainsi que la vitesse de convergence de ces
+schémas dans tous les Lp .
+3. On suppose dans cette question que b et σ sont Lipschitz en (t, x).
+3.a. Montrer que, pour tout réel α ∈]0, 21 [, il existe p ≥ 1 tel que
+                            X
+                                 npα E sup |Xt − X̄tn |p < +∞.
+                                n≥1        t∈[0,T ]
+
+
+3.b. En déduire que, pour tout α ∈]0, 21 [,
+                                                          p.s.
+                                      nα sup |Xt − X̄tn | −→ 0.
+                                        t∈[0,T ]
+
+3.c. Ce résultat s’étend-il au schéma d’Euler constant par morceaux ?
+
+                                                      2
+Problème (Volatilité locale). On considère un marché constitué d’un unique actif risqué
+dont le prix (actualisé) est régi entre l’instant 0 et une maturité T > 0 par l’EDS
+
+                                dXtx = Xtx σ(Xtx )dWt ,   X0x = x > 0.
+
+où σ : R+ → R+ est bornée, dérivable de dérivée vérifiant supξ∈R+ |ξσ 0 (ξ)| ≤ C pour
+une constante réelle C > 0. En outre on prolonge canoniquement σ à tout R en posant
+σ(x) = σ(x+ ) (soit encore σ(x) = σ(0), x ≤ 0). Le processus (Wt )t≥0 est un mouvement
+brownien standard défini sur un espace de probabilités (Ω, A, P).
+
+1.a. Justifier sans calculs l’existence et l’unicité de (Xtx )t∈[0,T ] comme solution forte de cette
+EDS.
+1.b. Montrer que le processus
+                               Z t 2 x              Z t               
+                                      σ (Xs )                  x
+                        x exp −                ds +       σ(Xs )dWs
+                                    0     2            0                   t∈[0,T ]
+
+est bien défini sur [0, T ], puis, en appliquant la formule d’Itô à une fonction adéquate, montrer
+que ce processus n’est autre que (Xtx )t∈[0,T ] lui-même.
+1.c. En déduire que X x est en fait strictement positif (ce qui justifie sa qualité de modèle
+                    (x)
+de prix) et que ξt = ln(Xtx ) est solution de l’équation
+
+                         (x)      1       (x)          (x)
+                                                                   (x)
+                       dξt     = − σ 2 (eξt ) dt + σ(eξt )dWt ,   ξ0 = ln x.
+                                  2
+
+On admettra dans la suite le résultat classique suivant : une fonction convexe g
+sur R est dérivable à droite et à gauche en tout point et ses dérivées gg0 et gd0 sont
+toutes deux croissantes et classées (gg0 ≤ gd0 ); à ce titre, elle sont simultanément
+continues sauf sur un ensemble dénombrable Dg de points de R. En dehors de
+Dg , g est dérivable et g 0 = gg0 = gd0 .
+2.a. Soit f : R+ → R croissante (resp. lipschitzienne). Montrer que son prolongement à
+tout R défini par f (x) = f (x+ ) reste croissant (resp. lipschitzien). Même question si f est
+convexe croissante .
+2.b. Soit g : R → R convexe et lipschitzienne. Montrer que que gd0 et gg0 sont bornées sur R.
+
+2.c. Soit Z : (Ω, A, P) → R une variable aléatoire intégrable, centrée et sans atome et g
+croissante, convexe et lipschitzienne sur R. Montrer que la fonction Q(g) : R × R+ → R
+définie par
+                       ∀ x ∈ R, ∀ u ∈ R+ , Q(g)(x, u) = Eg(x + uZ)
+est dérivable en u sur R∗+ de dérivée
+
+                                            ∂Q(g)
+                                                  (x, u) = E gd0 (x + uZ)Z .
+                                                                          
+                      ∀ u > 0, x ∈ R,
+                                             ∂u
+2.d. En déduire que pour toute fonction f : R+ → R convexe et lipschitzienne, la fonction
+Q+ (f ) définie par                                
+                       Q+ (f )(x, u) = E f (x + uZ)+ , u ≥ 0, x ∈ R
+
+                                                  3
+est croissante en u, convexe et lipschitzienne en (x, u).
+   On rappelle que dans toute la suite la fonction σ est prolongée à R tout entier
+par σ(x) = σ(x+ ).
+3.a. On considère le schéma d’Euler (à temps discret) (X̄tnnk )0≤k≤n de l’EDS ci-dessus de pas
+T
+n
+  , n ≥ 1. Montrer que, si l’on pose tnk = kT
+                                            n
+                                              , k = 0, . . . , n, alors X̄0n = x et
+                                      r       r
+                          T                   n
+X̄tnnk = X̄tnnk−1       1+σ(X̄tnnk−1 )
+                                Zk où Zk =       (Wtk −Wtk−1 ), k = 1, . . . , n est i.i.d. de loi N (0; 1).
+                            n                   T
+                                   
+En déduire que la suite (X̄tnnk )+ 0≤k≤n est une chı̂ne de Markov.
+3.b. Justifier soigneusement le fait que max0≤k≤n |Xtnk − X̄tnnk | → 0 dans tous les espaces
+Lp , p ∈ (0, ∞). En déduire que pour toute fonction ϕ : R+ → R continue à croissance
+polynomiale
+                               lim E ϕ (X̄Tn )+ = E ϕ XT ).
+                                               
+                                              n
+
+4.a. Pour  tout entier n ≥ 1 fixé, on définit la martingale (M̄kn )k=0,...,n de valeur terminale
+ϕ (X̄Tn )+ en posant
+                                               
+                     M̄kn = E ϕ (X̄Tn )+ | FkZ      où FkZ = σ(Z1 , . . . , Zk ).
+                                        
+
+
+Montrer par récurrence, l’existence de fonctions ϕk : R+ → R, k = 0, . . . , n, telles que
+
+                                      M̄kn = ϕk (X̄tnnk )+
+                                                           
+
+
+où les fonctions ϕk s’obtiennent par récurrence rétrograde comme suit:
+                                           rT           
+            ϕn = ϕ, ϕk (x) = Q+ (ϕk+1 ) x,        xσ(x) , x ∈ R+ , k = 0, . . . , n − 1,
+                                                n
+où l’opérateur Q+ est associé à la loi normale centrée réduite des Zk .
+4.b. Montrer que si les fonctions ϕ et ξ 7→ ξσ(ξ) sont toutes deux convexes (et lipschitzi-
+ennes) sur R+ , alors ces propriétés se propagent aux fonctions ϕk , k = n, . . . , 0.
+5. On considère un second modèle à volatilité locale
+
+                                          dYtx = Ytx ϑ(Ytx )dWt , Y0x = x > 0
+
+où la fonction ϑ vérifie ξ 7→ ξϑ(ξ) est lipschitzienne sur R+ et une fonction payoff ψ : R+ → R
+continue à croissance polynomiale. On associe à ψ les fonctions ψk selon la même récurrence
+que celle décrite en 4.a. On suppose en outre que
+
+                                (∗)               0≤ϕ≤ψ       et   σ≤ϑ      sur   R+ .
+
+5.a. Montrer par récurrence que pour tout k = 0, . . . , n, ϕk ≤ ψk .
+                                                                                      
+5.b. En déduire que E ϕ((X̄Tn )+ ) ≤ E ψ((ȲTn )+ ) pour tout n ≥ 1 puis que E ϕ(XTx ) ≤
+E ψ(YTx ) .
+
+                                                          4
+5.c. On suppose maintenant que ψ et ξ 7→ ξϑ(ξ) sont convexes croissantes et lipschitziennes
+et que ϕ est simplement continue et que ces fonctions vérifient en outre (∗). Qu’en est-il de
+la conclusion de la question 5.b. dans ce cadre “dual” ?
+5.d. Quelles conclusions peut-on tirer sur le prix d’un call de maturité T > 0 et de prix
+d’exercice K lorsque la fonction de volatilité locale positive σ vérifie ξ 7→ ξσ(ξ) est lipschitzi-
+enne bornée et σ est encadrée par deux réels strictement positifs σ et σ i.e. 0 < σ ≤ σ(x) ≤ σ
+pour tout x ∈ R+ ?
+
+
+
+
+                                                 5
+

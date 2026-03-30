@@ -1,0 +1,252 @@
+Méthodes de Monte Carlo en finance (G. Pagès, V. Lemaire)
+M2 Probabilités & Finance, UPMC-X
+3 janvier 2011
+
+                     3 h, polycopié et notes de cours non autorisées
+Rappel. On pourra, si nécessaire, utiliser sans démonstration le résultat suivant: deux
+                                  ′
+solutions fortes (Xtx )t≥0 et (Xtx )t≥0 de l’EDS (scalaire) dXt = b(Xt )dt + σ(Xt )dWt issues
+respectivement de x et x′ , x ≥ x′ , où b et σ sont lipschitziennes et W est un mouvement
+                                                                       ′
+brownien standard réel, vérifient P-p.s. : pour tout t ≥ 0, Xtx ≥ Xtx .
+
+Problème 1 (Sensibilités I : accélérer les différences finies) Soit F : R × Rq → R
+une fonction borélienne et Z : (Ω, A, P)Rq un vecteur aléatoire. Soit x ∈ R fixé et ε0 > 0
+vérifiant F (x, Z) ∈ L2 (P) et il existe une constante réelle CF,Z > 0 telle que
+
+            ∀ x′ ∈ Ix := (x − ε0 , x + ε0 ),        kF (x′ , Z) − F (x, Z)k2 ≤ CF,Z |x′ − x|.
+
+On suppose d’autre part que la fonction f définie sur R par f (ξ) = E F (ξ, Z) est trois fois
+dérivable sur Ix de dérivée troisième lipschitzienne sur Ix (on notera [f (3) ]Lip sa constante
+de Lipschitz). On considère enfin une suite (Zn )n≥1 de copies indépendantes de Z que l’on
+supposera définies sur le même espace de probabilités (Ω, A, P) que Z.
+1. Montrer que pour tout ε ∈ (0, ε0 ),
+
+                      f (x + ε) − f (x − ε)            ε2                      ε3
+                                            − f ′ (x) − f (3) (x) ≤ [f (3) ]Lip .
+                                2ε                     6                       6
+2. On pose pour tout ε ∈ (0, ε0),
+                                               F (x + ε, z) − F (x − ε, z)
+                                Fε (x, z) =                                .
+                                                            2ε
+
+                                     1 X
+                                        M
+                          d
+                          ′
+Pour tout M ≥ 1, on pose f (x)ε,M :=       Fε (x, Zk ).
+                                     M k=1
+2.a. Montrer que pour tout ε ∈ (0, ε0), E Fε (x, Z) = f (x+ε)−f        2ε
+                                                                          (x−ε)
+                                                                                   puis que
+                                                                                             
+                 f (x + ε) − f (x − ε)             √                    f (x + ε) − f (x − ε)
+     d′
+lim f (x)ε,M =                                             d′
+                                            p.s. et M f (x)ε,M −
+                                                                                                 L        2
+                                                                                                −→ N (0; σf,ε )
+ M                           2ε                                                      2ε
+                    r
+                                  f (x + ε) − f (x − ε) 2
+            ∗             2
+où σf,ε ≤ σf,ε := CF,Z       −                                ≤ CF,Z .
+                                              2ε
+2.b. Montrer que
+                                               s
+                                                   ε2                            2 σf,ε2
+                    f ′ (x) − fd′ (x)
+                                      ε,M   ≤          |f (3) (x)| + ε[f (3) ]
+                                                                              Lip     +     .
+                                          2         6                                    M
+
+2.c. Comment agir sur ε et M pour diviser l’(estimation de l’)erreur quadratique par un
+facteur 2 ? Tire-t-on partie de la régularité supplémentaire de f (par rapport au résultat vu
+en cours?).
+
+                                                      1
+3.a. Montrer l’existence de réels a et b que l’on déterminera explicitement tels que, pour
+tout ε ∈ (0, ε0 ),
+                                                                       ε3
+                     E aFε (x, Z) + bF ε2 (x, Z) − f ′ (x) ≤ [f (3) ]Lip .
+                                                                        12
+3.b. Construire un estimateur (biaisé) fg′ (x)   de f ′ (x) tel que
+                                                 ε,M
+                        s                      
+                                     ε 3 2 1  5   2  f (x+ε)−f (x−ε) f (x+ε/2)−f (x−ε/2)2
+ f (x) − fg
+  ′       ′ (x)
+                ε,M   ≤   [f (3) ]Lip       +      CF − a                +b
+                    2                 12     M 3 Z               2ε                ε
+                        s
+                                     ε3 2  5CFZ 2
+                      ≤   [f (3) ]Lip       +   √     .
+                                      12       3 M
+
+3.c. Montrer par un réordonnement adéquat des termes dans l’expression originelle de la
+variance asymptotique que la constante 5/3 peut-être en fait remplacée par 4/3.
+3.d. Comment agir sur ε et M pour diviser l’(estimation de l’)erreur quadratique par un
+facteur 2 ? Que constate-t-on ?
+
+Problème 2 (Sensibilités II: options digitales). On considère un marché constitué
+d’un unique actif risqué dont le prix est donc régi entre l’instant 0 et une maturité T > 0
+par l’EDS                                             
+                        dXtx = Xtx rdt + σ(Xtx )dWt , X0x = x > 0.
+où σ : R → R∗+ est bornée, dérivable de dérivée vérifiant supξ∈R |ξσ ′(ξ)| ≤ C pour une
+constante réelle C > 0. Le processus (Wt )t≥0 est un mouvement brownien standard défini
+sur un espace de probabilités (Ω, A, P).
+
+1.a. Justifier sans calculs l’existence et l’unicité de (Xtx )t∈[0,T ] comme solution de cette EDS.
+1.b. Montrer que le processus
+                        Z t                     Z t           
+                                  σ 2 (Xsx )             x
+                   x exp       r−             ds +     σ(Xs )dWs
+                            0          2            0               t∈[0,T ]
+
+est bien défini sur [0, T ], puis, en appliquant la formule d’Itô à une fonction adéquate, montrer
+que ce processus n’est autre que (Xtx )t∈[0,T ] lui-même.
+1.c. En déduire que X x est en fait strictement positif (ce qui justifie sa qualité de modèle
+                  (x)
+de prix) et que Yt = ln(Xtx ) est solution de l’équation
+                                1        (x)
+                                                      (x)
+                      (x)                                               (x)
+                   dYt      = r − σ 2 (eYt ) dt + σ(eYt )dWt ,       Y0       = ln x.
+                                 2
+On suppose dans la suite que, ξ 7→ σ(ξ) est en outre indéfiniment dérivable sur
+R∗+ avec |σ (k) (ξ)| ≤ Ck /|ξ|k , ξ ∈ R∗+ , et que σ est uniformément elliptique au sens où
+
+                                     ∀ ξ ∈ R,    σ(ξ) > ε0 > 0.
+
+
+
+                                                  2
+On admettra alors que, pour tout t > 0, la loi marginale PY (x) du processus Y (x)
+                                                                  t
+admet une densité bornée et indéfiniment différentiable (x, y) 7→ q(t, x, y) sur R∗+ ×R
+et que pour tout k ≥ 0, il existe Ck,T > 0 tel que
+                                                                                            2
+                                                   ∂ k q(t, x, y)          − (y−ln x)
+                     ∀ x ∈ R∗+ , ∀ y ∈ R,                         ≤ C k,T e    Ck,T
+                                                                                      x−k .
+                                                        ∂x  k
+
+
+2. On se propose de calculer numériquement le δ-hedge d’une option d’achat digitale de prix
+d’exercice K > 0 i.e. de payoff
+                                      hT = 1{XTx ≥K} .
+2.a. Montrer que la fonction f : R∗+ → R définie par
+
+                                             f (x) = P(XTx ≥ K)
+
+est dérivable sur R∗+ et donner une expression de f ′ en fonction de q. Justifier rapidement
+qu’en fait f est indéfiniment dérivable.
+2.b. Soit I un intervalle fermé inclus dans R∗+ . Montrer que pour tous x, x′ ∈ I, x < x′ ,
+                                                             2
+                                1{XTx ≥K} − 1{X x′ ≥K}           = f (x′ ) − f (x)
+                                                    T        2
+
+
+2.c. En déduire que x 7→ 1{XTx ≥K} est Höldérienne d’ordre 21 sur tout intervalle fermé I ⊂ R∗+
+à valeurs dans L2 (P).
+3. On définit la fonction aléatoire F sur R∗+ × Ω par F (x, ω) := 1{XTx (ω)≥K} .
+
+3.a. Proposer un estimateur fd  ′ (x)         ′
+                                      ε,M de f (x) par différences finies symétrique d’amplitude
+2ε (en vous inspirant si nécessaire du début du Problème 1).
+3.b. Montrer que
+                                                 s
+                                                   ε2                                2         2
+                                                                                                 σf,ε
+                  f ′ (x) − fd
+                             ′ (x)
+                                   ε,M       ≤           |f (3) (x)| + ε[f (3) ]Lip         +
+                                         2          6                                           2Mε
+                     r
+            ∗             2         (f (x + ε) − f (x − ε))2    2
+où σf,ε ≤ σf,ε :=       CHol,F −                            ≤ CHol,F (constante de Hölder d’ordre
+                                               2ε
+1
+2
+  de F ).
+3.b. Comment agir simultanément sur ε et M pour diviser l’(estimation de l’)erreur quadra-
+tique par 2 ?
+4. En vous inspirant de la fin du problème 1, améliorer la méthode proposée en justifiant
+l’approche adoptée.
+
+Problème 3 (Réduction de variance). Soit Z = (Z1 , . . . , Zd ) un vecteur gaussien centré
+de Rd de matrice de variance-covariance l’identité Id défini sur un espace de probabilités
+(Ω, A, P). Le pricing d’un Put de prix d’exercice K > 0 sur un panier (option Basket) dans
+
+
+
+                                                         3
+un modèle de Black-Scholes à d actifs risqués (avec un taux d’intérêt nul pour simplifier) se
+ramène au calcul d’une espérance de la forme E [φ(Z)] où
+                                                               !
+                                                 Xd
+                                φ(Z) = K −           λk eσk Zk
+                                                         k=1            +
+                            σ2
+                           − 2k
+avec σk > 0 et λk = xk e          , xk > 0, k = 1, . . . , d.
+1. Montrer que pout tout θ ∈ Rd ,
+                                                                             2
+                                                                                  
+                                                                −hθ,Zi− kθk
+                                  E [φ(Z)] = E φ(Z + θ)e                  2
+
+
+
+
+où h . , . i désigne le produit scalaire canonique sur Rd et k . k la norme euclidienne associée.
+2. Écrire l’estimateur de Monte Carlo fondé sur cette seconde représentation (qui dépend
+de θ). On note g la fonction définie par
+                                           h                         i
+                              d               2         −2hθ,Zi−kθk2
+                        ∀θ ∈ R , g(θ) = E φ (Z + θ)e                   .
+A quoi correspond g(θ) ?
+3.a. Montrer que P(φ(Z) > 0) > 0 et que
+                                                                        
+                                                                    kθk2
+                                        d               2    −hθ,Zi+ 2
+                              ∀θ ∈ R ,        g(θ) = E φ (Z)e              .
+
+En déduire que la fonction g est strictement convexe et que                  lim g(θ) = +∞. En conclure
+                                                                         |θ|→+∞
+qu’il existe un unique θ∗ ∈ Rd tel que
+                                              g(θ∗ ) = min g(θ).
+                                                        θ∈Rd
+
+3.b. Montrer rigoureusement que
+                                                                                     
+                                            ∂g           2    −hθ,Zi+ kθk
+                                                                          2
+                 ∀k ∈ {1, . . . , d},           (θ) = E φ (Z)e          2   (θk − Zk ) .
+                                            ∂θk
+           P
+4. Soit Λ = 1≤k≤d λk . Dans toute la suite de l’exercice, on suppose K < Λ. Montrer que
+          (                         ) (                                      )
+                    X
+                    d                               Xd
+           x ∈ Rd |    λk eσk xk < K ⊆ x ∈ Rd |         λk σk xk < Λ log(K/Λ) .
+                        k=1                                     k=1
+
+5. On considère le vecteur θ(α) défini par θk (α) = αλk σk , k = 1, . . . , d, où α est un paramètre
+réel. Montrer à l’aide de la question précédente que
+                       d(g ◦ θ)(α)                    Λ log(K/Λ)
+                                   > 0 pour tout α > P               2
+                                                                       .
+                           dα                         1≤k≤d (λk σk )
+
+6.a. En déduire que θ̄ ∈ Rd défini par
+                                   σk λk
+                        θ̄k = P               2
+                                                Λ log(K/Λ), k = 1, . . . , d,
+                               1≤k≤d (λk σk )
+
+vérifie g(θ̄) < g(0).
+6.b. Quelle méthode ce résultat suggère-t-il d’utiliser pour le calcul de E [φ(Z)] ?
+
+                                                        4
+

@@ -1,0 +1,207 @@
+Probabilités numériques (G. Pagès, V. Lemaire)
+M2 Probabilités & Finance, UPMC-École Polytechnique
+5 janvier 2015
+
+
+    3 h, polycopié, notes de cours, livres et téléphones mobiles non autorisés
+
+
+Quasi-Monte Carlo I 1.a. Décrire en détail une version quasi-Monte Carlo de la
+méthode de Box-Müller pour la simulation d’une loi normale centrée réduite sur R, incluant
+la spécification précise d’une suite à discrépance faible de votre choix.
+                                                                   
+1.b. Que proposez-vous pour la simulation d’une loi N 0, Id sur Rd , d ≥ 1.
+2.a. Rappeler la définition d’une fonction à variation finie au sens de la mesure définie sur
+[0, 1]d , puis l’inégalité de Koksma-Hlawka.
+2.b. Quelles conclusions peut-on en tirer quant à l’estimation d’erreur a priori pour des
+intégrales gaussiennes sur Rd ?
+
+Quasi-Monte Carlo II (randomisation) Pour tout réel x, on note {x} = x − bxc ∈
+[0, 1[ sa partie fractionnaire. Par extension, si x = (x1 , . . . , xd ) ∈ Rd , on note {x} =
+ {x1 }, . . . , {xd } .
+
+1. Soit f : [0, 1]d → R une fonction Riemann intégrable (i.e. f est bornée et l’ensemble
+Disc(f ) des points de [0, 1]d en lesquels f est discontinue est Lebesgue négligeable) et ξ ∈
+]0, 1[d . Montrer que la fonction fξ définie par fξ (u) = f ({u + ξ}), est Riemann-intégrable.
+Puis, montrer par récurrence sur d, que
+                             Z                        Z
+                                               
+                                   f {u + ξ} du =           f (u)du.
+                                 [0,1]d                      [0,1]d
+
+
+2. Soit (Uk )k≥1 une suite i.i.d. variables aléatoires de même loi uniforme sur [0, 1]d que U et
+(ξk )1≤k≤n une suite de réels de ]0, 1[d . Montrer que pour tout entier n ≥ 1,
+                            M   n
+                        1 XX                    p.s.
+           I(f )n,M :=
+           b                       f {Uk + ξ` } −→ Ef (U ) lorsque M → +∞,
+                       M n k=1 `=1
+
+puis que
+                                                      2
+                                           b )n,M = σn (f )
+                                                    
+                                      Var I(f
+                                                      M
+     2
+où σn (f ) est une quantité que l’on explicitera.
+3. On suppose maintenant que f est définie sur tout Rd et est isotropiquement périodique
+au sens où (δij désignant le symbole de Kronecker)
+
+                ∀ ei = (δij )1≤j≤d , i ∈ {1, . . . , d}, ∀ x ∈ Rd ,   f x + ei ) = f (x).
+
+3.a. Montrer que pour tout x ∈ Rd et tout ξ ∈]0, 1[d , f ({x + ξ}) = f (x + ξ).
+
+
+                                                     1
+4.b. En admettant que si f est continue et à variation finie sur [0, 1]d de variation V (f ),
+alors, pour tout v ∈ R, fv est à variation finie sur [0, 1]d avec V (fv ) = V (f ), montrer que
+
+                                   σn (f ) ≤ Dn∗ (ξ1 , . . . , ξn ) V (f ).
+
+3.c. Donner un exemple explicite de suite (ξ` )`≥1 telle qu’il existe une constante C > 0 (ne
+dépendant pas de f ) pour laquelle, pour tous n, M ≥ 1,
+                                                      2d
+                                    b )n,M ≤ C (log n) V (f )2 .
+                                          
+                                Var I(f
+                                                 n2 M
+
+3.d. Comparer (par exemple en termes d’intervalles de confiance) le résultat obtenu avec un
+estimateur Monte Carlo standard de taille nM . Conclure.
+4.a. Énoncer le théorème de Proı̈nov sur la vitesse d’intégration numérique des fonctions
+lipschitziennes par des suites équiréparties sur des hypercubes [0, 1]d .
+4.b. On suppose que f est isotropiquement périodique et Lipschitz. Reprendre les questions
+3.b, 3.c et 3.d. Que peut-on en conclure ?
+
+Problème : couvrir une option digitale On considère une diffusion brownienne uni-
+dimensionnelle (pour simplifier) X = (Xt )t∈[0,T ] , solution de l’équation différentielle stochas-
+tique (EDS):
+                           dXt = b(Xt )dt + σ(Xt )dWt , X0 = x0
+où b, σ : R → R sont des fonctions lipschitziennes et W est un mouvement brownien unidi-
+mensionnel défini sur un espace de probabilité (Ω, A, P) (que l’on munit de la filtration na-
+turelle augmentée de W ). Le but du problème est d’étudier comment évaluer numériquement
+le kappa d’un call digital européen de prix d’exercice K relatif à la diffusion (Xt )t∈[0,T ] i.e. la
+dérivée de la fonction f définie sur R par
+
+                                        f (K) = P(XT ≥ K).
+
+On se placera au voisinage d’un point K (diverses propriétés seront admises sous forme
+d’hypothèses au fil du problème).
+
+Questions préliminaires α. Écrire le schéma d’Euler X̄ n = (X̄tnnk )k=0:n à temps discret
+de pas T /n associé à cette EDS (les notations sont celles du cours).
+β. Rappeler sans démonstration quelle est la vitesse de convergence forte dans tous les
+espaces Lp des schémas X̄ n vers X lorsque le pas Tn tend vers 0.
+
+1.a. Soient Y et Ȳ deux variables aléatoires définies sur un même espace de probabilités.
+Montrer que
+
+                P(Y ≥ K) − P(Ȳ ≥ K) ≤ P(Ȳ < K ≤ Y ) + P(Y < K ≤ Ȳ ).
+
+1.b. Montrer que, pour tout réel η > 0 et tout réel p ∈ [1, +∞[,
+
+          P(Ȳ < K ≤ Y ) ≤ η −p E (Y − Ȳ )p 1{Y >Ȳ +η} + P(K ≤ Y ≤ K + η).
+                                                        
+
+
+                                                      2
+En déduire que
+
+            P(Y ≥ K) − P(Ȳ ≥ K) ≤ η −p E|Y − Ȳ |p + P(K − η ≤ Y ≤ K + η).
+
+2. On suppose que la loi de la variable aléatoire XTx0 est absolument continue de densité
+px0 ,T (ξ) vérifiant en outre
+
+              ∃η0 > 0           tel que        Λ = Λ(K, η0 ) :=           sup        px0 ,T (ξ) < +∞.
+                                                                   ξ∈[K−η0 ,K+η0 ]
+
+
+   Montrer pour tout δ ∈]0, 21 ] l’existence d’une constante réelle Cδ > 0 (ne dépendant
+notamment pas n) telle que, pour tout entier n assez grand
+                                                                                                1
+                ∀ K 0 ∈ [K − η0 /2, K + η0 /2],                f (K 0 ) − f¯n (K 0 ) ≤ Cδ n− 2 (1−δ)
+
+où, pour tout entier n ≥ 1, f¯n (K) = P(X̄Tn ≥ K). [Indication : on pourra passer par une
+majoration de type fort appropriée.]
+3. On suppose en outre que, dans ce voisinage fermé [K − η0 , K + η0 ] de K, la fonction
+ξ 7→ px0 ,T (ξ) est lipschitzienne de rapport [pT ]Lip . Montrer que la fonction f est dérivable en
+K et que, pour tout ε ∈ (0, η0 ],
+
+                                                 f (K + ε) − f (K)  ε
+                                    f 0 (K) −                      ≤ [pT ]Lip .
+                                                         ε          2
+
+4. Pour tout n, M ∈ N∗ et tout réel ε > 0, on définit l’estimateur
+                                                   M
+                                               1 X
+                                 bnε,M =
+                                 κ                   1 n,k       − 1{X̄ n,k ≥K} .
+                                              M ε k=1 {X̄T ≥K+ε}       T
+
+
+
+
+où (X̄Tn,k )k≥1 est une suite de copies indépendantes (obtenue par simulation du schéma) de
+X̄Tn,x0 .
+4.a. Montrer que
+                                                                                                        2
+                                                                        {X̄ ≥K+ε} − 1{X̄ n ≥K}
+                                                                  2 E 1 n
+                                            f¯n (K + ε) − f¯n (K)
+                                
+                        2
+      f 0 (K) − κ
+                bnε,M       ≤        0
+                                    f (K) −                         +      T
+                                                                               2
+                                                                                        T
+                                                                                               .
+                        2                             ε                       εM
+
+4.b. Montrer que, pour ε > 0 suffisamment petit et pour tout δ ∈]0, 21 ],
+
+                                        f¯n (K + ε) − f¯n (K)  ε          2      1
+                    f 0 (K) −                                 ≤ [pT ]Lip + Cδ n− 2 (1−δ) .
+                                                  ε            2          ε
+
+4.c. Montrer que, pour ε > 0 suffisamment petit et pour tout δ ∈]0, 31 ],
+                                                                   √                  1
+                            1{X̄ n ≥K+ε} − 1{X̄ n ≥K}          ≤       εΛ + 2 Cδ n− 2 (1−δ) .
+                                    T                T     2
+
+
+[Indication : cf. indication de la question 2.]
+
+                                                           3
+5.a. Montrer en choisissant un ε = εn approprié que, pour n assez grand,
+                                                   2
+                           f¯n (K + εn ) − f¯n (K)
+                  
+                                                                         1
+                    0
+                   f (K) −                            ≤ 4 [pT ]Lip Cδ n− 2 (1−δ) .
+                                     εn
+
+5.b. Montrer que, pour cette même spécification de ε = εn ,
+                                     2
+       E 1{X̄ n ≥K+ε} − 1{X̄ n ≥K}         C1       1
+                                                            − 12
+                                                                                           1
+                                                                               − 34 (1−δ)
+              T             T
+                                         ≤      [pT ]Lip Λ Cδ + 2 [pT ]Lip Cδ n
+                                                     2
+                                                                                           n 4 (1−δ)
+                   ε2 M                    M
+où C1 est une constante réelle purement numérique.
+5c. Proposer un choix raisonnable pour la taille M de la simulation. Quelle est, en fonction
+de n, la vitesse en moyenne quadratique de cette méthode de calcul par simulation de cette
+sensibilité?
+
+
+
+
+                                                     4
+
